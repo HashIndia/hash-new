@@ -213,8 +213,8 @@ export const analyticsAPI = {
 export const inventoryAPI = {
   updateStock: (productId, stockData) => 
     api.patch(`/products/${productId}/stock`, stockData),
-  getLowStockProducts: () => api.get('/products?stock=low'),
-  getOutOfStockProducts: () => api.get('/products?stock=out'),
+  getLowStockProducts: () => api.get('/products/inventory/low-stock'),
+  getOutOfStockProducts: () => api.get('/products/inventory/out-of-stock'),
   bulkUpdateStock: (updates) => api.patch('/products/bulk-stock', { updates }),
 };
 

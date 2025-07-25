@@ -61,7 +61,7 @@ const userSchema = new mongoose.Schema({
     marketingEmails: { type: Boolean, default: true }
   },
   wishlist: [{
-    type: mongoose.Schema.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Product'
   }],
   isActive: {

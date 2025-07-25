@@ -64,7 +64,7 @@ const adminSchema = new mongoose.Schema({
   passwordResetToken: String,
   passwordResetExpires: Date,
   createdBy: {
-    type: mongoose.Schema.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Admin'
   }
 }, {

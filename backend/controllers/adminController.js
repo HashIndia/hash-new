@@ -145,7 +145,7 @@ export const adminRefreshToken = catchAsync(async (req, res, next) => {
 
 // Get current admin
 export const getCurrentAdmin = catchAsync(async (req, res, next) => {
-  const admin = await Admin.findById(req.admin.id);
+  const admin = await Admin.findById(req.admin._id);
 
   res.status(200).json({
     status: 'success',
@@ -214,7 +214,7 @@ export const getDashboardAnalytics = catchAsync(async (req, res, next) => {
         _id: null,
         newCustomers: { $sum: 1 },
         verifiedCustomers: {
-          $sum: { $cond: ['$phoneVerified', 1, 0] }
+          $sum: { $cond: ['$isPhoneVerified', 1, 0] }
         }
       }
     }
@@ -320,9 +320,9 @@ export const getAllCustomers = catchAsync(async (req, res, next) => {
   
   if (status && status !== 'all') {
     if (status === 'verified') {
-      filter.phoneVerified = true;
+      filter.isPhoneVerified = true;
     } else if (status === 'unverified') {
-      filter.phoneVerified = false;
+      filter.isPhoneVerified = false;
     }
   }
   
@@ -480,9 +480,9 @@ export const sendCampaign = catchAsync(async (req, res, next) => {
   let recipients = [];
   
   if (campaign.targetAudience === 'all') {
-    recipients = await User.find({ phoneVerified: true }, 'email phone name');
+    recipients = await User.find({ isPhoneVerified: true }, 'email phone name');
   } else if (campaign.targetAudience === 'verified') {
-    recipients = await User.find({ phoneVerified: true }, 'email phone name');
+    recipients = await User.find({ isPhoneVerified: true }, 'email phone name');
   } else if (campaign.targetAudience === 'custom' && campaign.customRecipients.length > 0) {
     recipients = await User.find(
       { _id: { $in: campaign.customRecipients } },
@@ -540,6 +540,69 @@ export const sendCampaign = catchAsync(async (req, res, next) => {
 });
 
 // Get all campaigns
+// Get single campaign
+export const getCampaign = catchAsync(async (req, res, next) => {
+  const campaign = await Campaign.findById(req.params.id)
+    .populate('createdBy', 'name email');
+
+  if (!campaign) {
+    return next(new AppError('Campaign not found', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      campaign
+    }
+  });
+});
+
+// Update campaign
+export const updateCampaign = catchAsync(async (req, res, next) => {
+  const campaign = await Campaign.findById(req.params.id);
+
+  if (!campaign) {
+    return next(new AppError('Campaign not found', 404));
+  }
+
+  if (campaign.status === 'sent') {
+    return next(new AppError('Cannot update a campaign that has already been sent', 400));
+  }
+
+  const updatedCampaign = await Campaign.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true, runValidators: true }
+  ).populate('createdBy', 'name email');
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      campaign: updatedCampaign
+    }
+  });
+});
+
+// Delete campaign
+export const deleteCampaign = catchAsync(async (req, res, next) => {
+  const campaign = await Campaign.findById(req.params.id);
+
+  if (!campaign) {
+    return next(new AppError('Campaign not found', 404));
+  }
+
+  if (campaign.status === 'sent' || campaign.status === 'sending') {
+    return next(new AppError('Cannot delete a campaign that has been sent or is being sent', 400));
+  }
+
+  await Campaign.findByIdAndDelete(req.params.id);
+
+  res.status(204).json({
+    status: 'success',
+    data: null
+  });
+});
+
 export const getAllCampaigns = catchAsync(async (req, res, next) => {
   const { page = 1, limit = 10, type, status } = req.query;
 
@@ -569,6 +632,37 @@ export const getAllCampaigns = catchAsync(async (req, res, next) => {
   });
 });
 
+// Campaign templates
+export const getCampaignTemplates = catchAsync(async (req, res, next) => {
+  const templates = await Campaign.find({ 
+    isTemplate: true 
+  }).sort({ createdAt: -1 });
+
+  res.status(200).json({
+    status: 'success',
+    results: templates.length,
+    data: {
+      templates
+    }
+  });
+});
+
+export const createTemplate = catchAsync(async (req, res, next) => {
+  const template = await Campaign.create({
+    ...req.body,
+    isTemplate: true,
+    status: 'template',
+    createdBy: req.admin._id
+  });
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      template
+    }
+  });
+});
+
 // Update customer status
 export const updateCustomerStatus = catchAsync(async (req, res, next) => {
   const { status } = req.body;
@@ -594,7 +688,7 @@ export const updateCustomerStatus = catchAsync(async (req, res, next) => {
 // Get system statistics
 export const getSystemStats = catchAsync(async (req, res, next) => {
   const totalUsers = await User.countDocuments();
-  const verifiedUsers = await User.countDocuments({ phoneVerified: true });
+  const verifiedUsers = await User.countDocuments({ isPhoneVerified: true });
   const totalProducts = await Product.countDocuments();
   const lowStockProducts = await Product.countDocuments({ stock: { $lte: 10 } });
   const totalOrders = await Order.countDocuments();

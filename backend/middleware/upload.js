@@ -206,8 +206,12 @@ const generateResponsiveUrls = (publicId) => {
   };
 };
 
+export default uploadProductImages;
 export {
-  cloudinary,
+  uploadProductImages,
+  uploadAvatar,
+  uploadImage,
+  uploadToMemory,
   uploadProductImagesHandler,
   uploadAvatarHandler,
   uploadImageHandler,

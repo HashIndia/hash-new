@@ -1,6 +1,7 @@
 import express from 'express';
 import { body } from 'express-validator';
 import * as adminController from '../controllers/adminController.js';
+import * as analyticsController from '../controllers/analyticsController.js';
 import { protectAdmin, restrictTo } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -54,6 +55,9 @@ router.post('/logout-all', adminController.adminLogoutAll);
 // Dashboard and analytics
 router.get('/dashboard', adminController.getDashboardAnalytics);
 router.get('/system-stats', adminController.getSystemStats);
+router.get('/analytics/revenue', analyticsController.getRevenueAnalytics);
+router.get('/analytics/customers', analyticsController.getCustomerAnalytics);
+router.get('/analytics/products', analyticsController.getProductAnalytics);
 
 // Customer management
 router.get('/customers', adminController.getAllCustomers);
@@ -62,7 +66,12 @@ router.patch('/customers/:id/status', customerStatusValidation, adminController.
 
 // Campaign management
 router.get('/campaigns', adminController.getAllCampaigns);
+router.get('/campaigns/templates', adminController.getCampaignTemplates);
 router.post('/campaigns', campaignValidation, adminController.createCampaign);
+router.post('/campaigns/templates', campaignValidation, adminController.createTemplate);
+router.get('/campaigns/:id', adminController.getCampaign);
+router.patch('/campaigns/:id', campaignValidation, adminController.updateCampaign);
+router.delete('/campaigns/:id', adminController.deleteCampaign);
 router.post('/campaigns/:id/send', adminController.sendCampaign);
 
 export default router; 

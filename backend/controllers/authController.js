@@ -79,6 +79,7 @@ export const register = catchAsync(async (req, res, next) => {
 
   // Generate and send OTP
   const otp = newUser.generatePhoneOTP();
+  console.log(`[DEV] Registration OTP for ${newUser.phone}: ${otp}`); // <-- Log OTP for dev
   await newUser.save({ validateBeforeSave: false });
 
   // Send welcome email and OTP SMS
@@ -101,7 +102,7 @@ export const register = catchAsync(async (req, res, next) => {
         name: newUser.name,
         email: newUser.email,
         phone: newUser.phone,
-        phoneVerified: newUser.phoneVerified
+        phoneVerified: newUser.isPhoneVerified
       }
     }
   });
@@ -180,7 +181,7 @@ export const verifyOTP = catchAsync(async (req, res, next) => {
   }
 
   // Verify OTP and mark phone as verified
-  user.phoneVerified = true;
+  user.isPhoneVerified = true;
   user.otp = undefined;
   user.otpExpires = undefined;
   user.verifiedAt = new Date();
@@ -200,7 +201,7 @@ export const resendOTP = catchAsync(async (req, res, next) => {
 
   const user = await User.findOne({ 
     phone: smsService.formatPhoneNumber(phone),
-    phoneVerified: false
+    isPhoneVerified: false
   });
 
   if (!user) {
@@ -215,6 +216,7 @@ export const resendOTP = catchAsync(async (req, res, next) => {
 
   // Generate and send new OTP
   const otp = user.generatePhoneOTP();
+  console.log(`[DEV] Resend OTP for ${user.phone}: ${otp}`); // <-- Log OTP for dev
   await user.save({ validateBeforeSave: false });
 
   try {
@@ -363,7 +365,7 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 // Update password (for authenticated users)
 export const updatePassword = catchAsync(async (req, res, next) => {
   // Get user from collection
-  const user = await User.findById(req.user.id).select('+password');
+  const user = await User.findById(req.user._id).select('+password');
 
   // Check if POSTed current password is correct
   if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
@@ -384,7 +386,7 @@ export const updatePassword = catchAsync(async (req, res, next) => {
 
 // Get current user
 export const getMe = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id)
+  const user = await User.findById(req.user._id)
     .populate('addresses')
     .populate({
       path: 'orders',
@@ -424,10 +426,10 @@ export const updateMe = catchAsync(async (req, res, next) => {
   // If phone number is being updated, require re-verification
   if (filteredBody.phone && filteredBody.phone !== req.user.phone) {
     filteredBody.phone = smsService.formatPhoneNumber(filteredBody.phone);
-    filteredBody.phoneVerified = false;
+    filteredBody.isPhoneVerified = false;
     
     // Generate OTP for new phone number
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user._id);
     const otp = user.generatePhoneOTP();
     filteredBody.otp = user.otp;
     filteredBody.otpExpires = user.otpExpires;
@@ -440,7 +442,7 @@ export const updateMe = catchAsync(async (req, res, next) => {
   }
 
   // Update user document
-  const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
+  const updatedUser = await User.findByIdAndUpdate(req.user._id, filteredBody, {
     new: true,
     runValidators: true
   });
@@ -455,7 +457,7 @@ export const updateMe = catchAsync(async (req, res, next) => {
 
 // Address management
 export const getAddresses = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id).populate('addresses');
+  const user = await User.findById(req.user._id).populate('addresses');
   
   res.status(200).json({
     status: 'success',
@@ -466,7 +468,7 @@ export const getAddresses = catchAsync(async (req, res, next) => {
 });
 
 export const addAddress = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id);
+  const user = await User.findById(req.user._id);
   
   const newAddress = {
     ...req.body,
@@ -485,7 +487,7 @@ export const addAddress = catchAsync(async (req, res, next) => {
 });
 
 export const updateAddress = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id);
+  const user = await User.findById(req.user._id);
   const addressIndex = user.addresses.findIndex(addr => addr.id === req.params.addressId);
   
   if (addressIndex === -1) {
@@ -504,7 +506,7 @@ export const updateAddress = catchAsync(async (req, res, next) => {
 });
 
 export const deleteAddress = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id);
+  const user = await User.findById(req.user._id);
   user.addresses = user.addresses.filter(addr => addr.id !== req.params.addressId);
   await user.save();
   
@@ -516,7 +518,7 @@ export const deleteAddress = catchAsync(async (req, res, next) => {
 
 // Wishlist management
 export const getWishlist = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id).populate('wishlist');
+  const user = await User.findById(req.user._id).populate('wishlist');
   
   res.status(200).json({
     status: 'success',
@@ -527,7 +529,7 @@ export const getWishlist = catchAsync(async (req, res, next) => {
 });
 
 export const addToWishlist = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id);
+  const user = await User.findById(req.user._id);
   const productId = req.params.productId;
   
   if (!user.wishlist.includes(productId)) {
@@ -542,7 +544,7 @@ export const addToWishlist = catchAsync(async (req, res, next) => {
 });
 
 export const removeFromWishlist = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id);
+  const user = await User.findById(req.user._id);
   user.wishlist = user.wishlist.filter(id => id.toString() !== req.params.productId);
   await user.save();
   

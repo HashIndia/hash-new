@@ -321,7 +321,7 @@ export const getAllOrders = catchAsync(async (req, res, next) => {
 
   const skip = (page - 1) * limit;
   
-  let orders = Order.find(filter)
+  const orders = await Order.find(filter)
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(Number(limit))

@@ -16,6 +16,7 @@ import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import uploadRoutes from './routes/uploadRoutes.js';
 
 // Import middleware
 import { handleMulterError } from './middleware/upload.js';
@@ -84,11 +85,17 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Global health check route
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Backend is running!' });
+});
+
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Webhook routes (before body parser)
 app.use('/api/webhooks', express.raw({ type: 'application/json' }), (req, res, next) => {

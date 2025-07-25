@@ -135,4 +135,9 @@ router.get('/wishlist', authController.getWishlist);
 router.post('/wishlist/:productId', authController.addToWishlist);
 router.delete('/wishlist/:productId', authController.removeFromWishlist);
 
+// Health check route
+router.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Backend is running!' });
+});
+
 export default router; 

@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const recipientSchema = new mongoose.Schema({
   user: {
-    type: mongoose.Schema.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
   email: String,
@@ -48,6 +48,10 @@ const campaignSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Campaign content is required']
   },
+  isTemplate: {
+    type: Boolean,
+    default: false
+  },
   htmlContent: String, // For email campaigns
   templateId: {
     type: mongoose.Schema.ObjectId,
@@ -61,7 +65,7 @@ const campaignSchema = new mongoose.Schema({
   },
   customAudience: {
     userIds: [{
-      type: mongoose.Schema.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }],
     filters: {
@@ -174,7 +178,7 @@ const campaignSchema = new mongoose.Schema({
   },
   // Metadata
   createdBy: {
-    type: mongoose.Schema.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Admin',
     required: true
   },
@@ -188,7 +192,7 @@ const campaignSchema = new mongoose.Schema({
       default: Date.now
     },
     error: String,
-    recipientId: mongoose.Schema.ObjectId
+    recipientId: mongoose.Schema.Types.ObjectId
   }]
 }, {
   timestamps: true

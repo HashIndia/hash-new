@@ -44,6 +44,10 @@ router.get('/search', productController.searchProducts);
 router.get('/categories', productController.getCategories);
 router.get('/:id', productController.getProduct);
 
+// Special inventory routes (admin access required but placed before middleware)
+router.get('/inventory/low-stock', protectAdmin, productController.getLowStockProducts);
+router.get('/inventory/out-of-stock', protectAdmin, productController.getOutOfStockProducts);
+
 // Protected routes (require user authentication)
 router.use(protectUser);
 router.post('/:id/reviews', reviewValidation, productController.addReview);
@@ -63,5 +67,9 @@ router.patch(
   productController.updateProduct
 );
 router.delete('/:id', productController.deleteProduct);
+
+// Stock management routes
+router.patch('/:id/stock', productController.updateStock);
+router.patch('/bulk-stock', productController.bulkUpdateStock);
 
 export default router; 
