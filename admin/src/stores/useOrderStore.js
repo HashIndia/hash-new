@@ -1,190 +1,215 @@
 import { create } from 'zustand';
+import { ordersAPI, handleAPIError } from '../services/api.js';
 
 const useOrderStore = create((set, get) => ({
-  orders: [
-    {
-      id: 'ORD001',
-      customerName: 'John Doe',
-      customerEmail: 'john@example.com',
-      customerPhone: '+1234567890',
-      customerAddress: '123 Main St, City, State 12345',
-      items: [
-        { id: 1, name: 'Cotton T-Shirt', quantity: 2, price: 29.99, size: 'M', color: 'White' },
-        { id: 2, name: 'Denim Jeans', quantity: 1, price: 59.99, size: '32', color: 'Blue' }
-      ],
-      subtotal: 119.97,
-      shipping: 9.99,
-      tax: 10.40,
-      total: 140.36,
-      status: 'pending',
-      paymentStatus: 'paid',
-      paymentMethod: 'credit_card',
-      orderDate: new Date('2024-01-15'),
-      shippingDate: null,
-      deliveryDate: null,
-      trackingNumber: null,
-      otp: null,
-      otpVerified: false,
-      notes: ''
-    },
-    {
-      id: 'ORD002',
-      customerName: 'Jane Smith',
-      customerEmail: 'jane@example.com',
-      customerPhone: '+1234567891',
-      customerAddress: '456 Oak Ave, City, State 12345',
-      items: [
-        { id: 3, name: 'Summer Dress', quantity: 1, price: 79.99, size: 'S', color: 'Red' }
-      ],
-      subtotal: 79.99,
-      shipping: 9.99,
-      tax: 7.20,
-      total: 97.18,
-      status: 'shipped',
-      paymentStatus: 'paid',
-      paymentMethod: 'paypal',
-      orderDate: new Date('2024-01-14'),
-      shippingDate: new Date('2024-01-15'),
-      deliveryDate: null,
-      trackingNumber: 'TRK123456789',
-      otp: '123456',
-      otpVerified: false,
-      notes: 'Customer requested express delivery'
-    },
-    {
-      id: 'ORD003',
-      customerName: 'Bob Johnson',
-      customerEmail: 'bob@example.com',
-      customerPhone: '+1234567892',
-      customerAddress: '789 Pine St, City, State 12345',
-      items: [
-        { id: 1, name: 'Cotton T-Shirt', quantity: 3, price: 29.99, size: 'L', color: 'Black' }
-      ],
-      subtotal: 89.97,
-      shipping: 9.99,
-      tax: 8.00,
-      total: 107.96,
-      status: 'delivered',
-      paymentStatus: 'paid',
-      paymentMethod: 'credit_card',
-      orderDate: new Date('2024-01-13'),
-      shippingDate: new Date('2024-01-14'),
-      deliveryDate: new Date('2024-01-16'),
-      trackingNumber: 'TRK123456790',
-      otp: '654321',
-      otpVerified: true,
-      notes: ''
-    }
-  ],
+  // State
+  orders: [],
+  selectedOrder: null,
+  filters: {
+    status: 'all',
+    paymentStatus: 'all',
+    search: '',
+    startDate: '',
+    endDate: ''
+  },
+  pagination: {
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0
+  },
+  analytics: {
+    summary: null,
+    dailyStats: []
+  },
   isLoading: false,
-  searchTerm: '',
-  statusFilter: 'all',
-  dateRange: 'all',
+  error: null,
 
-  // Actions
-  updateOrderStatus: (orderId, status) => {
-    set(state => ({
-      orders: state.orders.map(order =>
-        order.id === orderId
-          ? { ...order, status, ...(status === 'shipped' && { shippingDate: new Date() }) }
-          : order
-      )
-    }));
+  // Order Management Actions
+  loadOrders: async (params = {}) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { filters, pagination } = get();
+      const queryParams = {
+        ...filters,
+        page: pagination.page,
+        limit: pagination.limit,
+        ...params
+      };
+
+      const response = await ordersAPI.getAllOrders(queryParams);
+      
+      set({
+        orders: response.data.orders,
+        pagination: {
+          page: response.page,
+          limit: response.limit || 10,
+          total: response.total,
+          totalPages: response.totalPages
+        },
+        isLoading: false
+      });
+    } catch (error) {
+      const errorMessage = handleAPIError(error);
+      set({ isLoading: false, error: errorMessage });
+    }
   },
 
-  generateOTP: (orderId) => {
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    set(state => ({
-      orders: state.orders.map(order =>
-        order.id === orderId
-          ? { ...order, otp, otpVerified: false }
-          : order
-      )
-    }));
-    return otp;
+  loadOrder: async (orderId) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await ordersAPI.getOrder(orderId);
+      set({ 
+        selectedOrder: response.data.order, 
+        isLoading: false 
+      });
+    } catch (error) {
+      const errorMessage = handleAPIError(error);
+      set({ isLoading: false, error: errorMessage });
+    }
   },
 
-  verifyOTP: (orderId, enteredOTP) => {
-    const { orders } = get();
-    const order = orders.find(o => o.id === orderId);
-    
-    if (order && order.otp === enteredOTP) {
+  updateOrderStatus: async (orderId, statusData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await ordersAPI.updateOrderStatus(orderId, statusData);
+      const updatedOrder = response.data.order;
+      
       set(state => ({
         orders: state.orders.map(order =>
-          order.id === orderId
-            ? { ...order, otpVerified: true, status: 'delivered', deliveryDate: new Date() }
-            : order
-        )
+          order._id === orderId ? updatedOrder : order
+        ),
+        selectedOrder: state.selectedOrder?._id === orderId ? updatedOrder : state.selectedOrder,
+        isLoading: false
       }));
-      return true;
+      
+      return { success: true, data: updatedOrder };
+    } catch (error) {
+      const errorMessage = handleAPIError(error);
+      set({ isLoading: false, error: errorMessage });
+      return { success: false, error: errorMessage };
     }
-    return false;
   },
 
-  addOrderNote: (orderId, note) => {
+  // Analytics Actions
+  loadOrderAnalytics: async (period = '30d') => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await ordersAPI.getOrderAnalytics(period);
+      
+      set({
+        analytics: {
+          summary: response.data.summary,
+          dailyStats: response.data.dailyStats
+        },
+        isLoading: false
+      });
+    } catch (error) {
+      const errorMessage = handleAPIError(error);
+      set({ isLoading: false, error: errorMessage });
+    }
+  },
+
+  // Filter and Search Actions
+  setFilters: (newFilters) => {
     set(state => ({
-      orders: state.orders.map(order =>
-        order.id === orderId
-          ? { ...order, notes: note }
-          : order
-      )
+      filters: { ...state.filters, ...newFilters },
+      pagination: { ...state.pagination, page: 1 } // Reset to first page
     }));
+    
+    // Automatically reload orders with new filters
+    get().loadOrders();
   },
 
-  setSearchTerm: (term) => set({ searchTerm: term }),
-  setStatusFilter: (status) => set({ statusFilter: status }),
-  setDateRange: (range) => set({ dateRange: range }),
-
-  // Getters
-  getFilteredOrders: () => {
-    const { orders, searchTerm, statusFilter, dateRange } = get();
+  clearFilters: () => {
+    const defaultFilters = {
+      status: 'all',
+      paymentStatus: 'all',
+      search: '',
+      startDate: '',
+      endDate: ''
+    };
     
-    let filtered = orders.filter(order => {
-      const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-      
-      let matchesDate = true;
-      if (dateRange !== 'all') {
-        const now = new Date();
-        const orderDate = new Date(order.orderDate);
-        
-        switch (dateRange) {
-          case 'today':
-            matchesDate = orderDate.toDateString() === now.toDateString();
-            break;
-          case 'week':
-            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            matchesDate = orderDate >= weekAgo;
-            break;
-          case 'month':
-            const monthAgo = new Date(now.setMonth(now.getMonth() - 1));
-            matchesDate = orderDate >= monthAgo;
-            break;
-        }
-      }
-      
-      return matchesSearch && matchesStatus && matchesDate;
+    set({ 
+      filters: defaultFilters,
+      pagination: { ...get().pagination, page: 1 }
     });
-
-    return filtered.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+    
+    get().loadOrders();
   },
 
-  getOrderStats: () => {
-    const { orders } = get();
+  searchOrders: (searchTerm) => {
+    set(state => ({
+      filters: { ...state.filters, search: searchTerm },
+      pagination: { ...state.pagination, page: 1 }
+    }));
     
+    get().loadOrders();
+  },
+
+  // Pagination Actions
+  setPage: (page) => {
+    set(state => ({
+      pagination: { ...state.pagination, page }
+    }));
+    get().loadOrders();
+  },
+
+  nextPage: () => {
+    const { pagination } = get();
+    if (pagination.page < pagination.totalPages) {
+      get().setPage(pagination.page + 1);
+    }
+  },
+
+  prevPage: () => {
+    const { pagination } = get();
+    if (pagination.page > 1) {
+      get().setPage(pagination.page - 1);
+    }
+  },
+
+  // Utility Actions
+  getOrderById: (orderId) => {
+    const { orders } = get();
+    return orders.find(order => order._id === orderId);
+  },
+
+  getOrdersByStatus: (status) => {
+    const { orders } = get();
+    if (status === 'all') return orders;
+    return orders.filter(order => order.status === status);
+  },
+
+  getOrdersCount: () => {
+    const { orders } = get();
     return {
       total: orders.length,
-      pending: orders.filter(o => o.status === 'pending').length,
-      shipped: orders.filter(o => o.status === 'shipped').length,
-      delivered: orders.filter(o => o.status === 'delivered').length,
-      cancelled: orders.filter(o => o.status === 'cancelled').length,
-      totalRevenue: orders.reduce((sum, order) => sum + order.total, 0),
-      avgOrderValue: orders.length > 0 ? orders.reduce((sum, order) => sum + order.total, 0) / orders.length : 0
+      pending: orders.filter(order => order.status === 'pending').length,
+      processing: orders.filter(order => order.status === 'processing').length,
+      shipped: orders.filter(order => order.status === 'shipped').length,
+      delivered: orders.filter(order => order.status === 'delivered').length,
+      cancelled: orders.filter(order => order.status === 'cancelled').length,
     };
-  }
+  },
+
+  getTotalRevenue: () => {
+    const { orders } = get();
+    return orders
+      .filter(order => order.status !== 'cancelled')
+      .reduce((total, order) => total + order.total, 0);
+  },
+
+  getRecentOrders: (limit = 5) => {
+    const { orders } = get();
+    return orders
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, limit);
+  },
+
+  // Clear actions
+  clearSelectedOrder: () => set({ selectedOrder: null }),
+  clearError: () => set({ error: null }),
 }));
 
 export default useOrderStore; 

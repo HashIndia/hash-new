@@ -1,171 +1,197 @@
 import { create } from 'zustand';
+import { customersAPI, handleAPIError } from '../services/api.js';
 
 const useCustomerStore = create((set, get) => ({
-  customers: [
-    {
-      id: 1,
-      name: 'John Doe',
-      email: 'john@example.com',
-      phone: '+1234567890',
-      address: '123 Main St, City, State 12345',
-      totalOrders: 5,
-      totalSpent: 450.25,
-      lastOrder: new Date('2024-01-15'),
-      joinDate: new Date('2023-06-15'),
-      status: 'active',
-      preferences: {
-        emailNotifications: true,
-        smsNotifications: true,
-        whatsappNotifications: false
-      },
-      tags: ['VIP', 'Frequent Buyer']
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      phone: '+1234567891',
-      address: '456 Oak Ave, City, State 12345',
-      totalOrders: 3,
-      totalSpent: 275.50,
-      lastOrder: new Date('2024-01-14'),
-      joinDate: new Date('2023-08-20'),
-      status: 'active',
-      preferences: {
-        emailNotifications: true,
-        smsNotifications: false,
-        whatsappNotifications: true
-      },
-      tags: ['New Customer']
-    },
-    {
-      id: 3,
-      name: 'Bob Johnson',
-      email: 'bob@example.com',
-      phone: '+1234567892',
-      address: '789 Pine St, City, State 12345',
-      totalOrders: 8,
-      totalSpent: 725.80,
-      lastOrder: new Date('2024-01-13'),
-      joinDate: new Date('2023-03-10'),
-      status: 'active',
-      preferences: {
-        emailNotifications: true,
-        smsNotifications: true,
-        whatsappNotifications: true
-      },
-      tags: ['VIP', 'Loyal Customer']
-    },
-    {
-      id: 4,
-      name: 'Alice Wilson',
-      email: 'alice@example.com',
-      phone: '+1234567893',
-      address: '321 Elm St, City, State 12345',
-      totalOrders: 1,
-      totalSpent: 89.99,
-      lastOrder: new Date('2024-01-12'),
-      joinDate: new Date('2024-01-12'),
-      status: 'active',
-      preferences: {
-        emailNotifications: true,
-        smsNotifications: false,
-        whatsappNotifications: false
-      },
-      tags: ['New Customer']
-    }
-  ],
+  // State
+  customers: [],
+  selectedCustomer: null,
+  filters: {
+    search: '',
+    status: 'all',
+    sortBy: 'createdAt',
+    order: 'desc'
+  },
+  pagination: {
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0
+  },
   isLoading: false,
-  searchTerm: '',
-  statusFilter: 'all',
-  selectedCustomers: [],
+  error: null,
 
-  // Actions
-  setSearchTerm: (term) => set({ searchTerm: term }),
-  setStatusFilter: (status) => set({ statusFilter: status }),
-  
-  selectCustomer: (customerId) => {
+  // Customer Management Actions
+  loadCustomers: async (params = {}) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { filters, pagination } = get();
+      const queryParams = {
+        ...filters,
+        page: pagination.page,
+        limit: pagination.limit,
+        ...params
+      };
+
+      const response = await customersAPI.getAllCustomers(queryParams);
+      
+      set({
+        customers: response.data.customers,
+        pagination: {
+          page: response.page,
+          limit: response.limit || 10,
+          total: response.total,
+          totalPages: response.totalPages
+        },
+        isLoading: false
+      });
+    } catch (error) {
+      const errorMessage = handleAPIError(error);
+      set({ isLoading: false, error: errorMessage });
+    }
+  },
+
+  loadCustomer: async (customerId) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await customersAPI.getCustomer(customerId);
+      set({ 
+        selectedCustomer: response.data.customer, 
+        isLoading: false 
+      });
+    } catch (error) {
+      const errorMessage = handleAPIError(error);
+      set({ isLoading: false, error: errorMessage });
+    }
+  },
+
+  updateCustomerStatus: async (customerId, status) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await customersAPI.updateCustomerStatus(customerId, status);
+      const updatedCustomer = response.data.customer;
+      
+      set(state => ({
+        customers: state.customers.map(customer =>
+          customer._id === customerId ? updatedCustomer : customer
+        ),
+        selectedCustomer: state.selectedCustomer?._id === customerId ? updatedCustomer : state.selectedCustomer,
+        isLoading: false
+      }));
+      
+      return { success: true, data: updatedCustomer };
+    } catch (error) {
+      const errorMessage = handleAPIError(error);
+      set({ isLoading: false, error: errorMessage });
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  // Filter and Search Actions
+  setFilters: (newFilters) => {
     set(state => ({
-      selectedCustomers: state.selectedCustomers.includes(customerId)
-        ? state.selectedCustomers.filter(id => id !== customerId)
-        : [...state.selectedCustomers, customerId]
+      filters: { ...state.filters, ...newFilters },
+      pagination: { ...state.pagination, page: 1 } // Reset to first page
     }));
-  },
-
-  selectAllCustomers: () => {
-    const { getFilteredCustomers } = get();
-    const filteredCustomers = getFilteredCustomers();
-    set({ selectedCustomers: filteredCustomers.map(c => c.id) });
-  },
-
-  deselectAllCustomers: () => {
-    set({ selectedCustomers: [] });
-  },
-
-  updateCustomerPreferences: (customerId, preferences) => {
-    set(state => ({
-      customers: state.customers.map(customer =>
-        customer.id === customerId
-          ? { ...customer, preferences: { ...customer.preferences, ...preferences } }
-          : customer
-      )
-    }));
-  },
-
-  addCustomerTag: (customerId, tag) => {
-    set(state => ({
-      customers: state.customers.map(customer =>
-        customer.id === customerId
-          ? { ...customer, tags: [...new Set([...customer.tags, tag])] }
-          : customer
-      )
-    }));
-  },
-
-  removeCustomerTag: (customerId, tag) => {
-    set(state => ({
-      customers: state.customers.map(customer =>
-        customer.id === customerId
-          ? { ...customer, tags: customer.tags.filter(t => t !== tag) }
-          : customer
-      )
-    }));
-  },
-
-  // Getters
-  getFilteredCustomers: () => {
-    const { customers, searchTerm, statusFilter } = get();
     
-    return customers.filter(customer => {
-      const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           customer.phone.includes(searchTerm);
-      
-      const matchesStatus = statusFilter === 'all' || customer.status === statusFilter;
-      
-      return matchesSearch && matchesStatus;
-    }).sort((a, b) => new Date(b.lastOrder) - new Date(a.lastOrder));
+    // Automatically reload customers with new filters
+    get().loadCustomers();
   },
 
-  getSelectedCustomers: () => {
-    const { customers, selectedCustomers } = get();
-    return customers.filter(customer => selectedCustomers.includes(customer.id));
+  clearFilters: () => {
+    const defaultFilters = {
+      search: '',
+      status: 'all',
+      sortBy: 'createdAt',
+      order: 'desc'
+    };
+    
+    set({ 
+      filters: defaultFilters,
+      pagination: { ...get().pagination, page: 1 }
+    });
+    
+    get().loadCustomers();
   },
 
-  getCustomerStats: () => {
+  searchCustomers: (searchTerm) => {
+    set(state => ({
+      filters: { ...state.filters, search: searchTerm },
+      pagination: { ...state.pagination, page: 1 }
+    }));
+    
+    get().loadCustomers();
+  },
+
+  // Pagination Actions
+  setPage: (page) => {
+    set(state => ({
+      pagination: { ...state.pagination, page }
+    }));
+    get().loadCustomers();
+  },
+
+  nextPage: () => {
+    const { pagination } = get();
+    if (pagination.page < pagination.totalPages) {
+      get().setPage(pagination.page + 1);
+    }
+  },
+
+  prevPage: () => {
+    const { pagination } = get();
+    if (pagination.page > 1) {
+      get().setPage(pagination.page - 1);
+    }
+  },
+
+  // Utility Actions
+  getCustomerById: (customerId) => {
     const { customers } = get();
+    return customers.find(customer => customer._id === customerId);
+  },
+
+  getCustomersByStatus: (status) => {
+    const { customers } = get();
+    if (status === 'all') return customers;
     
+    if (status === 'verified') {
+      return customers.filter(customer => customer.phoneVerified);
+    } else if (status === 'unverified') {
+      return customers.filter(customer => !customer.phoneVerified);
+    }
+    
+    return customers.filter(customer => customer.status === status);
+  },
+
+  getCustomersCount: () => {
+    const { customers } = get();
     return {
       total: customers.length,
-      active: customers.filter(c => c.status === 'active').length,
-      inactive: customers.filter(c => c.status === 'inactive').length,
-      vip: customers.filter(c => c.tags.includes('VIP')).length,
-      avgOrderValue: customers.length > 0 
-        ? customers.reduce((sum, c) => sum + (c.totalSpent / Math.max(c.totalOrders, 1)), 0) / customers.length 
-        : 0,
-      totalRevenue: customers.reduce((sum, c) => sum + c.totalSpent, 0)
+      verified: customers.filter(customer => customer.phoneVerified).length,
+      unverified: customers.filter(customer => !customer.phoneVerified).length,
+      active: customers.filter(customer => customer.status === 'active').length,
+      inactive: customers.filter(customer => customer.status === 'inactive').length,
     };
-  }
+  },
+
+  getTopCustomers: (limit = 5) => {
+    const { customers } = get();
+    return customers
+      .filter(customer => customer.orderStats)
+      .sort((a, b) => (b.orderStats.totalSpent || 0) - (a.orderStats.totalSpent || 0))
+      .slice(0, limit);
+  },
+
+  getRecentCustomers: (limit = 5) => {
+    const { customers } = get();
+    return customers
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, limit);
+  },
+
+  // Clear actions
+  clearSelectedCustomer: () => set({ selectedCustomer: null }),
+  clearError: () => set({ error: null }),
 }));
 
 export default useCustomerStore; 

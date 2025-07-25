@@ -1,50 +1,89 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { adminAuthAPI, handleAPIError } from '../services/api.js';
 
 const useAuthStore = create(persist(
   (set, get) => ({
+    // State
     user: null,
     isAuthenticated: false,
     isLoading: false,
+    error: null,
 
+    // Authentication Actions
     login: async (credentials) => {
-      set({ isLoading: true });
+      set({ isLoading: true, error: null });
       try {
-        // Simulate API call - replace with actual API
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const response = await adminAuthAPI.login(credentials);
+        const { admin, token } = response.data;
         
-        if (credentials.email === 'admin@example.com' && credentials.password === 'admin123') {
-          const user = {
-            id: 1,
-            name: 'Admin User',
-            email: credentials.email,
-            role: 'admin'
-          };
-          set({ user, isAuthenticated: true, isLoading: false });
-          return { success: true };
-        } else {
-          throw new Error('Invalid credentials');
-        }
+        localStorage.setItem('adminToken', token);
+        set({ 
+          user: admin, 
+          isAuthenticated: true, 
+          isLoading: false 
+        });
+        
+        return { success: true };
       } catch (error) {
-        set({ isLoading: false });
-        return { success: false, error: error.message };
+        const errorMessage = handleAPIError(error);
+        set({ 
+          isLoading: false, 
+          error: errorMessage,
+          user: null,
+          isAuthenticated: false 
+        });
+        return { success: false, error: errorMessage };
       }
     },
 
-    logout: () => {
-      set({ user: null, isAuthenticated: false });
+    logout: async () => {
+      try {
+        await adminAuthAPI.logout();
+      } catch (error) {
+        console.error('Logout error:', error);
+      } finally {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('admin');
+        set({ 
+          user: null, 
+          isAuthenticated: false,
+          error: null 
+        });
+      }
     },
 
-    checkAuth: () => {
-      const { user } = get();
-      if (user) {
-        set({ isAuthenticated: true });
+    checkAuth: async () => {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        set({ isAuthenticated: false, user: null });
+        return;
       }
-    }
+
+      try {
+        const response = await adminAuthAPI.getCurrentAdmin();
+        set({ 
+          user: response.data.admin, 
+          isAuthenticated: true 
+        });
+      } catch (error) {
+        localStorage.removeItem('adminToken');
+        set({ 
+          user: null, 
+          isAuthenticated: false 
+        });
+      }
+    },
+
+    // Clear error
+    clearError: () => set({ error: null }),
   }),
   {
     name: 'admin-auth',
-    partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated })
+    partialize: (state) => ({ 
+      user: state.user, 
+      isAuthenticated: state.isAuthenticated 
+    })
   }
 ));
 

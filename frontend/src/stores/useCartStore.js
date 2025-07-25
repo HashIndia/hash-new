@@ -1,28 +1,191 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { ordersAPI, handleAPIError } from '../services/api.js';
 
-const useCartStore = create((set, get) => ({
-  items: [],
-  addToCart: (product, qty = 1) => {
-    const items = get().items;
-    const existing = items.find((i) => i.id === product.id);
-    if (existing) {
-      set({
-        items: items.map((i) =>
-          i.id === product.id ? { ...i, qty: i.qty + qty } : i
-        ),
-      });
-    } else {
-      set({ items: [...items, { ...product, qty }] });
-    }
-  },
-  removeFromCart: (id) => set({ items: get().items.filter((i) => i.id !== id) }),
-  clearCart: () => set({ items: [] }),
-  updateQty: (id, qty) =>
-    set({
-      items: get().items.map((i) =>
-        i.id === id ? { ...i, qty } : i
-      ),
+const useCartStore = create(
+  persist(
+    (set, get) => ({
+      // State
+      items: [],
+      isLoading: false,
+      error: null,
+
+      // Cart Actions
+      addToCart: (product, quantity = 1, options = {}) => {
+        const { items } = get();
+        const { size, color } = options;
+        
+        // Create unique item key based on product id and options
+        const itemKey = `${product._id}-${size || ''}-${color || ''}`;
+        const existingItemIndex = items.findIndex(item => 
+          item.product._id === product._id && 
+          item.size === size && 
+          item.color === color
+        );
+
+        if (existingItemIndex >= 0) {
+          // Update existing item quantity
+          const updatedItems = [...items];
+          updatedItems[existingItemIndex].quantity += quantity;
+          set({ items: updatedItems });
+        } else {
+          // Add new item
+          const newItem = {
+            id: itemKey,
+            product,
+            quantity,
+            size: size || '',
+            color: color || '',
+            price: product.price
+          };
+          set({ items: [...items, newItem] });
+        }
+      },
+
+      removeFromCart: (itemId) => {
+        set(state => ({
+          items: state.items.filter(item => item.id !== itemId)
+        }));
+      },
+
+      updateQuantity: (itemId, quantity) => {
+        if (quantity <= 0) {
+          get().removeFromCart(itemId);
+          return;
+        }
+
+        set(state => ({
+          items: state.items.map(item =>
+            item.id === itemId ? { ...item, quantity } : item
+          )
+        }));
+      },
+
+      clearCart: () => set({ items: [] }),
+
+      // Order Actions
+      createOrder: async (shippingAddress, paymentMethod = 'cod') => {
+        const { items } = get();
+        
+        if (items.length === 0) {
+          return { success: false, error: 'Cart is empty' };
+        }
+
+        set({ isLoading: true, error: null });
+        
+        try {
+          // Prepare order items
+          const orderItems = items.map(item => ({
+            productId: item.product._id,
+            quantity: item.quantity,
+            size: item.size,
+            color: item.color
+          }));
+
+          const orderData = {
+            items: orderItems,
+            shippingAddress,
+            paymentMethod
+          };
+
+          const response = await ordersAPI.createOrder(orderData);
+          
+          // Clear cart after successful order
+          set({ items: [], isLoading: false });
+          
+          return { 
+            success: true, 
+            data: response.data.order 
+          };
+        } catch (error) {
+          const errorMessage = handleAPIError(error);
+          set({ isLoading: false, error: errorMessage });
+          return { success: false, error: errorMessage };
+        }
+      },
+
+      // Computed Values
+      getCartTotal: () => {
+        const { items } = get();
+        return items.reduce((total, item) => {
+          return total + (item.price * item.quantity);
+        }, 0);
+      },
+
+      getCartCount: () => {
+        const { items } = get();
+        return items.reduce((count, item) => count + item.quantity, 0);
+      },
+
+      getShippingCost: () => {
+        const total = get().getCartTotal();
+        return total > 500 ? 0 : 50; // Free shipping over ₹500
+      },
+
+      getTax: () => {
+        const total = get().getCartTotal();
+        return total * 0.18; // 18% GST
+      },
+
+      getGrandTotal: () => {
+        const subtotal = get().getCartTotal();
+        const shipping = get().getShippingCost();
+        const tax = get().getTax();
+        return subtotal + shipping + tax;
+      },
+
+      // Validation
+      validateCartItems: () => {
+        const { items } = get();
+        const errors = [];
+
+        items.forEach(item => {
+          if (!item.product) {
+            errors.push(`Invalid product in cart`);
+          }
+          if (item.quantity <= 0) {
+            errors.push(`Invalid quantity for ${item.product?.name}`);
+          }
+          if (item.product?.stock && item.quantity > item.product.stock) {
+            errors.push(`Insufficient stock for ${item.product.name}`);
+          }
+        });
+
+        return {
+          isValid: errors.length === 0,
+          errors
+        };
+      },
+
+      // Utility Actions
+      isInCart: (productId, options = {}) => {
+        const { items } = get();
+        const { size, color } = options;
+        return items.some(item => 
+          item.product._id === productId && 
+          item.size === (size || '') && 
+          item.color === (color || '')
+        );
+      },
+
+      getItemQuantity: (productId, options = {}) => {
+        const { items } = get();
+        const { size, color } = options;
+        const item = items.find(item => 
+          item.product._id === productId && 
+          item.size === (size || '') && 
+          item.color === (color || '')
+        );
+        return item ? item.quantity : 0;
+      },
+
+      clearError: () => set({ error: null }),
     }),
-}));
+    {
+      name: 'cart-store',
+      partialize: (state) => ({ items: state.items }),
+    }
+  )
+);
 
 export default useCartStore; 

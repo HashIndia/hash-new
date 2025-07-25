@@ -1,208 +1,364 @@
 import { create } from 'zustand';
+import { campaignsAPI, customersAPI, handleAPIError } from '../services/api.js';
 
 const useBroadcastStore = create((set, get) => ({
-  campaigns: [
-    {
-      id: 1,
-      name: 'Summer Sale 2024',
-      type: 'email',
-      subject: 'Don\'t miss our biggest summer sale!',
-      content: 'Get up to 50% off on all summer collections. Limited time offer!',
-      recipients: 'all_customers',
-      customRecipients: [],
-      scheduledDate: new Date('2024-06-01'),
-      status: 'completed',
-      sentCount: 1250,
-      deliveredCount: 1200,
-      openedCount: 480,
-      clickedCount: 120,
-      createdAt: new Date('2024-05-25'),
-      sentAt: new Date('2024-06-01')
-    },
-    {
-      id: 2,
-      name: 'New Arrivals Alert',
-      type: 'sms',
-      subject: '',
-      content: 'New arrivals just dropped! Check out our latest collection. Shop now: bit.ly/newarrivals',
-      recipients: 'vip_customers',
-      customRecipients: [],
-      scheduledDate: new Date('2024-01-20'),
-      status: 'sent',
-      sentCount: 85,
-      deliveredCount: 82,
-      openedCount: 75,
-      clickedCount: 25,
-      createdAt: new Date('2024-01-18'),
-      sentAt: new Date('2024-01-20')
-    }
-  ],
-  templates: [
-    {
-      id: 1,
-      name: 'Welcome Email',
-      type: 'email',
-      subject: 'Welcome to [Brand Name]!',
-      content: 'Thank you for joining our community. Enjoy 10% off your first order with code WELCOME10.'
-    },
-    {
-      id: 2,
-      name: 'Order Confirmation',
-      type: 'email',
-      subject: 'Order Confirmed - [Order ID]',
-      content: 'Your order has been confirmed and will be processed shortly. Track your order: [Tracking Link]'
-    },
-    {
-      id: 3,
-      name: 'Flash Sale SMS',
-      type: 'sms',
-      subject: '',
-      content: '⚡ FLASH SALE: 24hrs only! [Discount]% off everything. Use code: [Code]. Shop: [Link]'
-    }
-  ],
-  currentCampaign: {
-    name: '',
-    type: 'email',
-    subject: '',
-    content: '',
-    recipients: 'all_customers',
-    customRecipients: [],
-    scheduledDate: null,
-    sendNow: false
+  // State
+  campaigns: [],
+  templates: [],
+  selectedCampaign: null,
+  filters: {
+    type: 'all',
+    status: 'all',
+    search: ''
+  },
+  pagination: {
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0
+  },
+  recipients: {
+    all: [],
+    verified: [],
+    custom: []
   },
   isLoading: false,
+  error: null,
 
-  // Actions
-  setCampaignField: (field, value) => {
-    set(state => ({
-      currentCampaign: { ...state.currentCampaign, [field]: value }
-    }));
-  },
+  // Campaign Management Actions
+  loadCampaigns: async (params = {}) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { filters, pagination } = get();
+      const queryParams = {
+        ...filters,
+        page: pagination.page,
+        limit: pagination.limit,
+        ...params
+      };
 
-  resetCurrentCampaign: () => {
-    set({
-      currentCampaign: {
-        name: '',
-        type: 'email',
-        subject: '',
-        content: '',
-        recipients: 'all_customers',
-        customRecipients: [],
-        scheduledDate: null,
-        sendNow: false
-      }
-    });
-  },
-
-  loadTemplate: (templateId) => {
-    const { templates } = get();
-    const template = templates.find(t => t.id === templateId);
-    if (template) {
-      set(state => ({
-        currentCampaign: {
-          ...state.currentCampaign,
-          type: template.type,
-          subject: template.subject,
-          content: template.content
-        }
-      }));
+      const response = await campaignsAPI.getAllCampaigns(queryParams);
+      
+      set({
+        campaigns: response.data.campaigns,
+        pagination: {
+          page: response.page,
+          limit: response.limit || 10,
+          total: response.total,
+          totalPages: response.totalPages
+        },
+        isLoading: false
+      });
+    } catch (error) {
+      const errorMessage = handleAPIError(error);
+      set({ isLoading: false, error: errorMessage });
     }
   },
 
-  saveCampaign: async (campaign) => {
-    set({ isLoading: true });
+  loadCampaign: async (campaignId) => {
+    set({ isLoading: true, error: null });
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const newCampaign = {
-        ...campaign,
-        id: Date.now(),
-        status: campaign.sendNow ? 'sending' : 'scheduled',
-        sentCount: 0,
-        deliveredCount: 0,
-        openedCount: 0,
-        clickedCount: 0,
-        createdAt: new Date(),
-        sentAt: campaign.sendNow ? new Date() : null
-      };
+      const response = await campaignsAPI.getCampaign(campaignId);
+      set({ 
+        selectedCampaign: response.data.campaign, 
+        isLoading: false 
+      });
+    } catch (error) {
+      const errorMessage = handleAPIError(error);
+      set({ isLoading: false, error: errorMessage });
+    }
+  },
 
+  createCampaign: async (campaignData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await campaignsAPI.createCampaign(campaignData);
+      const newCampaign = response.data.campaign;
+      
       set(state => ({
         campaigns: [newCampaign, ...state.campaigns],
         isLoading: false
       }));
-
-      return { success: true, campaignId: newCampaign.id };
+      
+      return { success: true, data: newCampaign };
     } catch (error) {
-      set({ isLoading: false });
-      return { success: false, error: error.message };
+      const errorMessage = handleAPIError(error);
+      set({ isLoading: false, error: errorMessage });
+      return { success: false, error: errorMessage };
     }
   },
 
-  deleteCampaign: (campaignId) => {
-    set(state => ({
-      campaigns: state.campaigns.filter(c => c.id !== campaignId)
-    }));
-  },
-
-  duplicateCampaign: (campaignId) => {
-    const { campaigns } = get();
-    const campaign = campaigns.find(c => c.id === campaignId);
-    if (campaign) {
-      const duplicated = {
-        ...campaign,
-        id: Date.now(),
-        name: `${campaign.name} (Copy)`,
-        status: 'draft',
-        sentCount: 0,
-        deliveredCount: 0,
-        openedCount: 0,
-        clickedCount: 0,
-        createdAt: new Date(),
-        sentAt: null
-      };
+  updateCampaign: async (campaignId, campaignData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await campaignsAPI.updateCampaign(campaignId, campaignData);
+      const updatedCampaign = response.data.campaign;
       
       set(state => ({
-        campaigns: [duplicated, ...state.campaigns]
+        campaigns: state.campaigns.map(campaign =>
+          campaign._id === campaignId ? updatedCampaign : campaign
+        ),
+        selectedCampaign: state.selectedCampaign?._id === campaignId ? updatedCampaign : state.selectedCampaign,
+        isLoading: false
       }));
+      
+      return { success: true, data: updatedCampaign };
+    } catch (error) {
+      const errorMessage = handleAPIError(error);
+      set({ isLoading: false, error: errorMessage });
+      return { success: false, error: errorMessage };
     }
   },
 
-  // Template management
-  saveTemplate: (template) => {
-    const newTemplate = {
-      ...template,
-      id: Date.now()
-    };
-    
+  deleteCampaign: async (campaignId) => {
+    set({ isLoading: true, error: null });
+    try {
+      await campaignsAPI.deleteCampaign(campaignId);
+      
+      set(state => ({
+        campaigns: state.campaigns.filter(campaign => campaign._id !== campaignId),
+        selectedCampaign: state.selectedCampaign?._id === campaignId ? null : state.selectedCampaign,
+        isLoading: false
+      }));
+      
+      return { success: true };
+    } catch (error) {
+      const errorMessage = handleAPIError(error);
+      set({ isLoading: false, error: errorMessage });
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  sendCampaign: async (campaignId) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await campaignsAPI.sendCampaign(campaignId);
+      const updatedCampaign = response.data.campaign;
+      
+      set(state => ({
+        campaigns: state.campaigns.map(campaign =>
+          campaign._id === campaignId ? updatedCampaign : campaign
+        ),
+        selectedCampaign: state.selectedCampaign?._id === campaignId ? updatedCampaign : state.selectedCampaign,
+        isLoading: false
+      }));
+      
+      return { 
+        success: true, 
+        data: updatedCampaign,
+        message: response.message,
+        stats: {
+          successCount: response.successCount,
+          failureCount: response.failureCount,
+          totalRecipients: response.totalRecipients
+        }
+      };
+    } catch (error) {
+      const errorMessage = handleAPIError(error);
+      set({ isLoading: false, error: errorMessage });
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  // Template Management Actions
+  loadTemplates: async () => {
+    try {
+      const response = await campaignsAPI.getCampaignTemplates();
+      set({ templates: response.data.templates });
+    } catch (error) {
+      console.error('Failed to load templates:', error);
+    }
+  },
+
+  createTemplate: async (templateData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await campaignsAPI.createTemplate(templateData);
+      const newTemplate = response.data.template;
+      
+      set(state => ({
+        templates: [...state.templates, newTemplate],
+        isLoading: false
+      }));
+      
+      return { success: true, data: newTemplate };
+    } catch (error) {
+      const errorMessage = handleAPIError(error);
+      set({ isLoading: false, error: errorMessage });
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  // Recipients Management
+  loadRecipients: async () => {
+    try {
+      // Load all customers for recipient targeting
+      const allResponse = await customersAPI.getAllCustomers({ limit: 1000 });
+      const verifiedResponse = await customersAPI.getAllCustomers({ 
+        status: 'verified', 
+        limit: 1000 
+      });
+      
+      set({
+        recipients: {
+          all: allResponse.data.customers,
+          verified: verifiedResponse.data.customers,
+          custom: []
+        }
+      });
+    } catch (error) {
+      console.error('Failed to load recipients:', error);
+    }
+  },
+
+  setCustomRecipients: (customRecipients) => {
     set(state => ({
-      templates: [...state.templates, newTemplate]
+      recipients: {
+        ...state.recipients,
+        custom: customRecipients
+      }
     }));
   },
 
-  deleteTemplate: (templateId) => {
+  // Filter and Search Actions
+  setFilters: (newFilters) => {
     set(state => ({
-      templates: state.templates.filter(t => t.id !== templateId)
+      filters: { ...state.filters, ...newFilters },
+      pagination: { ...state.pagination, page: 1 } // Reset to first page
     }));
+    
+    // Automatically reload campaigns with new filters
+    get().loadCampaigns();
+  },
+
+  clearFilters: () => {
+    const defaultFilters = {
+      type: 'all',
+      status: 'all',
+      search: ''
+    };
+    
+    set({ 
+      filters: defaultFilters,
+      pagination: { ...get().pagination, page: 1 }
+    });
+    
+    get().loadCampaigns();
+  },
+
+  searchCampaigns: (searchTerm) => {
+    set(state => ({
+      filters: { ...state.filters, search: searchTerm },
+      pagination: { ...state.pagination, page: 1 }
+    }));
+    
+    get().loadCampaigns();
+  },
+
+  // Pagination Actions
+  setPage: (page) => {
+    set(state => ({
+      pagination: { ...state.pagination, page }
+    }));
+    get().loadCampaigns();
+  },
+
+  nextPage: () => {
+    const { pagination } = get();
+    if (pagination.page < pagination.totalPages) {
+      get().setPage(pagination.page + 1);
+    }
+  },
+
+  prevPage: () => {
+    const { pagination } = get();
+    if (pagination.page > 1) {
+      get().setPage(pagination.page - 1);
+    }
+  },
+
+  // Utility Actions
+  getCampaignById: (campaignId) => {
+    const { campaigns } = get();
+    return campaigns.find(campaign => campaign._id === campaignId);
+  },
+
+  getCampaignsByType: (type) => {
+    const { campaigns } = get();
+    if (type === 'all') return campaigns;
+    return campaigns.filter(campaign => campaign.type === type);
+  },
+
+  getCampaignsByStatus: (status) => {
+    const { campaigns } = get();
+    if (status === 'all') return campaigns;
+    return campaigns.filter(campaign => campaign.status === status);
+  },
+
+  getCampaignsCount: () => {
+    const { campaigns } = get();
+    return {
+      total: campaigns.length,
+      draft: campaigns.filter(campaign => campaign.status === 'draft').length,
+      sent: campaigns.filter(campaign => campaign.status === 'sent').length,
+      scheduled: campaigns.filter(campaign => campaign.status === 'scheduled').length,
+      email: campaigns.filter(campaign => campaign.type === 'email').length,
+      sms: campaigns.filter(campaign => campaign.type === 'sms').length,
+    };
+  },
+
+  getRecentCampaigns: (limit = 5) => {
+    const { campaigns } = get();
+    return campaigns
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, limit);
+  },
+
+  getTemplateById: (templateId) => {
+    const { templates } = get();
+    return templates.find(template => template._id === templateId);
+  },
+
+  getTemplatesByType: (type) => {
+    const { templates } = get();
+    if (type === 'all') return templates;
+    return templates.filter(template => template.type === type);
   },
 
   // Analytics
-  getCampaignStats: () => {
+  getCampaignAnalytics: () => {
     const { campaigns } = get();
-    const completedCampaigns = campaigns.filter(c => c.status === 'completed');
+    const sentCampaigns = campaigns.filter(campaign => campaign.status === 'sent');
     
+    if (sentCampaigns.length === 0) {
+      return {
+        totalSent: 0,
+        totalRecipients: 0,
+        avgOpenRate: 0,
+        avgClickRate: 0,
+        successRate: 0
+      };
+    }
+
+    const totalSent = sentCampaigns.length;
+    const totalRecipients = sentCampaigns.reduce((sum, campaign) => sum + (campaign.sentCount || 0), 0);
+    const totalOpened = sentCampaigns.reduce((sum, campaign) => sum + (campaign.openedCount || 0), 0);
+    const totalClicked = sentCampaigns.reduce((sum, campaign) => sum + (campaign.clickedCount || 0), 0);
+    const totalSuccess = sentCampaigns.reduce((sum, campaign) => sum + (campaign.sentCount || 0), 0);
+    const totalAttempted = sentCampaigns.reduce((sum, campaign) => sum + (campaign.totalRecipients || 0), 0);
+
     return {
-      totalCampaigns: campaigns.length,
-      totalSent: completedCampaigns.reduce((sum, c) => sum + c.sentCount, 0),
-      totalDelivered: completedCampaigns.reduce((sum, c) => sum + c.deliveredCount, 0),
-      avgOpenRate: completedCampaigns.length > 0 
-        ? (completedCampaigns.reduce((sum, c) => sum + (c.openedCount / Math.max(c.deliveredCount, 1)), 0) / completedCampaigns.length) * 100
-        : 0,
-      avgClickRate: completedCampaigns.length > 0
-        ? (completedCampaigns.reduce((sum, c) => sum + (c.clickedCount / Math.max(c.deliveredCount, 1)), 0) / completedCampaigns.length) * 100
-        : 0
+      totalSent,
+      totalRecipients,
+      avgOpenRate: totalRecipients > 0 ? (totalOpened / totalRecipients) * 100 : 0,
+      avgClickRate: totalOpened > 0 ? (totalClicked / totalOpened) * 100 : 0,
+      successRate: totalAttempted > 0 ? (totalSuccess / totalAttempted) * 100 : 0
     };
-  }
+  },
+
+  // Clear actions
+  clearSelectedCampaign: () => set({ selectedCampaign: null }),
+  clearError: () => set({ error: null }),
 }));
 
 export default useBroadcastStore; 
