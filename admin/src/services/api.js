@@ -10,36 +10,66 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add admin auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('adminToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+// Flag to prevent multiple refresh attempts
+let isRefreshing = false;
+let failedQueue = [];
 
-// Response interceptor for error handling
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  
+  failedQueue = [];
+};
+
+// Response interceptor for error handling and token refresh
 api.interceptors.response.use(
   (response) => {
     return response.data;
   },
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
     const message = error.response?.data?.message || error.message || 'An error occurred';
     
-    // Handle specific error cases
-    if (error.response?.status === 401) {
-      localStorage.removeItem('adminToken');
-      localStorage.removeItem('admin');
-      window.location.href = '/login';
+    // Handle 401 errors - try to refresh token
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // If refresh is already in progress, queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(() => {
+          return api(originalRequest);
+        }).catch(err => {
+          return Promise.reject(err);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        // Try to refresh the admin token
+        await api.post('/admin/refresh-token');
+        processQueue(null);
+        isRefreshing = false;
+        
+        // Retry the original request
+        return api(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        isRefreshing = false;
+        
+        // Refresh failed - redirect to login
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
     }
     
-    // Create a standardized error object
+    // For other errors, create a standardized error object
     const standardError = {
       message,
       status: error.response?.status,
@@ -54,6 +84,8 @@ api.interceptors.response.use(
 export const adminAuthAPI = {
   login: (credentials) => api.post('/admin/login', credentials),
   logout: () => api.post('/admin/logout'),
+  logoutAll: () => api.post('/admin/logout-all'),
+  refreshToken: () => api.post('/admin/refresh-token'),
   getCurrentAdmin: () => api.get('/admin/me'),
 };
 

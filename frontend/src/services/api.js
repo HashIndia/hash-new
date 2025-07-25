@@ -10,36 +10,66 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+// Flag to prevent multiple refresh attempts
+let isRefreshing = false;
+let failedQueue = [];
 
-// Response interceptor for error handling
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  
+  failedQueue = [];
+};
+
+// Response interceptor for error handling and token refresh
 api.interceptors.response.use(
   (response) => {
     return response.data;
   },
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
     const message = error.response?.data?.message || error.message || 'An error occurred';
     
-    // Handle specific error cases
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+    // Handle 401 errors - try to refresh token
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // If refresh is already in progress, queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(() => {
+          return api(originalRequest);
+        }).catch(err => {
+          return Promise.reject(err);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        // Try to refresh the token
+        await api.post('/auth/refresh-token');
+        processQueue(null);
+        isRefreshing = false;
+        
+        // Retry the original request
+        return api(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        isRefreshing = false;
+        
+        // Refresh failed - redirect to login
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
     }
     
-    // Create a standardized error object
+    // For other errors, create a standardized error object
     const standardError = {
       message,
       status: error.response?.status,
@@ -56,20 +86,21 @@ export const authAPI = {
   register: (userData) => api.post('/auth/register', userData),
   login: (credentials) => api.post('/auth/login', credentials),
   logout: () => api.post('/auth/logout'),
+  logoutAll: () => api.post('/auth/logout-all'),
+  refreshToken: () => api.post('/auth/refresh-token'),
   verifyOTP: (otpData) => api.post('/auth/verify-otp', otpData),
   resendOTP: (phone) => api.post('/auth/resend-otp', { phone }),
   forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
-  resetPassword: (resetData) => api.post('/auth/reset-password', resetData),
-  changePassword: (passwordData) => api.patch('/auth/change-password', passwordData),
+  resetPassword: (token, passwordData) => api.patch(`/auth/reset-password/${token}`, passwordData),
+  updatePassword: (passwordData) => api.patch('/auth/update-password', passwordData),
   getCurrentUser: () => api.get('/auth/me'),
-  updateProfile: (userData) => api.patch('/auth/update-profile', userData),
+  updateProfile: (userData) => api.patch('/auth/update-me', userData),
 
   // Address Management
   getAddresses: () => api.get('/auth/addresses'),
   addAddress: (addressData) => api.post('/auth/addresses', addressData),
   updateAddress: (addressId, addressData) => api.patch(`/auth/addresses/${addressId}`, addressData),
   deleteAddress: (addressId) => api.delete(`/auth/addresses/${addressId}`),
-  setDefaultAddress: (addressId) => api.patch(`/auth/addresses/${addressId}/default`),
 
   // Wishlist Management
   getWishlist: () => api.get('/auth/wishlist'),

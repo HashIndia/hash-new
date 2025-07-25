@@ -11,69 +11,73 @@ const useAuthStore = create(persist(
     error: null,
 
     // Authentication Actions
-    login: async (credentials) => {
-      set({ isLoading: true, error: null });
-      try {
-        const response = await adminAuthAPI.login(credentials);
-        const { admin, token } = response.data;
-        
-        localStorage.setItem('adminToken', token);
-        set({ 
-          user: admin, 
-          isAuthenticated: true, 
-          isLoading: false 
-        });
-        
-        return { success: true };
-      } catch (error) {
-        const errorMessage = handleAPIError(error);
-        set({ 
-          isLoading: false, 
-          error: errorMessage,
-          user: null,
-          isAuthenticated: false 
-        });
-        return { success: false, error: errorMessage };
-      }
-    },
+          login: async (credentials) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await adminAuthAPI.login(credentials);
+          const { admin } = response.data;
+          
+          set({ 
+            user: admin, 
+            isAuthenticated: true, 
+            isLoading: false 
+          });
+          
+          return { success: true };
+        } catch (error) {
+          const errorMessage = handleAPIError(error);
+          set({ 
+            isLoading: false, 
+            error: errorMessage,
+            user: null,
+            isAuthenticated: false 
+          });
+          return { success: false, error: errorMessage };
+        }
+      },
 
-    logout: async () => {
-      try {
-        await adminAuthAPI.logout();
-      } catch (error) {
-        console.error('Logout error:', error);
-      } finally {
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('admin');
-        set({ 
-          user: null, 
-          isAuthenticated: false,
-          error: null 
-        });
-      }
-    },
+          logout: async () => {
+        try {
+          await adminAuthAPI.logout();
+        } catch (error) {
+          console.error('Logout error:', error);
+        } finally {
+          set({ 
+            user: null, 
+            isAuthenticated: false,
+            error: null 
+          });
+        }
+      },
 
-    checkAuth: async () => {
-      const token = localStorage.getItem('adminToken');
-      if (!token) {
-        set({ isAuthenticated: false, user: null });
-        return;
-      }
+      logoutAll: async () => {
+        try {
+          await adminAuthAPI.logoutAll();
+        } catch (error) {
+          console.error('Logout all error:', error);
+        } finally {
+          set({ 
+            user: null, 
+            isAuthenticated: false,
+            error: null 
+          });
+        }
+      },
 
-      try {
-        const response = await adminAuthAPI.getCurrentAdmin();
-        set({ 
-          user: response.data.admin, 
-          isAuthenticated: true 
-        });
-      } catch (error) {
-        localStorage.removeItem('adminToken');
-        set({ 
-          user: null, 
-          isAuthenticated: false 
-        });
-      }
-    },
+          checkAuth: async () => {
+        try {
+          const response = await adminAuthAPI.getCurrentAdmin();
+          set({ 
+            user: response.data.admin, 
+            isAuthenticated: true 
+          });
+        } catch (error) {
+          set({ 
+            user: null, 
+            isAuthenticated: false 
+          });
+        }
+      },
 
     // Clear error
     clearError: () => set({ error: null }),

@@ -5,8 +5,19 @@ import User from '../models/User.js';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import Campaign from '../models/Campaign.js';
+import RefreshToken from '../models/RefreshToken.js';
 import * as emailService from '../services/emailService.js';
 import * as smsService from '../services/smsService.js';
+import { 
+  generateAccessToken, 
+  generateRefreshToken, 
+  verifyRefreshToken, 
+  revokeRefreshToken,
+  revokeAllRefreshTokens,
+  setAuthCookies,
+  clearAuthCookies,
+  extractTokensFromCookies
+} from '../utils/tokenUtils.js';
 
 // Admin Authentication
 export const adminLogin = catchAsync(async (req, res, next) => {
@@ -16,30 +27,128 @@ export const adminLogin = catchAsync(async (req, res, next) => {
     return next(new AppError('Please provide email and password', 400));
   }
 
-  const admin = await Admin.findOne({ email }).select('+password');
+  const admin = await Admin.findOne({ email }).select('+password +loginAttempts +lockUntil');
 
   if (!admin || !(await admin.correctPassword(password, admin.password))) {
+    // Handle failed login attempts
+    if (admin) {
+      await admin.incLoginAttempts();
+    }
     return next(new AppError('Incorrect email or password', 401));
+  }
+
+  // Check if account is locked
+  if (admin.isLocked) {
+    return next(new AppError('Admin account is temporarily locked due to too many failed login attempts. Please try again later.', 423));
+  }
+
+  // Reset login attempts on successful login
+  if (admin.loginAttempts && admin.loginAttempts > 0) {
+    await admin.updateOne({
+      $unset: { loginAttempts: 1, lockUntil: 1 }
+    });
   }
 
   admin.lastLogin = new Date();
   await admin.save({ validateBeforeSave: false });
 
-  const token = admin.signToken();
+  // Generate tokens
+  const accessToken = generateAccessToken({ id: admin._id, role: admin.role || 'admin' }, 'admin');
+  const refreshToken = await generateRefreshToken(
+    admin._id, 
+    'admin', 
+    req.ip, 
+    req.get('User-Agent')
+  );
 
-  const cookieOptions = {
-    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production'
-  };
+  // Set secure HTTP-only cookies
+  setAuthCookies(res, accessToken, refreshToken, 'admin');
 
-  res.cookie('adminToken', token, cookieOptions);
-
+  // Remove sensitive data from output
   admin.password = undefined;
 
   res.status(200).json({
     status: 'success',
-    token,
+    data: {
+      admin
+    }
+  });
+});
+
+// Admin logout
+export const adminLogout = catchAsync(async (req, res, next) => {
+  const { adminRefreshToken } = extractTokensFromCookies(req);
+
+  // Revoke refresh token if it exists
+  if (adminRefreshToken) {
+    try {
+      await revokeRefreshToken(adminRefreshToken, req.ip, req.get('User-Agent'));
+    } catch (error) {
+      console.error('Failed to revoke admin refresh token:', error);
+    }
+  }
+
+  // Clear auth cookies
+  clearAuthCookies(res, 'admin');
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Admin logged out successfully'
+  });
+});
+
+// Admin logout from all devices
+export const adminLogoutAll = catchAsync(async (req, res, next) => {
+  const adminId = req.admin._id;
+
+  // Revoke all refresh tokens for this admin
+  await revokeAllRefreshTokens(adminId, 'admin');
+
+  // Clear auth cookies
+  clearAuthCookies(res, 'admin');
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Admin logged out from all devices successfully'
+  });
+});
+
+// Refresh admin access token
+export const adminRefreshToken = catchAsync(async (req, res, next) => {
+  const { adminRefreshToken } = extractTokensFromCookies(req);
+
+  if (!adminRefreshToken) {
+    return next(new AppError('Admin refresh token not provided', 401));
+  }
+
+  try {
+    // Verify refresh token
+    const tokenDoc = await verifyRefreshToken(adminRefreshToken, 'admin');
+    const admin = tokenDoc.admin;
+
+    // Generate new access token
+    const newAccessToken = generateAccessToken({ id: admin._id, role: admin.role || 'admin' }, 'admin');
+
+    // Update access token cookie (keep refresh token as is)
+    setAuthCookies(res, newAccessToken, adminRefreshToken, 'admin');
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Admin token refreshed successfully'
+    });
+  } catch (error) {
+    // Clear cookies if refresh token is invalid
+    clearAuthCookies(res, 'admin');
+    return next(new AppError('Invalid admin refresh token', 401));
+  }
+});
+
+// Get current admin
+export const getCurrentAdmin = catchAsync(async (req, res, next) => {
+  const admin = await Admin.findById(req.admin.id);
+
+  res.status(200).json({
+    status: 'success',
     data: {
       admin
     }

@@ -19,9 +19,8 @@ const useUserStore = create(
         set({ isLoading: true, error: null });
         try {
           const response = await authAPI.login(credentials);
-          const { user, token } = response.data;
+          const { user } = response.data;
           
-          localStorage.setItem('token', token);
           set({ 
             user, 
             isAuthenticated: true, 
@@ -61,9 +60,8 @@ const useUserStore = create(
         set({ isLoading: true, error: null });
         try {
           const response = await authAPI.verifyOTP(otpData);
-          const { user, token } = response.data;
+          const { user } = response.data;
           
-          localStorage.setItem('token', token);
           set({ 
             user, 
             isAuthenticated: true, 
@@ -85,8 +83,22 @@ const useUserStore = create(
         } catch (error) {
           console.error('Logout error:', error);
         } finally {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+          set({ 
+            user: null, 
+            isAuthenticated: false, 
+            addresses: [], 
+            orders: [], 
+            wishlist: [] 
+          });
+        }
+      },
+
+      logoutAll: async () => {
+        try {
+          await authAPI.logoutAll();
+        } catch (error) {
+          console.error('Logout all error:', error);
+        } finally {
           set({ 
             user: null, 
             isAuthenticated: false, 
@@ -250,12 +262,6 @@ const useUserStore = create(
       },
 
       checkAuth: async () => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          set({ isAuthenticated: false, user: null });
-          return;
-        }
-
         try {
           const response = await authAPI.getCurrentUser();
           set({ 
@@ -264,7 +270,6 @@ const useUserStore = create(
           });
           await get().loadUserData();
         } catch (error) {
-          localStorage.removeItem('token');
           set({ 
             user: null, 
             isAuthenticated: false 

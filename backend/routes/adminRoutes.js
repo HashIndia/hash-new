@@ -41,9 +41,15 @@ const customerStatusValidation = [
 
 // Public admin routes
 router.post('/login', loginValidation, adminController.adminLogin);
+router.post('/refresh-token', adminController.adminRefreshToken);
 
 // Protected admin routes
 router.use(protectAdmin);
+
+// Admin auth management
+router.get('/me', adminController.getCurrentAdmin);
+router.post('/logout', adminController.adminLogout);
+router.post('/logout-all', adminController.adminLogoutAll);
 
 // Dashboard and analytics
 router.get('/dashboard', adminController.getDashboardAnalytics);

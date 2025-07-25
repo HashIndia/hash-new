@@ -66,71 +66,73 @@ const resetPasswordValidation = [
     })
 ];
 
+const addressValidation = [
+  body('street')
+    .trim()
+    .isLength({ min: 5, max: 200 })
+    .withMessage('Street address must be between 5 and 200 characters'),
+  body('city')
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('City must be between 2 and 50 characters'),
+  body('state')
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('State must be between 2 and 50 characters'),
+  body('zipCode')
+    .trim()
+    .isLength({ min: 5, max: 10 })
+    .withMessage('ZIP code must be between 5 and 10 characters')
+];
+
 // Public routes
 router.post('/register', registerValidation, authController.register);
 router.post('/login', loginValidation, authController.login);
 router.post('/verify-otp', otpValidation, authController.verifyOTP);
 router.post('/resend-otp', authController.resendOTP);
+router.post('/refresh-token', authController.refreshToken);
 router.post('/forgot-password', authController.forgotPassword);
 router.patch('/reset-password/:token', resetPasswordValidation, authController.resetPassword);
 
-// Google OAuth routes
-router.get('/google', authController.googleAuth);
-router.get('/google/callback', authController.googleCallback);
+// Protected routes (require authentication)
+router.use(protectUser);
 
-// Protected routes
-router.use(protectUser); // All routes after this middleware are protected
-
+// User profile routes
 router.get('/me', authController.getMe);
-router.patch('/update-profile', authController.updateProfile);
-router.patch('/change-password', 
-  sensitiveOpLimit(),
+router.patch('/update-me', authController.updateMe);
+router.patch('/update-password', 
+  sensitiveOpLimit,
   [
-    body('currentPassword').notEmpty().withMessage('Current password is required'),
-    body('newPassword')
+    body('passwordCurrent').notEmpty().withMessage('Current password is required'),
+    body('password')
       .isLength({ min: 6 })
       .withMessage('New password must be at least 6 characters long')
       .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
       .withMessage('New password must contain at least one uppercase letter, one lowercase letter, and one number'),
     body('passwordConfirm')
       .custom((value, { req }) => {
-        if (value !== req.body.newPassword) {
+        if (value !== req.body.password) {
           throw new Error('Passwords do not match');
         }
         return true;
       })
   ],
-  authController.changePassword
+  authController.updatePassword
 );
 
-router.delete('/delete-account', 
-  sensitiveOpLimit(),
-  authController.deleteAccount
-);
-
+// Logout routes
 router.post('/logout', authController.logout);
+router.post('/logout-all', authController.logoutAll);
 
 // Address management routes
 router.get('/addresses', authController.getAddresses);
-router.post('/addresses', 
-  [
-    body('line1').notEmpty().withMessage('Address line 1 is required'),
-    body('city').notEmpty().withMessage('City is required'),
-    body('state').notEmpty().withMessage('State is required'),
-    body('zip').notEmpty().withMessage('ZIP code is required')
-  ],
-  authController.addAddress
-);
+router.post('/addresses', addressValidation, authController.addAddress);
 router.patch('/addresses/:addressId', authController.updateAddress);
 router.delete('/addresses/:addressId', authController.deleteAddress);
 
-// Wishlist routes
+// Wishlist management routes
 router.get('/wishlist', authController.getWishlist);
 router.post('/wishlist/:productId', authController.addToWishlist);
 router.delete('/wishlist/:productId', authController.removeFromWishlist);
-
-// Email verification routes
-router.post('/send-verification-email', authController.sendVerificationEmail);
-router.get('/verify-email/:token', authController.verifyEmail);
 
 export default router; 
