@@ -2,6 +2,9 @@ import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import AppError from '../utils/appError.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Configure Cloudinary
 cloudinary.config({
@@ -103,13 +106,13 @@ const uploadToMemoryHandler = uploadToMemory.array('images', 10);
 const handleMulterError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
-      return next(new AppError('File too large. Maximum size is 5MB.', 400));
+      return next(new AppError('File is too large.', 400));
     }
     if (err.code === 'LIMIT_FILE_COUNT') {
-      return next(new AppError('Too many files. Maximum is 10 files.', 400));
+      return next(new AppError('Too many files were uploaded.', 400));
     }
     if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-      return next(new AppError('Unexpected field name.', 400));
+      return next(new AppError('Unexpected field name for file upload.', 400));
     }
   }
   next(err);
@@ -223,4 +226,4 @@ export {
   processAndUploadImages,
   generateImageUrl,
   generateResponsiveUrls
-}; 
+};

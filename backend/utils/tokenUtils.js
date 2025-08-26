@@ -1,5 +1,8 @@
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 import RefreshToken from '../models/RefreshToken.js';
+
+dotenv.config();
 
 // Generate access token (short-lived)
 export const generateAccessToken = (payload, type = 'user') => {
@@ -128,4 +131,4 @@ export const setAuthCookies = (res, accessToken, refreshToken, type = 'user') =>
     res.cookie('adminAccessToken', accessToken, accessTokenOptions);
     res.cookie('adminRefreshToken', refreshToken, refreshTokenOptions);
   }
-}; 
+};

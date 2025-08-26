@@ -85,23 +85,32 @@ userSchema.pre('save', async function(next) {
   next();
 });
 
-// Compare password method
+// Static method to generate OTP
+userSchema.statics.generateOTP = function() {
+  const otpLength = process.env.OTP_LENGTH || 4;
+  let otp = '';
+  for (let i = 0; i < otpLength; i++) {
+    otp += Math.floor(Math.random() * 10);
+  }
+  return otp;
+};
+
+// Instance method for password comparison
 userSchema.methods.correctPassword = async function(candidatePassword, userPassword) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
-// Generate phone verification OTP
-userSchema.methods.generatePhoneOTP = function() {
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  this.phoneVerificationOTP = otp;
-  this.otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-  return otp;
-};
-
-// Clear OTP
-userSchema.methods.clearOTP = function() {
-  this.phoneVerificationOTP = undefined;
-  this.otpExpires = undefined;
+// Instance method for password reset token
+userSchema.methods.createPasswordResetToken = function() {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+  
+  // Set expiry for the password reset token
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  return resetToken;
 };
 
 // Add address method
@@ -143,4 +152,4 @@ userSchema.methods.removeAddress = function(addressId) {
   return this.save();
 };
 
-export default mongoose.model('User', userSchema); 
+export default mongoose.model('User', userSchema);

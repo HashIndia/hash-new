@@ -1,3 +1,14 @@
+import Razorpay from 'razorpay';
+import dotenv from 'dotenv';
+import AppError from '../utils/appError.js';
+
+dotenv.config();
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
+
 // TODO: Replace this stub with real Payment integration before production
 
 export const createPaymentIntent = async (...args) => {
@@ -10,4 +21,4 @@ export const verifyPayment = async (...args) => {
   return Promise.resolve({ status: 'stub-verified' });
 };
 
-// Add other stubs as needed for your codebase 
+// Add other stubs as needed for your codebase

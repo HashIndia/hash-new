@@ -88,7 +88,6 @@ const addressValidation = [
 // Public routes
 router.post('/register', registerValidation, authController.register);
 router.post('/login', loginValidation, authController.login);
-router.post('/verify-otp', otpValidation, authController.verifyOTP);
 router.post('/resend-otp', authController.resendOTP);
 router.post('/refresh-token', authController.refreshToken);
 router.post('/forgot-password', authController.forgotPassword);
@@ -140,4 +139,4 @@ router.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Backend is running!' });
 });
 
-export default router; 
+export default router;

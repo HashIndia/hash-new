@@ -1,3 +1,8 @@
+import dotenv from 'dotenv';
+
+// Configure dotenv before any other imports
+dotenv.config();
+
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
@@ -6,10 +11,6 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
-
-// Configure environment variables
-dotenv.config();
 
 // Import routes
 import authRoutes from './routes/authRoutes.js';
@@ -178,4 +179,4 @@ const startServer = async () => {
 
 startServer();
 
-export default app; 
+export default app;

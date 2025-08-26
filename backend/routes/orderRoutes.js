@@ -1,7 +1,7 @@
 import express from 'express';
 import { body } from 'express-validator';
 import * as orderController from '../controllers/orderController.js';
-import { protectUser, protectAdmin, restrictTo } from '../middleware/auth.js';
+import { protectUser, protectAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -43,13 +43,6 @@ const statusUpdateValidation = [
     .withMessage('Invalid order status')
 ];
 
-const otpValidation = [
-  body('otp')
-    .isLength({ min: 6, max: 6 })
-    .isNumeric()
-    .withMessage('OTP must be a 6-digit number')
-];
-
 // Protected routes (require user authentication)
 router.use(protectUser);
 
@@ -58,7 +51,6 @@ router.post('/', orderValidation, orderController.createOrder);
 router.get('/my-orders', orderController.getUserOrders);
 router.get('/:id', orderController.getOrder);
 router.patch('/:id/cancel', orderController.cancelOrder);
-router.post('/:id/verify-delivery', otpValidation, orderController.verifyDeliveryOtp);
 
 // Admin routes (require admin authentication)
 router.use(protectAdmin);
@@ -66,4 +58,4 @@ router.get('/', orderController.getAllOrders);
 router.patch('/:id/status', statusUpdateValidation, orderController.updateOrderStatus);
 router.get('/analytics/overview', orderController.getOrderAnalytics);
 
-export default router; 
+export default router;

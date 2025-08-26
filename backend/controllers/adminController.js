@@ -7,7 +7,6 @@ import Product from '../models/Product.js';
 import Campaign from '../models/Campaign.js';
 import RefreshToken from '../models/RefreshToken.js';
 import * as emailService from '../services/emailService.js';
-import * as smsService from '../services/smsService.js';
 import { 
   generateAccessToken, 
   generateRefreshToken, 
@@ -212,10 +211,8 @@ export const getDashboardAnalytics = catchAsync(async (req, res, next) => {
     {
       $group: {
         _id: null,
-        newCustomers: { $sum: 1 },
-        verifiedCustomers: {
-          $sum: { $cond: ['$isPhoneVerified', 1, 0] }
-        }
+        newCustomers: { $sum: 1 }
+        // verifiedCustomers metric removed as it's redundant now
       }
     }
   ]);
@@ -319,11 +316,7 @@ export const getAllCustomers = catchAsync(async (req, res, next) => {
   const filter = {};
   
   if (status && status !== 'all') {
-    if (status === 'verified') {
-      filter.isPhoneVerified = true;
-    } else if (status === 'unverified') {
-      filter.isPhoneVerified = false;
-    }
+    filter.status = status; // Use the actual 'status' field on the User model
   }
   
   if (search) {
@@ -479,14 +472,13 @@ export const sendCampaign = catchAsync(async (req, res, next) => {
   // Get target audience
   let recipients = [];
   
-  if (campaign.targetAudience === 'all') {
-    recipients = await User.find({ isPhoneVerified: true }, 'email phone name');
-  } else if (campaign.targetAudience === 'verified') {
-    recipients = await User.find({ isPhoneVerified: true }, 'email phone name');
+  if (campaign.targetAudience === 'all' || campaign.targetAudience === 'verified') {
+    // 'verified' is now the default, so it's the same as 'all'
+    recipients = await User.find({}, 'email name');
   } else if (campaign.targetAudience === 'custom' && campaign.customRecipients.length > 0) {
     recipients = await User.find(
       { _id: { $in: campaign.customRecipients } },
-      'email phone name'
+      'email name'
     );
   }
 
@@ -508,10 +500,8 @@ export const sendCampaign = catchAsync(async (req, res, next) => {
           recipient.name
         );
         successCount++;
-      } else if (campaign.type === 'sms' && recipient.phone) {
-        await smsService.sendMarketing(recipient.phone, campaign.content);
-        successCount++;
       }
+      // SMS campaign logic removed
     } catch (error) {
       console.error(`Failed to send ${campaign.type} to ${recipient.email || recipient.phone}:`, error);
       failureCount++;
@@ -721,4 +711,4 @@ export const getSystemStats = catchAsync(async (req, res, next) => {
       }
     }
   });
-}); 
+});

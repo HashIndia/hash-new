@@ -1,15 +1,18 @@
 import nodemailer from 'nodemailer';
 import AppError from '../utils/appError.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 class EmailService {
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: process.env.EMAIL_PORT,
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
       secure: false, // true for 465, false for other ports
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
       }
     });
   }
@@ -18,7 +21,7 @@ class EmailService {
   async sendEmail(options) {
     try {
       const mailOptions = {
-        from: `Hash Store <${process.env.EMAIL_FROM}>`,
+        from: `Hash Store <${process.env.SENDER_EMAIL}>`,
         to: options.to,
         subject: options.subject,
         text: options.text,
@@ -299,6 +302,25 @@ class EmailService {
       html
     });
   }
+
+  // Send marketing email
+  async sendMarketing(to, subject, content, name = '') {
+    const personalizedContent = content.replace(/{{name}}/g, name);
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="padding: 30px 20px; background: #f8f9fa;">
+          <h2 style="color: #333; margin-bottom: 20px;">${subject}</h2>
+          <div>${personalizedContent}</div>
+        </div>
+      </div>
+    `;
+
+    return this.sendEmail({
+      to,
+      subject,
+      html
+    });
+  }
 }
 
-export default new EmailService(); 
+export default new EmailService();

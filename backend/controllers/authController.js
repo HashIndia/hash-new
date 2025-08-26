@@ -1,11 +1,11 @@
 import crypto from 'crypto';
 import { validationResult } from 'express-validator';
+import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import RefreshToken from '../models/RefreshToken.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 import * as emailService from '../services/emailService.js';
-import * as smsService from '../services/smsService.js';
 import { 
   generateAccessToken, 
   generateRefreshToken, 
@@ -45,7 +45,7 @@ const createSendTokens = async (user, statusCode, res, req) => {
   });
 };
 
-// Register new user
+// Register new user - Step 1: Initiate registration and send OTP
 export const register = catchAsync(async (req, res, next) => {
   // Check validation errors
   const errors = validationResult(req);
@@ -55,55 +55,45 @@ export const register = catchAsync(async (req, res, next) => {
 
   const { name, email, phone, password } = req.body;
 
-  // Check if user already exists
+  // Check if user already exists and is verified
   const existingUser = await User.findOne({
-    $or: [{ email }, { phone }]
+    $or: [{ email }, { phone }],
+    isPhoneVerified: true
   });
 
   if (existingUser) {
     if (existingUser.email === email) {
-      return next(new AppError('User with this email already exists', 400));
+      return next(new AppError('An account with this email already exists.', 400));
     }
     if (existingUser.phone === phone) {
-      return next(new AppError('User with this phone number already exists', 400));
+      return next(new AppError('An account with this phone number already exists.', 400));
     }
   }
 
-  // Create new user
-  const newUser = await User.create({
-    name,
-    email,
-    phone: smsService.formatPhoneNumber(phone),
-    password
-  });
+  // Generate OTP
+  const otp = User.generateOTP();
+  console.log(`[DEV] Registration OTP for ${email}: ${otp}`); // <-- Log OTP for dev
 
-  // Generate and send OTP
-  const otp = newUser.generatePhoneOTP();
-  console.log(`[DEV] Registration OTP for ${newUser.phone}: ${otp}`); // <-- Log OTP for dev
-  await newUser.save({ validateBeforeSave: false });
-
-  // Send welcome email and OTP SMS
+  // Send OTP email
   try {
-    await Promise.all([
-      emailService.sendWelcomeEmail(newUser),
-      smsService.sendOTP(newUser.phone, otp, newUser.name)
-    ]);
+    await emailService.sendOTPEmail({ name, email }, otp);
   } catch (error) {
-    console.error('Failed to send welcome messages:', error);
-    // Don't fail registration if messages fail
+    console.error('Failed to send OTP email:', error);
+    return next(new AppError('Failed to send OTP. Please try again.', 500));
   }
 
-  res.status(201).json({
+  // Create a temporary token containing user data and OTP
+  const registrationToken = jwt.sign(
+    { name, email, phone, password, otp },
+    process.env.JWT_SECRET,
+    { expiresIn: `${process.env.OTP_EXPIRY_MINUTES}m` }
+  );
+
+  res.status(200).json({
     status: 'success',
-    message: 'Registration successful. Please verify your phone number with the OTP sent.',
+    message: `An OTP has been sent to ${email}. Please use it to verify your account.`,
     data: {
-      user: {
-        id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        phone: newUser.phone,
-        phoneVerified: newUser.isPhoneVerified
-      }
+      registrationToken
     }
   });
 });
@@ -159,7 +149,7 @@ export const login = catchAsync(async (req, res, next) => {
   await createSendTokens(user, 200, res, req);
 });
 
-// Verify OTP
+// Verify OTP - Step 2: Verify OTP and create user
 export const verifyOTP = catchAsync(async (req, res, next) => {
   // Check validation errors
   const errors = validationResult(req);
@@ -167,70 +157,91 @@ export const verifyOTP = catchAsync(async (req, res, next) => {
     return next(new AppError('Validation failed', 400, errors.array()));
   }
 
-  const { phone, otp } = req.body;
+  const { registrationToken, otp } = req.body;
 
-  // Find user by phone
-  const user = await User.findOne({ 
-    phone: smsService.formatPhoneNumber(phone),
-    otp,
-    otpExpires: { $gt: Date.now() }
-  });
-
-  if (!user) {
-    return next(new AppError('Invalid or expired OTP', 400));
+  if (!registrationToken || !otp) {
+    return next(new AppError('Registration token and OTP are required.', 400));
   }
 
-  // Verify OTP and mark phone as verified
-  user.isPhoneVerified = true;
-  user.otp = undefined;
-  user.otpExpires = undefined;
-  user.verifiedAt = new Date();
-  await user.save({ validateBeforeSave: false });
+  // Verify the temporary token
+  let decoded;
+  try {
+    decoded = jwt.verify(registrationToken, process.env.JWT_SECRET);
+  } catch (err) {
+    return next(new AppError('Invalid or expired registration token. Please register again.', 400));
+  }
 
-  // Send tokens only if user is completely verified
-  await createSendTokens(user, 200, res, req);
+  // Check if OTP matches
+  if (decoded.otp !== otp) {
+    return next(new AppError('Invalid OTP.', 400));
+  }
+
+  // OTP is correct, create the user
+  const { name, email, phone, password } = decoded;
+
+  const newUser = await User.create({
+    name,
+    email,
+    phone,
+    password,
+    isPhoneVerified: true, // Mark as verified since OTP is correct
+    verifiedAt: new Date()
+  });
+
+  // Send welcome email
+  try {
+    await emailService.sendWelcomeEmail(newUser);
+  } catch (error) {
+    console.error('Failed to send welcome email after verification:', error);
+  }
+
+  // Log the new user in
+  await createSendTokens(newUser, 201, res, req);
 });
 
 // Resend OTP
 export const resendOTP = catchAsync(async (req, res, next) => {
-  const { phone } = req.body;
+  const { registrationToken } = req.body;
 
-  if (!phone) {
-    return next(new AppError('Please provide phone number', 400));
+  if (!registrationToken) {
+    return next(new AppError('Registration token is required to resend OTP.', 400));
   }
 
-  const user = await User.findOne({ 
-    phone: smsService.formatPhoneNumber(phone),
-    isPhoneVerified: false
-  });
-
-  if (!user) {
-    return next(new AppError('User not found or phone already verified', 404));
+  // Verify the temporary token to get user details
+  let decoded;
+  try {
+    decoded = jwt.verify(registrationToken, process.env.JWT_SECRET, {
+      ignoreExpiration: true // We allow resending OTP for expired tokens
+    });
+  } catch (err) {
+    return next(new AppError('Invalid registration token.', 400));
   }
 
-  // Check if we can send another OTP (rate limiting)
-  const timeSinceLastOTP = Date.now() - user.otpExpires + (10 * 60 * 1000); // OTP expires in 10 minutes
-  if (timeSinceLastOTP < 60000) { // 1 minute cooldown
-    return next(new AppError('Please wait before requesting another OTP', 429));
-  }
+  const { name, email, phone, password } = decoded;
 
   // Generate and send new OTP
-  const otp = user.generatePhoneOTP();
-  console.log(`[DEV] Resend OTP for ${user.phone}: ${otp}`); // <-- Log OTP for dev
-  await user.save({ validateBeforeSave: false });
+  const newOtp = User.generateOTP();
+  console.log(`[DEV] Resend OTP for ${email}: ${newOtp}`); // <-- Log OTP for dev
 
   try {
-    await smsService.sendOTP(user.phone, otp, user.name);
+    await emailService.sendOTPEmail({ name, email }, newOtp);
   } catch (error) {
-    user.otp = undefined;
-    user.otpExpires = undefined;
-    await user.save({ validateBeforeSave: false });
     return next(new AppError('Failed to send OTP. Please try again.', 500));
   }
 
+  // Create a new registration token with the new OTP
+  const newRegistrationToken = jwt.sign(
+    { name, email, phone, password, otp: newOtp },
+    process.env.JWT_SECRET,
+    { expiresIn: `${process.env.OTP_EXPIRY_MINUTES}m` }
+  );
+
   res.status(200).json({
     status: 'success',
-    message: 'OTP sent successfully'
+    message: 'A new OTP has been sent to your email.',
+    data: {
+      registrationToken: newRegistrationToken
+    }
   });
 });
 
@@ -423,24 +434,6 @@ export const updateMe = catchAsync(async (req, res, next) => {
     }
   });
 
-  // If phone number is being updated, require re-verification
-  if (filteredBody.phone && filteredBody.phone !== req.user.phone) {
-    filteredBody.phone = smsService.formatPhoneNumber(filteredBody.phone);
-    filteredBody.isPhoneVerified = false;
-    
-    // Generate OTP for new phone number
-    const user = await User.findById(req.user._id);
-    const otp = user.generatePhoneOTP();
-    filteredBody.otp = user.otp;
-    filteredBody.otpExpires = user.otpExpires;
-    
-    try {
-      await smsService.sendOTP(filteredBody.phone, otp, user.name);
-    } catch (error) {
-      return next(new AppError('Failed to send OTP to new phone number', 500));
-    }
-  }
-
   // Update user document
   const updatedUser = await User.findByIdAndUpdate(req.user._id, filteredBody, {
     new: true,
@@ -552,4 +545,4 @@ export const removeFromWishlist = catchAsync(async (req, res, next) => {
     status: 'success',
     message: 'Product removed from wishlist'
   });
-}); 
+});

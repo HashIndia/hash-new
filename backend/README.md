@@ -11,7 +11,6 @@ A robust e-commerce backend built with Node.js, Express, MongoDB, and various th
 - **Admin Panel**: Comprehensive admin features for managing products, orders, customers
 - **File Upload**: Cloudinary integration for image management
 - **Email Service**: Nodemailer integration for transactional emails
-- **SMS Service**: Twilio integration for OTP and notifications
 - **Payment Gateway**: Razorpay integration for secure payments
 
 ### Security Features
@@ -68,10 +67,6 @@ A robust e-commerce backend built with Node.js, Express, MongoDB, and various th
    CLOUDINARY_CLOUD_NAME=your-cloudinary-cloud-name
    CLOUDINARY_API_KEY=your-cloudinary-api-key
    CLOUDINARY_API_SECRET=your-cloudinary-api-secret
-   
-   TWILIO_ACCOUNT_SID=your-twilio-account-sid
-   TWILIO_AUTH_TOKEN=your-twilio-auth-token
-   TWILIO_PHONE_NUMBER=+1234567890
    
    RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxxxxxx
    RAZORPAY_KEY_SECRET=your-razorpay-key-secret
@@ -197,7 +192,6 @@ backend/
 │   └── adminRoutes.js
 ├── services/            # External services
 │   ├── emailService.js
-│   ├── smsService.js
 │   └── paymentService.js
 ├── utils/               # Utility functions
 │   ├── appError.js
@@ -230,17 +224,11 @@ backend/
 4. Verify payment signature
 5. Update order status
 
-## 📱 SMS & Email Services
-
-### SMS Features (Twilio)
-- OTP verification
-- Order confirmations  
-- Shipping notifications
-- Delivery OTP
-- Marketing campaigns
+## 📱 Email Services
 
 ### Email Features (Nodemailer)
 - Welcome emails
+- OTP verification
 - Order confirmations
 - Shipping notifications
 - Password reset
@@ -276,7 +264,6 @@ backend/
 1. **Set up MongoDB** (local or Atlas)
 2. **Create accounts** for third-party services:
    - [Cloudinary](https://cloudinary.com/) - Image management
-   - [Twilio](https://www.twilio.com/) - SMS services
    - [Razorpay](https://razorpay.com/) - Payment gateway
 3. **Configure Gmail App Password** for emails
 4. **Copy and edit** `.env.sample` to `.env`
@@ -345,4 +332,4 @@ This project is licensed under the MIT License.
 
 ---
 
-**Hash Store Backend** - Built with ❤️ using modern ES6 modules for scalable e-commerce needs. 
+**Hash Store Backend** - Built with ❤️ using modern ES6 modules for scalable e-commerce needs.

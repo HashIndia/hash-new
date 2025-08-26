@@ -4,7 +4,6 @@ import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import User from '../models/User.js';
 import * as paymentService from '../services/paymentService.js';
-import * as smsService from '../services/smsService.js';
 import * as emailService from '../services/emailService.js';
 
 // Create new order
@@ -89,7 +88,9 @@ export const createOrder = catchAsync(async (req, res, next) => {
 
   // Send order confirmation email
   try {
-    await emailService.sendOrderConfirmation(req.user.email, order);
+    // Adapt order object for email service
+    const emailOrder = { ...order.toObject(), customerInfo: order.user };
+    await emailService.sendOrderConfirmationEmail(emailOrder);
   } catch (error) {
     console.error('Failed to send order confirmation email:', error);
   }
@@ -152,7 +153,7 @@ export const getOrder = catchAsync(async (req, res, next) => {
 
 // Update order status (Admin only)
 export const updateOrderStatus = catchAsync(async (req, res, next) => {
-  const { status, trackingNumber, deliveryOtp } = req.body;
+  const { status, trackingNumber } = req.body;
   
   const order = await Order.findById(req.params.id).populate('user');
   
@@ -174,9 +175,6 @@ export const updateOrderStatus = catchAsync(async (req, res, next) => {
 
   if (status === 'shipped') {
     order.shippedAt = new Date();
-    if (deliveryOtp) {
-      order.deliveryOtp = deliveryOtp;
-    }
   }
 
   if (status === 'delivered') {
@@ -187,13 +185,13 @@ export const updateOrderStatus = catchAsync(async (req, res, next) => {
 
   // Send notifications based on status change
   try {
+    const emailOrder = { ...order.toObject(), customerInfo: order.user };
     if (status === 'confirmed' && previousStatus === 'pending') {
-      await smsService.sendOrderConfirmation(order.user.phone, order._id);
+      await emailService.sendOrderConfirmationEmail(emailOrder);
     } else if (status === 'shipped') {
-      await smsService.sendShippingNotification(order.user.phone, order._id, trackingNumber);
-      await emailService.sendShippingNotification(order.user.email, order);
+      await emailService.sendShippingNotification(emailOrder);
     } else if (status === 'delivered') {
-      await smsService.sendDeliveryConfirmation(order.user.phone, order._id);
+      // Optionally send a delivery confirmation email
     }
   } catch (error) {
     console.error('Failed to send notification:', error);
@@ -201,40 +199,6 @@ export const updateOrderStatus = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    data: {
-      order
-    }
-  });
-});
-
-// Verify delivery OTP
-export const verifyDeliveryOtp = catchAsync(async (req, res, next) => {
-  const { otp } = req.body;
-  const orderId = req.params.id;
-
-  const order = await Order.findById(orderId);
-  
-  if (!order) {
-    return next(new AppError('Order not found', 404));
-  }
-
-  if (order.status !== 'shipped') {
-    return next(new AppError('Order is not shipped yet', 400));
-  }
-
-  if (order.deliveryOtp !== otp) {
-    return next(new AppError('Invalid delivery OTP', 400));
-  }
-
-  order.status = 'delivered';
-  order.deliveredAt = new Date();
-  order.otpVerified = true;
-  
-  await order.save();
-
-  res.status(200).json({
-    status: 'success',
-    message: 'Order delivered successfully',
     data: {
       order
     }
@@ -443,4 +407,4 @@ export const getOrderAnalytics = catchAsync(async (req, res, next) => {
       period
     }
   });
-}); 
+});
