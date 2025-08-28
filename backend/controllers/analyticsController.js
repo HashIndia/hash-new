@@ -43,9 +43,9 @@ export const getRevenueAnalytics = catchAsync(async (req, res, next) => {
           month: { $month: '$createdAt' },
           day: { $dayOfMonth: '$createdAt' }
         },
-        revenue: { $sum: '$total' },
+        revenue: { $sum: '$totalAmount' },
         orders: { $sum: 1 },
-        avgOrderValue: { $avg: '$total' }
+        avgOrderValue: { $avg: '$totalAmount' }
       }
     },
     {
@@ -64,9 +64,9 @@ export const getRevenueAnalytics = catchAsync(async (req, res, next) => {
     {
       $group: {
         _id: null,
-        total: { $sum: '$total' },
+        total: { $sum: '$totalAmount' },
         count: { $sum: 1 },
-        avgOrderValue: { $avg: '$total' }
+        avgOrderValue: { $avg: '$totalAmount' }
       }
     }
   ]);
@@ -83,7 +83,7 @@ export const getRevenueAnalytics = catchAsync(async (req, res, next) => {
     {
       $group: {
         _id: null,
-        total: { $sum: '$total' },
+        total: { $sum: '$totalAmount' },
         count: { $sum: 1 }
       }
     }
@@ -328,7 +328,7 @@ export const getDashboardStats = catchAsync(async (req, res, next) => {
           status: { $ne: 'cancelled' }
         }
       },
-      { $group: { _id: null, total: { $sum: '$total' } } }
+      { $group: { _id: null, total: { $sum: '$totalAmount' } } }
     ]),
     Order.aggregate([
       {
@@ -337,7 +337,7 @@ export const getDashboardStats = catchAsync(async (req, res, next) => {
           status: { $ne: 'cancelled' }
         }
       },
-      { $group: { _id: null, total: { $sum: '$total' } } }
+      { $group: { _id: null, total: { $sum: '$totalAmount' } } }
     ]),
     Order.aggregate([
       {
@@ -346,13 +346,13 @@ export const getDashboardStats = catchAsync(async (req, res, next) => {
           status: { $ne: 'cancelled' }
         }
       },
-      { $group: { _id: null, total: { $sum: '$total' } } }
+      { $group: { _id: null, total: { $sum: '$totalAmount' } } }
     ]),
     Order.aggregate([
       {
         $match: { status: { $ne: 'cancelled' } }
       },
-      { $group: { _id: null, total: { $sum: '$total' } } }
+      { $group: { _id: null, total: { $sum: '$totalAmount' } } }
     ])
   ]);
 

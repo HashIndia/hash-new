@@ -1,5 +1,5 @@
 import express from 'express';
-import upload from '../middleware/upload.js';
+import upload, { uploadProductFiles, processAndUploadFiles } from '../middleware/upload.js';
 import { protectAdmin } from '../middleware/auth.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
@@ -9,6 +9,31 @@ const router = express.Router();
 
 // Protect all upload routes
 router.use(protectAdmin);
+
+// Upload mixed files (images and videos) for products
+router.post('/product-files', uploadProductFiles, catchAsync(async (req, res, next) => {
+  if (!req.files || req.files.length === 0) {
+    return next(new AppError('No files provided', 400));
+  }
+
+  if (req.files.length > 6) {
+    return next(new AppError('Maximum 6 files allowed', 400));
+  }
+
+  try {
+    const uploadResults = await processAndUploadFiles(req.files, 'hash/products');
+    
+    res.status(200).json({
+      status: 'success',
+      data: {
+        files: uploadResults
+      }
+    });
+  } catch (error) {
+    console.error('Upload error:', error);
+    return next(new AppError('Failed to upload files', 500));
+  }
+}));
 
 // Upload multiple images
 router.post('/images', upload.array('images', 10), catchAsync(async (req, res, next) => {

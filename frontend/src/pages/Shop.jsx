@@ -39,13 +39,22 @@ export default function Shop() {
           category: selectedCategory,
           sort: sortBy.split('-')[0],
           order: sortBy.split('-')[1] || 'desc',
-          minPrice: priceRange.split('-')[0] === 'under' ? 0 : priceRange.split('-')[0],
-          maxPrice: priceRange.split('-')[1],
         };
-        if (priceRange === 'all') {
-          delete params.minPrice;
-          delete params.maxPrice;
+
+        // Handle price range filtering
+        if (priceRange !== 'all') {
+          if (priceRange.startsWith('under-')) {
+            params.minPrice = 0;
+            params.maxPrice = parseInt(priceRange.split('-')[1]);
+          } else if (priceRange.endsWith('-above')) {
+            params.minPrice = parseInt(priceRange.split('-')[0]);
+          } else {
+            const [min, max] = priceRange.split('-');
+            params.minPrice = parseInt(min);
+            params.maxPrice = parseInt(max);
+          }
         }
+        
         if (params.category === 'all') delete params.category;
 
         const response = await productsAPI.getProducts(params);
@@ -146,10 +155,11 @@ export default function Shop() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Prices</SelectItem>
-                  <SelectItem value="under-500">Under $50</SelectItem>
-                  <SelectItem value="500-1000">$50 - $100</SelectItem>
-                  <SelectItem value="1000-2000">$100 - $200</SelectItem>
-                  <SelectItem value="2000-above">$200 & Above</SelectItem>
+                  <SelectItem value="under-500">Under ₹500</SelectItem>
+                  <SelectItem value="500-1000">₹500 - ₹1,000</SelectItem>
+                  <SelectItem value="1000-2500">₹1,000 - ₹2,500</SelectItem>
+                  <SelectItem value="2500-5000">₹2,500 - ₹5,000</SelectItem>
+                  <SelectItem value="5000-above">₹5,000 & Above</SelectItem>
                 </SelectContent>
               </Select>
               
@@ -227,9 +237,12 @@ export default function Shop() {
                       <CardContent className="p-0">
                         <div className="aspect-square overflow-hidden rounded-t-xl relative">
                           <img
-                            src={product.images?.[0] || '/placeholder-product.jpg'}
+                            src={product.images?.[0]?.url || product.images?.[0] || '/placeholder-product.jpg'}
                             alt={product.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              e.target.src = '/placeholder-product.jpg';
+                            }}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         </div>
@@ -237,7 +250,7 @@ export default function Shop() {
                           <h3 className="font-semibold text-lg mb-2 text-foreground group-hover:text-hash-purple transition-colors duration-200">{product.name}</h3>
                           <p className="text-muted-foreground text-sm mb-3 line-clamp-2">{product.description}</p>
                           <div className="flex justify-between items-center">
-                            <span className="text-xl font-bold text-hash-purple">${product.price}</span>
+                            <span className="text-xl font-bold text-hash-purple">₹{product.price}</span>
                             <Badge variant="secondary" className="bg-hash-purple/10 text-hash-purple border-hash-purple/20">
                               {product.category}
                             </Badge>

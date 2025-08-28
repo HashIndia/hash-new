@@ -136,7 +136,7 @@ export default function Dashboard() {
   const stats = useMemo(() => [
     {
       name: 'Total Revenue',
-      value: `$${orderStats.totalRevenue.toFixed(2)}`,
+      value: `₹${orderStats.totalRevenue.toFixed(2)}`,
       change: '+12.5%',
       changeType: 'increase',
       icon: DollarSign,

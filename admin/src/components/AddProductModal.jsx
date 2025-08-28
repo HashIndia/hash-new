@@ -11,11 +11,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
-import { productsAPI } from '../services/api';
+import { productsAPI, uploadAPI } from '../services/api';
+import FileUpload from './FileUpload';
 import toast from 'react-hot-toast';
 
 const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }) => {
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -82,14 +85,42 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
     try {
       setLoading(true);
       
+      let uploadedFiles = [];
+      
+      // Upload files if any are selected
+      if (selectedFiles.length > 0) {
+        setUploading(true);
+        try {
+          const uploadResponse = await uploadAPI.uploadProductFiles(selectedFiles);
+          uploadedFiles = uploadResponse.data.files;
+          toast.success(`${uploadedFiles.length} files uploaded successfully`);
+        } catch (uploadError) {
+          console.error('File upload error:', uploadError);
+          toast.error('Failed to upload files');
+          setUploading(false);
+          setLoading(false);
+          return;
+        }
+        setUploading(false);
+      }
+      
       const productData = {
         ...formData,
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
         sku: formData.sku || `SKU-${Date.now()}`,
-        images: formData.images.length > 0 && formData.images[0] 
-          ? [{ url: formData.images[0], alt: formData.name || '', isPrimary: true }]
-          : [{ url: 'https://via.placeholder.com/400x500', alt: 'Product image', isPrimary: true }]
+        images: uploadedFiles.length > 0 
+          ? uploadedFiles.map((file, index) => ({
+              url: file.url,
+              publicId: file.publicId,
+              alt: formData.name || '',
+              isPrimary: index === 0,
+              type: file.type,
+              format: file.format
+            }))
+          : formData.images.length > 0 && formData.images[0] 
+            ? [{ url: formData.images[0], alt: formData.name || '', isPrimary: true }]
+            : [{ url: 'https://via.placeholder.com/400x500', alt: 'Product image', isPrimary: true }]
       };
 
       let response;
@@ -129,6 +160,8 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
       sizes: [],
       images: []
     });
+    setSelectedFiles([]);
+    setUploading(false);
     onClose();
   };
 
@@ -272,16 +305,19 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Images (URLs)
+                  Product Images & Videos
                 </label>
-                <Input
-                  value={formData.images[0] || ''}
-                  onChange={(e) => handleInputChange('images', [e.target.value])}
-                  placeholder="Enter image URL"
+                <FileUpload
+                  onFilesSelected={setSelectedFiles}
+                  maxFiles={6}
+                  acceptedTypes={['image/*', 'video/*']}
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  For now, please enter image URLs. File upload coming soon.
-                </p>
+                {formData.images.length > 0 && formData.images[0] && (
+                  <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-sm text-blue-700 font-medium">Current image:</p>
+                    <p className="text-xs text-blue-600 break-all">{formData.images[0]}</p>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end space-x-3 pt-6 border-t">
@@ -289,16 +325,21 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
                   type="button"
                   variant="outline"
                   onClick={handleClose}
-                  disabled={loading}
+                  disabled={loading || uploading}
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || uploading}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
-                  {loading ? (
+                  {uploading ? (
+                    <div className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Uploading files...
+                    </div>
+                  ) : loading ? (
                     <div className="flex items-center">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                       {editProduct ? 'Updating...' : 'Adding...'}

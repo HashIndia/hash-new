@@ -105,9 +105,12 @@ export default function Cart() {
                     {/* Product Image */}
                     <div className="flex-shrink-0">
                       <img
-                        src={item.product.images?.[0] || "https://placehold.co/150x150/64748b/fff?text=Product"}
+                        src={item.product.images?.[0]?.url || item.product.images?.[0] || "https://placehold.co/150x150/64748b/fff?text=Product"}
                         alt={item.product.name}
                         className="w-24 h-24 rounded-xl object-cover"
+                        onError={(e) => {
+                          e.target.src = "https://placehold.co/150x150/64748b/fff?text=Product";
+                        }}
                       />
                     </div>
 
@@ -161,10 +164,10 @@ export default function Cart() {
                       {/* Price */}
                       <div className="mt-4 flex justify-between items-center">
                         <div className="text-xl font-bold text-hash-purple">
-                          ${item.price * item.quantity}
+                          ₹{item.price * item.quantity}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {item.quantity} × ${item.price}
+                          {item.quantity} × ₹{item.price}
                         </div>
                       </div>
                     </div>
@@ -183,20 +186,20 @@ export default function Cart() {
               <CardContent className="p-6 space-y-4">
                 <div className="flex justify-between text-muted-foreground">
                   <span>Subtotal</span>
-                  <span>${Math.round(subtotal)}</span>
+                  <span>₹{Math.round(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>Shipping</span>
-                  <span>{shipping === 0 ? 'Free' : `$${Math.round(shipping)}`}</span>
+                  <span>{shipping === 0 ? 'Free' : `₹${Math.round(shipping)}`}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>Tax (18%)</span>
-                  <span>${Math.round(tax)}</span>
+                  <span>₹{Math.round(tax)}</span>
                 </div>
                 <hr className="border-border" />
                 <div className="flex justify-between text-xl font-bold text-foreground">
                   <span>Total</span>
-                  <span>${Math.round(total)}</span>
+                  <span>₹{Math.round(total)}</span>
                 </div>
                 
                 <div className="space-y-3 pt-4">
@@ -218,10 +221,10 @@ export default function Cart() {
                 </div>
 
                 {/* Free Shipping Notice */}
-                {subtotal < 50 && (
+                {subtotal < 1000 && (
                   <div className="bg-hash-orange/10 border border-hash-orange/20 rounded-xl p-3 text-center">
                     <p className="text-hash-orange text-sm">
-                      Add ${Math.round(50 - subtotal)} more for free shipping!
+                      Add ₹{Math.round(1000 - subtotal)} more for free shipping!
                     </p>
                   </div>
                 )}

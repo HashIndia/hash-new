@@ -26,6 +26,23 @@ const productStorage = new CloudinaryStorage({
   }
 });
 
+// Cloudinary storage for product videos
+const productVideoStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'hash/products/videos',
+    resource_type: 'video',
+    allowed_formats: ['mp4', 'mov', 'avi', 'mkv', 'webm'],
+    transformation: [
+      { quality: 'auto', fetch_format: 'auto' },
+      { width: 1000, height: 1000, crop: 'limit' }
+    ]
+  }
+});
+
+// Mixed storage for products (images and videos)
+const productMixedStorage = multer.memoryStorage();
+
 // Cloudinary storage for user avatars
 const avatarStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -39,12 +56,12 @@ const avatarStorage = new CloudinaryStorage({
   }
 });
 
-// File filter function
+// File filter function for images and videos
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
+  if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
     cb(null, true);
   } else {
-    cb(new AppError('Not an image! Please upload only images.', 400), false);
+    cb(new AppError('Invalid file type! Please upload only images or videos.', 400), false);
   }
 };
 
@@ -209,12 +226,61 @@ const generateResponsiveUrls = (publicId) => {
   };
 };
 
+// Upload mixed files (images and videos) to memory for processing
+const uploadProductFiles = multer({
+  storage: productMixedStorage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB limit
+    files: 6 // Maximum 6 files
+  }
+}).array('files', 6);
+
+// Process and upload mixed files (images and videos)
+const processAndUploadFiles = async (files, folder = 'hash/products') => {
+  if (!files || files.length === 0) {
+    return [];
+  }
+
+  const uploadPromises = files.map(async (file) => {
+    const isVideo = file.mimetype.startsWith('video/');
+    
+    const options = {
+      folder: isVideo ? `${folder}/videos` : folder,
+      resource_type: isVideo ? 'video' : 'image',
+      transformation: isVideo 
+        ? [
+            { quality: 'auto' },
+            { width: 1000, height: 1000, crop: 'limit' }
+          ]
+        : [
+            { quality: 'auto', fetch_format: 'auto' },
+            { width: 1000, height: 1000, crop: 'limit' }
+          ]
+    };
+
+    const result = await uploadToCloudinary(file.buffer, options);
+    return {
+      url: result.secure_url,
+      publicId: result.public_id,
+      width: result.width,
+      height: result.height,
+      type: isVideo ? 'video' : 'image',
+      format: result.format,
+      duration: result.duration || null
+    };
+  });
+
+  return Promise.all(uploadPromises);
+};
+
 export default uploadProductImages;
 export {
   uploadProductImages,
   uploadAvatar,
   uploadImage,
   uploadToMemory,
+  uploadProductFiles,
   uploadProductImagesHandler,
   uploadAvatarHandler,
   uploadImageHandler,
@@ -224,6 +290,7 @@ export {
   deleteFromCloudinary,
   extractPublicId,
   processAndUploadImages,
+  processAndUploadFiles,
   generateImageUrl,
   generateResponsiveUrls
 };

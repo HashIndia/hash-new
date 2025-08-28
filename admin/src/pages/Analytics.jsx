@@ -42,21 +42,21 @@ import useAnalyticsStore from '../stores/useAnalyticsStore';
 
 // Move static data outside component to prevent re-creation
 const revenueDataFallback = [
-  { date: '2024-01-01', revenue: 4500, orders: 23 },
-  { date: '2024-01-02', revenue: 3200, orders: 18 },
-  { date: '2024-01-03', revenue: 5100, orders: 28 },
-  { date: '2024-01-04', revenue: 4800, orders: 25 },
-  { date: '2024-01-05', revenue: 6200, orders: 34 },
-  { date: '2024-01-06', revenue: 5500, orders: 29 },
-  { date: '2024-01-07', revenue: 7200, orders: 42 }
+  { date: '2024-01-01', revenue: 45000, orders: 23 },
+  { date: '2024-01-02', revenue: 32000, orders: 18 },
+  { date: '2024-01-03', revenue: 51000, orders: 28 },
+  { date: '2024-01-04', revenue: 48000, orders: 25 },
+  { date: '2024-01-05', revenue: 62000, orders: 34 },
+  { date: '2024-01-06', revenue: 55000, orders: 29 },
+  { date: '2024-01-07', revenue: 72000, orders: 42 }
 ];
 
 const topProductsDataFallback = [
-  { name: 'Cotton T-Shirt', sales: 145, revenue: 4350 },
-  { name: 'Denim Jeans', sales: 98, revenue: 5880 },
-  { name: 'Summer Dress', sales: 67, revenue: 5360 },
-  { name: 'Hoodie', sales: 45, revenue: 2250 },
-  { name: 'Sneakers', sales: 34, revenue: 3400 }
+  { name: 'Cotton T-Shirt', sales: 145, revenue: 43500 },
+  { name: 'Denim Jeans', sales: 98, revenue: 58800 },
+  { name: 'Summer Dress', sales: 67, revenue: 53600 },
+  { name: 'Hoodie', sales: 45, revenue: 22500 },
+  { name: 'Sneakers', sales: 34, revenue: 34000 }
 ];
 
 const customerSegmentDataFallback = [
@@ -71,13 +71,6 @@ const trafficSourceData = [
   { source: 'Direct', visitors: 1200, conversions: 145 },
   { source: 'Email', visitors: 800, conversions: 120 },
   { source: 'Paid Ads', visitors: 600, conversions: 85 }
-];
-
-const recentActivityData = [
-  { action: 'New order received', details: 'Order #ORD004 - $87.50', time: '2 minutes ago', type: 'order' },
-  { action: 'Low stock alert', details: 'Cotton T-Shirt - 8 units left', time: '15 minutes ago', type: 'alert' },
-  { action: 'New customer registered', details: 'Sarah Johnson', time: '1 hour ago', type: 'customer' },
-  { action: 'Payment processed', details: 'Order #ORD003 - $107.96', time: '2 hours ago', type: 'payment' }
 ];
 
 // Memoized chart components to prevent re-renders
@@ -97,7 +90,7 @@ const RevenueChart = memo(({ data }) => (
       />
       <YAxis />
       <Tooltip 
-        formatter={(value, name) => [`$${value}`, 'Revenue']}
+        formatter={(value, name) => [`₹${value}`, 'Revenue']}
         labelFormatter={(date) => new Date(date).toLocaleDateString()}
       />
       <Area 
@@ -143,7 +136,10 @@ const TopProductsChart = memo(({ data }) => (
       <CartesianGrid strokeDasharray="3 3" />
       <XAxis type="number" />
       <YAxis dataKey="name" type="category" width={100} />
-      <Tooltip formatter={(value, name) => [value, name === 'sales' ? 'Sales' : 'Revenue']} />
+      <Tooltip formatter={(value, name) => [
+        name === 'sales' ? value : `₹${value}`, 
+        name === 'sales' ? 'Sales' : 'Revenue'
+      ]} />
       <Bar dataKey="sales" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
     </BarChart>
   </ResponsiveContainer>
@@ -153,6 +149,7 @@ TopProductsChart.displayName = 'TopProductsChart';
 
 const Analytics = () => {
   const [dateRange, setDateRange] = useState('7d');
+  const [recentActivities, setRecentActivities] = useState([]);
   
   const {
     dashboardStats,
@@ -170,7 +167,44 @@ const Analytics = () => {
   // Initialize analytics data on component mount
   useEffect(() => {
     initialize();
+    loadRecentActivities();
   }, [initialize]);
+
+  // Function to load recent activities from orders
+  const loadRecentActivities = useCallback(async () => {
+    try {
+      const { ordersAPI } = await import('../services/api');
+      const response = await ordersAPI.getOrders({ limit: 5, sort: 'createdAt' });
+      const activities = response.data.orders.map(order => {
+        const orderDate = new Date(order.createdAt);
+        const now = new Date();
+        const diffInMinutes = Math.floor((now - orderDate) / (1000 * 60));
+        
+        let timeAgo;
+        if (diffInMinutes < 1) timeAgo = 'Just now';
+        else if (diffInMinutes < 60) timeAgo = `${diffInMinutes}m ago`;
+        else if (diffInMinutes < 1440) timeAgo = `${Math.floor(diffInMinutes / 60)}h ago`;
+        else timeAgo = `${Math.floor(diffInMinutes / 1440)}d ago`;
+        
+        return {
+          action: 'New order received',
+          details: `Order #${order._id.slice(-6)} - ₹${order.totalAmount}`,
+          time: timeAgo,
+          type: 'order'
+        };
+      });
+      setRecentActivities(activities);
+    } catch (error) {
+      console.error('Failed to load recent activities:', error);
+      // Keep fallback data if API fails
+      setRecentActivities([
+        { action: 'New order received', details: 'Order #ORD004 - ₹8,750', time: '2 minutes ago', type: 'order' },
+        { action: 'Low stock alert', details: 'Cotton T-Shirt - 8 units left', time: '15 minutes ago', type: 'alert' },
+        { action: 'New customer registered', details: 'Sarah Johnson', time: '1 hour ago', type: 'customer' },
+        { action: 'Payment processed', details: 'Order #ORD003 - ₹10,796', time: '2 hours ago', type: 'payment' }
+      ]);
+    }
+  }, []);
 
   // Reload data when date range changes
   useEffect(() => {
@@ -232,8 +266,9 @@ const Analytics = () => {
     const shipped = orders.filter(o => o.status === 'shipped').length;
     const delivered = orders.filter(o => o.status === 'delivered').length;
     const cancelled = orders.filter(o => o.status === 'cancelled').length;
-    const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
-    const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
+    const validOrders = orders.filter(o => o.status !== 'cancelled');
+    const totalRevenue = validOrders.reduce((sum, order) => sum + (order.totalAmount || order.total || 0), 0);
+    const avgOrderValue = validOrders.length > 0 ? totalRevenue / validOrders.length : 0;
     
     return {
       total,
@@ -250,9 +285,9 @@ const Analytics = () => {
   const kpis = useMemo(() => [
     {
       title: 'Total Revenue',
-      value: `$${orderStats.totalRevenue.toFixed(2)}`,
-      change: '+12.5%',
-      changeType: 'increase',
+      value: `₹${orderStats.totalRevenue.toFixed(2)}`,
+      change: revenueAnalytics?.growth ? `${revenueAnalytics.growth > 0 ? '+' : ''}${revenueAnalytics.growth.toFixed(1)}%` : '+12.5%',
+      changeType: revenueAnalytics?.growth ? (revenueAnalytics.growth > 0 ? 'increase' : 'decrease') : 'increase',
       icon: DollarSign,
       color: 'bg-green-500'
     },
@@ -265,22 +300,22 @@ const Analytics = () => {
       color: 'bg-blue-500'
     },
     {
-      title: 'Conversion Rate',
-      value: '3.24%',
-      change: '+0.8%',
-      changeType: 'increase',
-      icon: TrendingUp,
+      title: 'Total Customers',
+      value: customerAnalytics?.totalCustomers || customers.length,
+      change: customerAnalytics?.growth ? `${customerAnalytics.growth > 0 ? '+' : ''}${customerAnalytics.growth.toFixed(1)}%` : '+5.3%',
+      changeType: customerAnalytics?.growth ? (customerAnalytics.growth > 0 ? 'increase' : 'decrease') : 'increase',
+      icon: Users,
       color: 'bg-purple-500'
     },
     {
       title: 'Avg Order Value',
-      value: `$${orderStats.avgOrderValue.toFixed(2)}`,
+      value: `₹${orderStats.avgOrderValue.toFixed(2)}`,
       change: '-2.1%',
       changeType: 'decrease',
       icon: DollarSign,
       color: 'bg-orange-500'
     }
-  ], [orderStats]);
+  ], [orderStats, revenueAnalytics, customerAnalytics, customers.length]);
 
   const handleDateRangeChange = useCallback((value) => {
     setDateRange(value);
@@ -316,20 +351,29 @@ const Analytics = () => {
       {/* KPI Cards */}
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[...Array(4)].map((_, i) => (
+          {[1, 2, 3, 4].map((i) => (
             <Card key={i} className="p-6">
               <div className="animate-pulse">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="h-4 bg-gray-300 rounded w-24 mb-2"></div>
-                    <div className="h-8 bg-gray-300 rounded w-16 mb-2"></div>
-                    <div className="h-4 bg-gray-300 rounded w-20"></div>
-                  </div>
-                  <div className="bg-gray-300 w-12 h-12 rounded-lg"></div>
-                </div>
+                <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                <div className="h-8 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/3"></div>
               </div>
             </Card>
           ))}
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <p className="text-red-600">Failed to load analytics data: {error}</p>
+          <Button 
+            variant="outline" 
+            className="mt-4"
+            onClick={() => {
+              initialize();
+              loadRecentActivities();
+            }}
+          >
+            Retry
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -474,7 +518,7 @@ const Analytics = () => {
           <Card className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
             <div className="space-y-4">
-              {recentActivityData.map((activity, index) => (
+              {recentActivities.map((activity, index) => (
                 <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                   <div className={`w-2 h-2 rounded-full ${
                     activity.type === 'order' ? 'bg-green-500' :
@@ -488,6 +532,11 @@ const Analytics = () => {
                   <span className="text-xs text-gray-500">{activity.time}</span>
                 </div>
               ))}
+              {recentActivities.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No recent activities found</p>
+                </div>
+              )}
             </div>
           </Card>
         </motion.div>

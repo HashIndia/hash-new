@@ -23,10 +23,12 @@ import {
 import { productsAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import AddProductModal from '../components/AddProductModal';
+import ProductViewModal from '../components/ProductViewModal';
 
 const Inventory = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [viewMode, setViewMode] = useState('grid');
   const [loading, setLoading] = useState(true);
@@ -96,6 +98,11 @@ const Inventory = () => {
   const handleEditProduct = (product) => {
     setSelectedProduct(product);
     setShowEditModal(true);
+  };
+
+  const handleViewProduct = (product) => {
+    setSelectedProduct(product);
+    setShowViewModal(true);
   };
 
   const handleProductUpdated = (updatedProduct) => {
@@ -217,9 +224,12 @@ const Inventory = () => {
                   <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                     <div className="aspect-w-1 aspect-h-1 bg-gray-200">
                       <img
-                        src={product.images?.[0] || 'https://via.placeholder.com/200'}
+                        src={product.images?.[0]?.url || product.images?.[0] || 'https://via.placeholder.com/200'}
                         alt={product.name}
                         className="w-full h-48 object-cover"
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/200';
+                        }}
                       />
                     </div>
                     <div className="p-4">
@@ -237,7 +247,7 @@ const Inventory = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setSelectedProduct(product)}
+                          onClick={() => handleViewProduct(product)}
                         >
                           <Eye className="w-3 h-3 mr-1" />
                           View
@@ -300,9 +310,12 @@ const Inventory = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <img
-                            src={product.images?.[0] || 'https://via.placeholder.com/40'}
+                            src={product.images?.[0]?.url || product.images?.[0] || 'https://via.placeholder.com/40'}
                             alt={product.name}
                             className="w-10 h-10 rounded-lg object-cover mr-3"
+                            onError={(e) => {
+                              e.target.src = 'https://via.placeholder.com/40';
+                            }}
                           />
                           <div>
                             <div className="text-sm font-medium text-gray-900">{product.name}</div>
@@ -328,7 +341,7 @@ const Inventory = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setSelectedProduct(product)}
+                          onClick={() => handleViewProduct(product)}
                         >
                           <Eye className="w-3 h-3" />
                         </Button>
@@ -373,6 +386,16 @@ const Inventory = () => {
         }}
         onProductAdded={handleProductUpdated}
         editProduct={selectedProduct}
+      />
+
+      {/* View Product Modal */}
+      <ProductViewModal
+        isOpen={showViewModal}
+        onClose={() => {
+          setShowViewModal(false);
+          setSelectedProduct(null);
+        }}
+        product={selectedProduct}
       />
     </div>
   );

@@ -221,9 +221,12 @@ export default function Orders() {
                         {(order.items || []).map((item, index) => (
                           <div key={index} className="flex items-center gap-4 p-4 bg-accent/50 rounded-xl border border-border">
                             <img
-                              src={item.image || item.product?.images?.[0] || `https://placehold.co/60x60/64748b/fff?text=Item`}
+                              src={item.image || item.product?.images?.[0]?.url || item.product?.images?.[0] || `https://placehold.co/60x60/64748b/fff?text=Item`}
                               alt={item.name}
                               className="w-12 h-12 object-cover rounded-lg"
+                              onError={(e) => {
+                                e.target.src = `https://placehold.co/60x60/64748b/fff?text=Item`;
+                              }}
                             />
                             <div className="flex-1">
                               <h5 className="font-medium text-foreground">{item.name}</h5>

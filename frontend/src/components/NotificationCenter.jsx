@@ -15,7 +15,9 @@ const NotificationCenter = ({ isOpen, onClose }) => {
     markAllAsRead, 
     removeNotification, 
     clearAllNotifications,
-    createOrderNotification 
+    createOrderNotification,
+    demoNotificationsInitialized,
+    setDemoNotificationsInitialized
   } = useNotificationStore();
 
   // Icon mapping for notifications
@@ -32,7 +34,10 @@ const NotificationCenter = ({ isOpen, onClose }) => {
 
   // Demo: Create some initial real-looking notifications for demo purposes
   useEffect(() => {
-    if (user && notifications.length === 0) {
+    if (user && !demoNotificationsInitialized) {
+      // Mark as initialized to prevent regeneration
+      setDemoNotificationsInitialized(true);
+      
       // Simulate some recent order notifications
       setTimeout(() => {
         createOrderNotification('ORD-' + Math.random().toString(36).substr(2, 6).toUpperCase(), 'shipped', 2499);
@@ -46,7 +51,7 @@ const NotificationCenter = ({ isOpen, onClose }) => {
         createOrderNotification('ORD-' + Math.random().toString(36).substr(2, 6).toUpperCase(), 'confirmed', 1299);
       }, 2000);
     }
-  }, [user, notifications.length, createOrderNotification]);
+  }, [user, demoNotificationsInitialized, createOrderNotification, setDemoNotificationsInitialized]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 

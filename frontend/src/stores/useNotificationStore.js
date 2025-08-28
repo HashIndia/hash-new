@@ -6,6 +6,7 @@ const useNotificationStore = create(
     (set, get) => ({
       // State
       notifications: [],
+      demoNotificationsInitialized: false,
       
       // Actions
       addNotification: (notification) => {
@@ -50,6 +51,10 @@ const useNotificationStore = create(
 
       clearAllNotifications: () => {
         set({ notifications: [] });
+      },
+
+      setDemoNotificationsInitialized: (value) => {
+        set({ demoNotificationsInitialized: value });
       },
 
       // Helper to create order status notifications
@@ -127,7 +132,8 @@ const useNotificationStore = create(
     {
       name: 'notification-store',
       partialize: (state) => ({
-        notifications: state.notifications
+        notifications: state.notifications,
+        demoNotificationsInitialized: state.demoNotificationsInitialized
       })
     }
   )

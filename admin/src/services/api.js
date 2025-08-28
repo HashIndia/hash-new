@@ -50,6 +50,24 @@ export const productsAPI = {
   deleteProduct: (id) => adminApi.delete(`/admin/products/${id}`),
 };
 
+// Upload API for admin
+export const uploadAPI = {
+  uploadProductFiles: (files) => {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+    
+    return adminApi.post('/upload/product-files', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      timeout: 60000, // 60 seconds for file uploads
+    });
+  },
+  deleteFile: (publicId) => adminApi.delete('/upload/images', { data: { publicId } }),
+};
+
 // Orders API for admin
 export const ordersAPI = {
   getOrders: (params) => adminApi.get('/admin/orders', { params }),

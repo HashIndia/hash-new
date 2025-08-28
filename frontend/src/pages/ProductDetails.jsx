@@ -262,11 +262,11 @@ export default function ProductDetails() {
               {/* Price */}
               <div className="flex items-center gap-3 mb-6">
                 <span className="text-3xl font-bold text-hash-purple">
-                  ${currentPrice.toLocaleString()}
+                  ₹{currentPrice.toLocaleString()}
                 </span>
                 {originalPrice && (
                   <span className="text-xl text-muted-foreground line-through">
-                    ${originalPrice.toLocaleString()}
+                    ₹{originalPrice.toLocaleString()}
                   </span>
                 )}
               </div>

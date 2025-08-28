@@ -85,7 +85,7 @@ export default function Checkout() {
           quantity: item.quantity,
           price: item.price,
           name: item.product.name,
-          image: item.product.images?.[0],
+          image: item.product.images?.[0]?.url || item.product.images?.[0],
           size: item.size,
           color: item.color,
         })),
@@ -431,15 +431,18 @@ export default function Checkout() {
                         transition={{ duration: 0.3 }}
                       >
                         <img
-                          src={item.product.images?.[0] || 'https://placehold.co/60x60/64748b/fff?text=Item'}
+                          src={item.product.images?.[0]?.url || item.product.images?.[0] || 'https://placehold.co/60x60/64748b/fff?text=Item'}
                           alt={item.product.name}
                           className="w-12 h-12 object-cover rounded"
+                          onError={(e) => {
+                            e.target.src = 'https://placehold.co/60x60/64748b/fff?text=Item';
+                          }}
                         />
                         <div className="flex-1">
                           <div className="font-medium text-sm text-foreground">{item.product.name}</div>
                           <div className="text-xs text-muted-foreground">Qty: {item.quantity}</div>
                         </div>
-                        <div className="font-semibold text-hash-purple">${item.price * item.quantity}</div>
+                        <div className="font-semibold text-hash-purple">₹{item.price * item.quantity}</div>
                       </motion.div>
                     ))}
                   </div>
@@ -448,19 +451,19 @@ export default function Checkout() {
                   <div className="border-t border-border pt-4 space-y-2">
                     <div className="flex justify-between text-muted-foreground">
                       <span>Subtotal</span>
-                      <span>${subtotal}</span>
+                      <span>₹{subtotal}</span>
                     </div>
                     <div className="flex justify-between text-muted-foreground">
                       <span>Shipping</span>
-                      <span>{shipping === 0 ? 'FREE' : `$${shipping}`}</span>
+                      <span>{shipping === 0 ? 'FREE' : `₹${shipping}`}</span>
                     </div>
                     <div className="flex justify-between text-muted-foreground">
                       <span>Tax (18%)</span>
-                      <span>${tax}</span>
+                      <span>₹{tax}</span>
                     </div>
                     <div className="border-t border-border pt-2 flex justify-between font-bold text-lg text-foreground">
                       <span>Total</span>
-                      <span>${total}</span>
+                      <span>₹{total}</span>
                     </div>
                   </div>
 
@@ -474,7 +477,7 @@ export default function Checkout() {
                       disabled={isLoading}
                       className="w-full py-4 text-lg font-semibold bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 shadow-hash-purple/25"
                     >
-                      {isLoading ? 'Placing Order...' : `Place Order - $${total}`}
+                      {isLoading ? 'Placing Order...' : `Place Order - ₹${total}`}
                     </Button>
                   </motion.div>
                 </div>

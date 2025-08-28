@@ -216,7 +216,7 @@ const Customers = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-gray-900">${stats.totalRevenue.toFixed(0)}</p>
+              <p className="text-2xl font-bold text-gray-900">₹{stats.totalRevenue.toFixed(0)}</p>
             </div>
           </div>
         </Card>
@@ -325,7 +325,7 @@ const Customers = () => {
                         <p className="text-xs text-gray-500">Orders</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-lg font-bold text-gray-900">${customer.totalSpent.toFixed(0)}</p>
+                        <p className="text-lg font-bold text-gray-900">₹{customer.totalSpent.toFixed(0)}</p>
                         <p className="text-xs text-gray-500">Spent</p>
                       </div>
                       <div className="text-center">

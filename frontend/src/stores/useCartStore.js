@@ -119,7 +119,7 @@ const useCartStore = create(
 
       getShippingCost: () => {
         const total = get().getCartTotal();
-        return total > 500 ? 0 : 50; // Free shipping over ₹500
+        return total > 1000 ? 0 : 100; // Free shipping over ₹1000, otherwise ₹100
       },
 
       getTax: () => {
