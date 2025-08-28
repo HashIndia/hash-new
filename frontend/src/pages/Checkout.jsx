@@ -176,7 +176,7 @@ export default function Checkout() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="spinner-lg mb-4"></div>
+          <div className="w-16 h-16 border-4 border-hash-purple/20 border-t-hash-purple rounded-full animate-spin mb-4"></div>
           <p className="text-muted-foreground">Processing your order...</p>
         </div>
       </div>
@@ -458,7 +458,7 @@ export default function Checkout() {
                       <span>{shipping === 0 ? 'FREE' : `₹${shipping}`}</span>
                     </div>
                     <div className="flex justify-between text-muted-foreground">
-                      <span>Tax (18%)</span>
+                      <span>Gateway Charges (2%)</span>
                       <span>₹{tax}</span>
                     </div>
                     <div className="border-t border-border pt-2 flex justify-between font-bold text-lg text-foreground">

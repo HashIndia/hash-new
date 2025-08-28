@@ -1,41 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ShoppingBag, Heart, Star, Share, Truck, ShieldCheck, RotateCcw } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Heart, Star, Share, Truck, ShieldCheck, RotateCcw, Ruler } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
+import ReviewsList from '../components/ReviewsList';
+import SizeChart from '../components/SizeChart';
 import useProductStore from '../stores/useProductStore';
 import useCartStore from '../stores/useCartStore';
 import useUserStore from '../stores/useUserStore';
 import { authAPI } from '../services/api';
 import toast from 'react-hot-toast';
-
-// Mock reviews data
-const mockReviews = [
-  {
-    id: 1,
-    user: 'Sarah Johnson',
-    rating: 5,
-    comment: 'Amazing quality! Fits perfectly and looks exactly like the pictures.',
-    date: '2024-01-15'
-  },
-  {
-    id: 2,
-    user: 'Mike Chen',
-    rating: 4,
-    comment: 'Great product, fast shipping. Very satisfied with the purchase.',
-    date: '2024-01-10'
-  },
-  {
-    id: 3,
-    user: 'Emma Wilson',
-    rating: 5,
-    comment: 'Excellent quality and comfort. Highly recommend!',
-    date: '2024-01-08'
-  }
-];
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -48,6 +25,8 @@ export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [showSizeChart, setShowSizeChart] = useState(false);
+  const [totalReviews, setTotalReviews] = useState(0);
 
   // Load product on mount
   useEffect(() => {
@@ -78,10 +57,11 @@ export default function ProductDetails() {
              [{ url: '/placeholder-image.jpg', isPrimary: true }],
     stock: product.stock || 0,
     category: product.category || 'General',
-    sizes: product.sizes || [],
+    sizeVariants: product.sizeVariants || [],
     colors: product.colors || [],
+    sizeChart: product.sizeChart || { hasChart: false },
     brand: product.brand || 'Unknown Brand',
-    reviews: product.reviews || [],
+    reviewStats: product.reviewStats || { averageRating: 0, totalReviews: 0 },
     features: product.features || []
   } : null;
 
@@ -133,13 +113,26 @@ export default function ProductDetails() {
   };
 
   const handleAddToCart = () => {
-    if (safeProduct.stock === 0) {
+    // Check if product has size variants
+    if (safeProduct.sizeVariants && safeProduct.sizeVariants.length > 0) {
+      if (!selectedSize) {
+        toast.error('Please select a size');
+        return;
+      }
+      
+      // Check stock for selected size
+      const sizeVariant = safeProduct.sizeVariants.find(v => v.size === selectedSize);
+      if (!sizeVariant || sizeVariant.stock === 0) {
+        toast.error('Selected size is out of stock');
+        return;
+      }
+      
+      if (quantity > sizeVariant.stock) {
+        toast.error(`Only ${sizeVariant.stock} items available for size ${selectedSize}`);
+        return;
+      }
+    } else if (safeProduct.stock === 0) {
       toast.error('This product is out of stock');
-      return;
-    }
-
-    if (safeProduct.sizes && safeProduct.sizes.length > 0 && !selectedSize) {
-      toast.error('Please select a size');
       return;
     }
 
@@ -275,10 +268,22 @@ export default function ProductDetails() {
               <div className="flex items-center gap-2 mb-6">
                 <div className="flex text-yellow-400">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-current" />
+                    <Star 
+                      key={i} 
+                      className={`h-5 w-5 ${
+                        i < Math.floor(safeProduct.reviewStats.averageRating) 
+                          ? 'fill-current' 
+                          : 'fill-none'
+                      }`} 
+                    />
                   ))}
                 </div>
-                <span className="text-muted-foreground">({mockReviews.length} reviews)</span>
+                <span className="text-muted-foreground">
+                  {safeProduct.reviewStats.averageRating > 0 
+                    ? `${safeProduct.reviewStats.averageRating}/5 (${safeProduct.reviewStats.totalReviews} reviews)`
+                    : 'No reviews yet'
+                  }
+                </span>
               </div>
 
               {/* Description */}
@@ -288,24 +293,59 @@ export default function ProductDetails() {
             </motion.div>
 
             {/* Size Selection */}
-            {safeProduct.sizes && safeProduct.sizes.length > 0 && (
+            {safeProduct.sizeVariants && safeProduct.sizeVariants.length > 0 && (
               <div>
-                <h3 className="font-semibold text-foreground mb-3">Size</h3>
-                <div className="flex gap-2 flex-wrap">
-                  {safeProduct.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`px-4 py-2 border-2 rounded-lg transition-all ${
-                        selectedSize === size
-                          ? 'border-hash-purple bg-hash-purple text-white'
-                          : 'border-border hover:border-hash-purple/50'
-                      }`}
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-foreground">Size</h3>
+                  {safeProduct.sizeChart?.hasChart && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowSizeChart(true)}
+                      className="text-hash-purple hover:text-hash-purple/80"
                     >
-                      {size}
-                    </button>
-                  ))}
+                      <Ruler className="w-4 h-4 mr-1" />
+                      Size Chart
+                    </Button>
+                  )}
                 </div>
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                  {safeProduct.sizeVariants.map((variant) => {
+                    const isAvailable = variant.stock > 0;
+                    const isSelected = selectedSize === variant.size;
+                    
+                    return (
+                      <button
+                        key={variant.size}
+                        onClick={() => isAvailable && setSelectedSize(variant.size)}
+                        disabled={!isAvailable}
+                        className={`
+                          px-3 py-2 border-2 rounded-lg transition-all text-sm font-medium
+                          ${isSelected
+                            ? 'border-hash-purple bg-hash-purple text-white'
+                            : isAvailable
+                            ? 'border-border hover:border-hash-purple/50 text-foreground'
+                            : 'border-border bg-muted text-muted-foreground cursor-not-allowed opacity-50'
+                          }
+                        `}
+                      >
+                        <div>{variant.size}</div>
+                        <div className="text-xs opacity-75">
+                          {isAvailable ? `${variant.stock} left` : 'Out'}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+                {selectedSize && (
+                  <div className="mt-2 text-sm text-muted-foreground">
+                    Selected size: {selectedSize} 
+                    {(() => {
+                      const variant = safeProduct.sizeVariants.find(v => v.size === selectedSize);
+                      return variant ? ` (${variant.stock} available)` : '';
+                    })()}
+                  </div>
+                )}
               </div>
             )}
 
@@ -313,18 +353,26 @@ export default function ProductDetails() {
             {safeProduct.colors && safeProduct.colors.length > 0 && (
               <div>
                 <h3 className="font-semibold text-foreground mb-3">Color</h3>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-3 flex-wrap">
                   {safeProduct.colors.map((color) => (
                     <button
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
-                      className={`px-4 py-2 border-2 rounded-lg transition-all ${
-                        selectedColor === color
+                      key={color.name || color}
+                      onClick={() => setSelectedColor(color.name || color)}
+                      className={`
+                        flex items-center gap-2 px-4 py-2 border-2 rounded-lg transition-all
+                        ${selectedColor === (color.name || color)
                           ? 'border-hash-purple bg-hash-purple text-white'
                           : 'border-border hover:border-hash-purple/50 text-foreground'
-                      }`}
+                        }
+                      `}
                     >
-                      {color}
+                      {color.hex && (
+                        <div 
+                          className="w-4 h-4 rounded-full border border-gray-300"
+                          style={{ backgroundColor: color.hex }}
+                        />
+                      )}
+                      <span>{color.name || color}</span>
                     </button>
                   ))}
                 </div>
@@ -333,10 +381,34 @@ export default function ProductDetails() {
 
             {/* Stock Status */}
             <div className="flex items-center gap-2">
-              <div className={`w-3 h-3 rounded-full ${safeProduct.stock > 0 ? 'bg-hash-green' : 'bg-destructive'}`}></div>
-              <span className={`text-sm font-medium ${safeProduct.stock > 0 ? 'text-hash-green' : 'text-destructive'}`}>
-                {safeProduct.stock > 0 ? `${safeProduct.stock} items in stock` : 'Out of stock'}
-              </span>
+              {safeProduct.sizeVariants && safeProduct.sizeVariants.length > 0 ? (
+                selectedSize ? (
+                  (() => {
+                    const variant = safeProduct.sizeVariants.find(v => v.size === selectedSize);
+                    const stock = variant ? variant.stock : 0;
+                    return (
+                      <>
+                        <div className={`w-3 h-3 rounded-full ${stock > 0 ? 'bg-hash-green' : 'bg-destructive'}`}></div>
+                        <span className={`text-sm font-medium ${stock > 0 ? 'text-hash-green' : 'text-destructive'}`}>
+                          {stock > 0 ? `${stock} items in stock (Size ${selectedSize})` : `Size ${selectedSize} out of stock`}
+                        </span>
+                      </>
+                    );
+                  })()
+                ) : (
+                  <>
+                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <span className="text-sm font-medium text-yellow-600">Select a size to check availability</span>
+                  </>
+                )
+              ) : (
+                <>
+                  <div className={`w-3 h-3 rounded-full ${safeProduct.stock > 0 ? 'bg-hash-green' : 'bg-destructive'}`}></div>
+                  <span className={`text-sm font-medium ${safeProduct.stock > 0 ? 'text-hash-green' : 'text-destructive'}`}>
+                    {safeProduct.stock > 0 ? `${safeProduct.stock} items in stock` : 'Out of stock'}
+                  </span>
+                </>
+              )}
             </div>
 
             {/* Quantity Selection */}
@@ -410,34 +482,24 @@ export default function ProductDetails() {
           <Card className="shadow-lg bg-card/80 backdrop-blur-sm border border-border">
             <CardHeader>
               <CardTitle className="text-2xl text-foreground font-space">
-                Customer Reviews ({mockReviews.length})
+                Customer Reviews
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                {mockReviews.map(review => (
-                  <div key={review.id} className="border-b border-border pb-6 last:border-b-0">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-hash-purple/10 rounded-full flex items-center justify-center font-semibold text-hash-purple">
-                          {review.user.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-foreground">{review.user}</div>
-                          <div className="flex text-hash-orange text-sm">
-                            {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
-                          </div>
-                        </div>
-                      </div>
-                      <span className="text-sm text-muted-foreground">{review.date}</span>
-                    </div>
-                    <p className="text-foreground">{review.comment}</p>
-                  </div>
-                ))}
-              </div>
+              <ReviewsList 
+                productId={id} 
+                onReviewsLoaded={setTotalReviews}
+              />
             </CardContent>
           </Card>
         </div>
+
+        {/* Size Chart Modal */}
+        <SizeChart
+          isOpen={showSizeChart}
+          onClose={() => setShowSizeChart(false)}
+          product={safeProduct}
+        />
       </div>
     </div>
   );

@@ -124,7 +124,7 @@ const useCartStore = create(
 
       getTax: () => {
         const total = get().getCartTotal();
-        return total * 0.18; // 18% GST
+        return total * 0.02; // 2% Gateway charges
       },
 
       getGrandTotal: () => {

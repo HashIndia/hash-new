@@ -41,6 +41,52 @@ const productSchema = new mongoose.Schema({
     min: [0, 'Stock cannot be negative'],
     default: 0
   },
+  // Size variants with individual stock
+  sizeVariants: [{
+    size: {
+      type: String,
+      required: true,
+      enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '28', '30', '32', '34', '36', '38', '40', '42', '6', '7', '8', '9', '10', '11', '12', 'ONE_SIZE']
+    },
+    stock: {
+      type: Number,
+      required: true,
+      min: [0, 'Size stock cannot be negative'],
+      default: 0
+    },
+    price: {
+      type: Number, // Optional different price for different sizes
+      min: [0, 'Size price cannot be negative']
+    }
+  }],
+  // Size chart information
+  sizeChart: {
+    hasChart: {
+      type: Boolean,
+      default: false
+    },
+    chartType: {
+      type: String,
+      enum: ['clothing', 'shoes', 'accessories'],
+      default: 'clothing'
+    },
+    measurements: [{
+      size: String,
+      chest: Number, // in cm
+      waist: Number, // in cm
+      hips: Number,  // in cm
+      length: Number, // in cm
+      shoulders: Number, // in cm
+      sleeves: Number   // in cm
+    }],
+    guidelines: [String] // Array of sizing guidelines
+  },
+  // Colors available
+  colors: [{
+    name: String,
+    hex: String,
+    images: [String] // Images for this color variant
+  }],
   images: [{
     url: { type: String, required: true },
     alt: { type: String, default: '' },
@@ -79,6 +125,26 @@ const productSchema = new mongoose.Schema({
   maxOrderQuantity: {
     type: Number,
     default: 100
+  },
+  // Review aggregation
+  reviewStats: {
+    averageRating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5
+    },
+    totalReviews: {
+      type: Number,
+      default: 0
+    },
+    ratingDistribution: {
+      1: { type: Number, default: 0 },
+      2: { type: Number, default: 0 },
+      3: { type: Number, default: 0 },
+      4: { type: Number, default: 0 },
+      5: { type: Number, default: 0 }
+    }
   }
 }, {
   timestamps: true
@@ -101,6 +167,22 @@ productSchema.virtual('currentPrice').get(function() {
   return this.price;
 });
 
+// Virtual for total stock across all sizes
+productSchema.virtual('totalStock').get(function() {
+  if (this.sizeVariants && this.sizeVariants.length > 0) {
+    return this.sizeVariants.reduce((total, variant) => total + variant.stock, 0);
+  }
+  return this.stock;
+});
+
+// Virtual for available sizes
+productSchema.virtual('availableSizes').get(function() {
+  if (this.sizeVariants && this.sizeVariants.length > 0) {
+    return this.sizeVariants.filter(variant => variant.stock > 0).map(variant => variant.size);
+  }
+  return [];
+});
+
 // Method to check if product is on sale
 productSchema.methods.isOnSale = function() {
   if (!this.salePrice || !this.saleStartDate || !this.saleEndDate) {
@@ -108,6 +190,27 @@ productSchema.methods.isOnSale = function() {
   }
   const now = new Date();
   return now >= this.saleStartDate && now <= this.saleEndDate;
+};
+
+// Method to get stock for specific size
+productSchema.methods.getStockForSize = function(size) {
+  if (this.sizeVariants && this.sizeVariants.length > 0) {
+    const variant = this.sizeVariants.find(v => v.size === size);
+    return variant ? variant.stock : 0;
+  }
+  return this.stock;
+};
+
+// Method to update stock for specific size
+productSchema.methods.updateSizeStock = function(size, quantity) {
+  if (this.sizeVariants && this.sizeVariants.length > 0) {
+    const variant = this.sizeVariants.find(v => v.size === size);
+    if (variant) {
+      variant.stock = Math.max(0, variant.stock - quantity);
+    }
+  } else {
+    this.stock = Math.max(0, this.stock - quantity);
+  }
 };
 
 // Pre-save middleware to generate SKU if not provided

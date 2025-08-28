@@ -193,7 +193,7 @@ export default function Cart() {
                   <span>{shipping === 0 ? 'Free' : `₹${Math.round(shipping)}`}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
-                  <span>Tax (18%)</span>
+                  <span>Gateway Charges (2%)</span>
                   <span>₹{Math.round(tax)}</span>
                 </div>
                 <hr className="border-border" />

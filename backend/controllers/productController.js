@@ -214,7 +214,25 @@ export const createProduct = catchAsync(async (req, res, next) => {
     status: req.body.status || 'active',
     images: Array.isArray(req.body.images) ? req.body.images : [],
     tags: Array.isArray(req.body.tags) ? req.body.tags : [],
-    isFeatures: Boolean(req.body.isFeatures) || false
+    isFeatures: Boolean(req.body.isFeatures) || false,
+    
+    // Size variants handling
+    sizeVariants: Array.isArray(req.body.sizeVariants) ? req.body.sizeVariants.map(variant => ({
+      size: variant.size,
+      stock: parseInt(variant.stock) || 0,
+      price: variant.price ? parseFloat(variant.price) : undefined
+    })) : [],
+    
+    // Colors handling
+    colors: Array.isArray(req.body.colors) ? req.body.colors : [],
+    
+    // Size chart handling
+    sizeChart: req.body.sizeChart || {
+      hasChart: false,
+      chartType: 'clothing',
+      measurements: [],
+      guidelines: []
+    }
   };
 
   console.log('Processed product data:', productData);

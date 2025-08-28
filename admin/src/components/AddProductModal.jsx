@@ -26,12 +26,19 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
     category: '',
     stock: '',
     sku: '',
-    sizes: [],
+    sizeVariants: [],
+    colors: [],
+    sizeChart: {
+      hasChart: false,
+      chartType: 'clothing',
+      measurements: [],
+      guidelines: []
+    },
     images: []
   });
 
   const categories = ['clothing', 'accessories', 'shoes', 'bags', 'electronics', 'home', 'beauty', 'sports'];
-  const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+  const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '28', '30', '32', '34', '36', '38', '40', '42', '6', '7', '8', '9', '10', '11', '12', 'ONE_SIZE'];
 
   // Populate form data when editing
   useEffect(() => {
@@ -43,7 +50,14 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
         category: editProduct.category || '',
         stock: editProduct.stock?.toString() || '',
         sku: editProduct.sku || '',
-        sizes: editProduct.sizes || [],
+        sizeVariants: editProduct.sizeVariants || [],
+        colors: editProduct.colors || [],
+        sizeChart: editProduct.sizeChart || {
+          hasChart: false,
+          chartType: 'clothing',
+          measurements: [],
+          guidelines: []
+        },
         images: editProduct.images?.length > 0 ? [editProduct.images[0].url] : []
       });
     } else {
@@ -54,7 +68,14 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
         category: '',
         stock: '',
         sku: '',
-        sizes: [],
+        sizeVariants: [],
+        colors: [],
+        sizeChart: {
+          hasChart: false,
+          chartType: 'clothing',
+          measurements: [],
+          guidelines: []
+        },
         images: []
       });
     }
@@ -64,12 +85,58 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleSizeVariantAdd = () => {
+    setFormData(prev => ({
+      ...prev,
+      sizeVariants: [...prev.sizeVariants, { size: '', stock: 0, price: '' }]
+    }));
+  };
+
+  const handleSizeVariantChange = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      sizeVariants: prev.sizeVariants.map((variant, i) => 
+        i === index ? { ...variant, [field]: value } : variant
+      )
+    }));
+  };
+
+  const handleSizeVariantRemove = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      sizeVariants: prev.sizeVariants.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleColorAdd = () => {
+    setFormData(prev => ({
+      ...prev,
+      colors: [...prev.colors, { name: '', hex: '#000000', images: [] }]
+    }));
+  };
+
+  const handleColorChange = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      colors: prev.colors.map((color, i) => 
+        i === index ? { ...color, [field]: value } : color
+      )
+    }));
+  };
+
+  const handleColorRemove = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      colors: prev.colors.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSizeToggle = (size) => {
     setFormData(prev => ({
       ...prev,
-      sizes: prev.sizes.includes(size)
+      sizes: prev.sizes?.includes(size)
         ? prev.sizes.filter(s => s !== size)
-        : [...prev.sizes, size]
+        : [...(prev.sizes || []), size]
     }));
   };
 
@@ -157,7 +224,14 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
       category: '',
       stock: '',
       sku: '',
-      sizes: [],
+      sizeVariants: [],
+      colors: [],
+      sizeChart: {
+        hasChart: false,
+        chartType: 'clothing',
+        measurements: [],
+        guidelines: []
+      },
       images: []
     });
     setSelectedFiles([]);
@@ -283,23 +357,112 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Available Sizes
+                  Size Variants with Stock
                 </label>
-                <div className="flex flex-wrap gap-2">
-                  {availableSizes.map(size => (
-                    <button
-                      key={size}
-                      type="button"
-                      onClick={() => handleSizeToggle(size)}
-                      className={`px-3 py-1 text-sm border rounded-lg transition-colors ${
-                        formData.sizes.includes(size)
-                          ? 'bg-blue-600 text-white border-blue-600'
-                          : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300'
-                      }`}
-                    >
-                      {size}
-                    </button>
+                <div className="space-y-3">
+                  {formData.sizeVariants.map((variant, index) => (
+                    <div key={index} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
+                      <Select 
+                        value={variant.size} 
+                        onValueChange={(value) => handleSizeVariantChange(index, 'size', value)}
+                      >
+                        <SelectTrigger className="w-24">
+                          <SelectValue placeholder="Size" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableSizes.map(size => (
+                            <SelectItem key={size} value={size}>{size}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      <Input
+                        type="number"
+                        placeholder="Stock"
+                        value={variant.stock}
+                        onChange={(e) => handleSizeVariantChange(index, 'stock', parseInt(e.target.value) || 0)}
+                        className="w-24"
+                      />
+                      
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="Price (optional)"
+                        value={variant.price}
+                        onChange={(e) => handleSizeVariantChange(index, 'price', e.target.value)}
+                        className="w-32"
+                      />
+                      
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSizeVariantRemove(index)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
                   ))}
+                  
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleSizeVariantAdd}
+                    className="w-full"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Size Variant
+                  </Button>
+                </div>
+                
+                <div className="mt-3 text-xs text-gray-500">
+                  Add different sizes with individual stock quantities. Leave price empty to use base price.
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Color Variants
+                </label>
+                <div className="space-y-3">
+                  {formData.colors.map((color, index) => (
+                    <div key={index} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
+                      <Input
+                        placeholder="Color name"
+                        value={color.name}
+                        onChange={(e) => handleColorChange(index, 'name', e.target.value)}
+                        className="flex-1"
+                      />
+                      
+                      <Input
+                        type="color"
+                        value={color.hex}
+                        onChange={(e) => handleColorChange(index, 'hex', e.target.value)}
+                        className="w-16"
+                      />
+                      
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleColorRemove(index)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleColorAdd}
+                    className="w-full"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Color Variant
+                  </Button>
                 </div>
               </div>
 
