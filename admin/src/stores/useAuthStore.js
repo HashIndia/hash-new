@@ -72,14 +72,23 @@ const useAuthStore = create(persist(
             isAuthenticated: true 
           });
         } catch (error) {
-          // If getCurrentAdmin fails, try refreshing the token
-          try {
-            const refreshResponse = await adminAuthAPI.refreshToken();
-            set({ 
-              user: refreshResponse.data.user,
-              isAuthenticated: true 
-            });
-          } catch (refreshError) {
+          // Only try refresh if the error suggests we have tokens but they're expired
+          // Don't try refresh on first load when no cookies exist
+          if (error.status === 401 && document.cookie.includes('adminAccessToken')) {
+            try {
+              const refreshResponse = await adminAuthAPI.refreshToken();
+              set({ 
+                user: refreshResponse.data.user,
+                isAuthenticated: true 
+              });
+            } catch (refreshError) {
+              set({ 
+                user: null, 
+                isAuthenticated: false 
+              });
+            }
+          } else {
+            // No cookies or different error - just set as unauthenticated
             set({ 
               user: null, 
               isAuthenticated: false 

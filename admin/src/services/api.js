@@ -33,7 +33,11 @@ adminApi.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Only attempt refresh for 401 errors, not already retried, and we have cookies
+    if (error.response?.status === 401 && 
+        !originalRequest._retry && 
+        document.cookie.includes('adminRefreshToken')) {
+      
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -61,6 +65,14 @@ adminApi.interceptors.response.use(
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
+      }
+    }
+    
+    // For 401 without refresh token, just redirect to login
+    if (error.response?.status === 401 && !document.cookie.includes('adminRefreshToken')) {
+      localStorage.removeItem('admin-auth');
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
       }
     }
     
