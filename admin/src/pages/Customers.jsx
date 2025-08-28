@@ -27,6 +27,7 @@ import {
 } from '../components/ui/select';
 import useCustomerStore from '../stores/useCustomerStore';
 import CustomerModal from '../components/CustomerModal';
+import BroadcastModal from '../components/BroadcastModal';
 import { format } from 'date-fns';
 
 const Customers = () => {
@@ -417,6 +418,14 @@ const Customers = () => {
           onClose={handleCloseCustomerModal}
         />
       )}
+
+      {/* Broadcast Modal */}
+      <BroadcastModal
+        isOpen={showBroadcastModal}
+        onClose={() => setShowBroadcastModal(false)}
+        selectedCustomers={selectedCustomersList}
+        type={selectedCustomers.length > 0 ? 'selected' : 'all'}
+      />
     </div>
   );
 };

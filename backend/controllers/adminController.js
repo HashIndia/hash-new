@@ -388,6 +388,68 @@ export const sendBroadcastEmail = catchAsync(async (req, res, next) => {
   });
 });
 
+// Send targeted email to specific users
+export const sendTargetedEmail = catchAsync(async (req, res, next) => {
+  const { subject, message, htmlContent, recipients } = req.body;
+  
+  if (!subject || !message) {
+    return next(new AppError('Please provide subject and message', 400));
+  }
+
+  if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
+    return next(new AppError('Please provide at least one recipient email', 400));
+  }
+
+  console.log(`[Targeted Email] Sending to ${recipients.length} recipients`);
+
+  let successCount = 0;
+  let failCount = 0;
+  const failedEmails = [];
+
+  // Send emails to specified recipients
+  for (const email of recipients) {
+    try {
+      // Find user to get name for personalization
+      const user = await User.findOne({ email }).select('name email');
+      const userName = user?.name || 'Customer';
+
+      await emailService.sendEmail({
+        to: email,
+        subject: subject,
+        text: message,
+        html: htmlContent || `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">Hello ${userName},</h2>
+            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              ${message.replace(/\n/g, '<br>')}
+            </div>
+            <p style="color: #666; font-size: 14px;">
+              Best regards,<br>
+              Hash Store Team
+            </p>
+          </div>
+        `
+      });
+      successCount++;
+    } catch (error) {
+      console.error(`Failed to send email to ${email}:`, error);
+      failCount++;
+      failedEmails.push(email);
+    }
+  }
+
+  res.status(200).json({
+    status: 'success',
+    message: `Targeted email sent successfully`,
+    data: {
+      totalRecipients: recipients.length,
+      successCount,
+      failCount,
+      failedEmails: failCount > 0 ? failedEmails : undefined
+    }
+  });
+});
+
 // Get user count for debugging
 export const getUserCount = catchAsync(async (req, res, next) => {
   const userCount = await User.countDocuments();

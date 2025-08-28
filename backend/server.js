@@ -17,6 +17,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 
 // Import admin routes
+import adminRoutes from './routes/adminRoutes.js';
 import adminAuthRoutes from './routes/admin/auth.js';
 import adminProductRoutes from './routes/admin/products.js';
 import adminOrderRoutes from './routes/admin/orders.js';
@@ -113,6 +114,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);
 
 // Admin Routes
+app.use('/api/admin', adminRoutes);
 app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/admin/products', adminProductRoutes);
 app.use('/api/admin/orders', adminOrderRoutes);

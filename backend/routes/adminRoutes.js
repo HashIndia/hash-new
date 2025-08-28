@@ -29,6 +29,7 @@ router.patch('/orders/:id/status', restrictTo('admin', 'superadmin'), adminContr
 
 // Broadcast Management
 router.post('/broadcast/email', restrictTo('admin', 'superadmin'), adminController.sendBroadcastEmail);
+router.post('/broadcast/email/targeted', restrictTo('admin', 'superadmin'), adminController.sendTargetedEmail);
 
 // Temporary route to create admin (remove after creating admin)
 router.post('/create-admin', async (req, res) => {

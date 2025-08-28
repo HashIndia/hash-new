@@ -95,6 +95,7 @@ export const analyticsAPI = {
 // Broadcast API for admin
 export const broadcastAPI = {
   sendBroadcastEmail: (emailData) => adminApi.post('/admin/broadcast/email', emailData),
+  sendTargetedEmail: (emailData) => adminApi.post('/admin/broadcast/email/targeted', emailData),
 };
 
 // Error handling utility
