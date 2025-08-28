@@ -154,10 +154,8 @@ export default function Checkout() {
       // Open Cashfree checkout
       cashfree.checkout(checkoutOptions).then((result) => {
         if (result.error) {
-          console.error('Payment failed:', result.error);
           toast.error('Payment failed. Please try again.');
         } else if (result.redirect) {
-          console.log('Payment successful, redirecting...');
           // Handle success - the returnUrl will handle the redirect
         }
       });

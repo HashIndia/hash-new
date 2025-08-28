@@ -13,12 +13,10 @@ const useUserStore = create(
 
       // Actions
       setUser: (userData) => {
-        console.log('[UserStore] Setting user:', userData?.email);
         set({ user: userData, isAuthenticated: !!userData });
       },
       
       logout: () => {
-        console.log('[UserStore] Logging out user');
         set({ 
           user: null, 
           isAuthenticated: false, 

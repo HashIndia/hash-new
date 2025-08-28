@@ -31,7 +31,6 @@ const Login = () => {
     setError('');
     
     try {
-      console.log('[Admin Login] Attempting login...');
       const result = await login({ email, password });
       
       if (result.success) {

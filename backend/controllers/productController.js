@@ -171,18 +171,8 @@ export const getAllProductsAdmin = catchAsync(async (req, res, next) => {
 
 // Create product (admin)
 export const createProduct = catchAsync(async (req, res, next) => {
-  console.log('=== CREATE PRODUCT DEBUG ===');
-  console.log('Headers:', req.headers);
-  console.log('Content-Type:', req.headers['content-type']);
-  console.log('Raw body:', req.body);
-  console.log('Body keys:', Object.keys(req.body || {}));
-  console.log('Body values:', Object.values(req.body || {}));
-  console.log('Request method:', req.method);
-  console.log('Request URL:', req.url);
-  
   // Check if body is empty
   if (!req.body || Object.keys(req.body).length === 0) {
-    console.log('ERROR: Request body is empty or undefined');
     return res.status(400).json({
       status: 'fail',
       message: 'Request body is empty. Please check if you are sending JSON data with correct Content-Type header.',
@@ -192,7 +182,6 @@ export const createProduct = catchAsync(async (req, res, next) => {
   
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log('Validation errors:', errors.array());
     return res.status(400).json({
       status: 'fail',
       message: 'Validation failed',
@@ -242,13 +231,8 @@ export const createProduct = catchAsync(async (req, res, next) => {
     productData.stock = productData.variants.reduce((total, variant) => total + variant.stock, 0);
   }
 
-  console.log('Processed product data:', productData);
-  console.log('Variants being saved:', productData.variants);
-  console.log('Calculated total stock:', productData.stock);
-
   try {
     const product = await Product.create(productData);
-    console.log('Product created successfully:', product._id);
 
     res.status(201).json({
       status: 'success',
@@ -257,7 +241,6 @@ export const createProduct = catchAsync(async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Error creating product:', error);
     return next(error);
   }
 });

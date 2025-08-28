@@ -28,12 +28,6 @@ const processQueue = (error, token = null) => {
 // Add request interceptor to log cookies
 api.interceptors.request.use(
   (config) => {
-    // Only log important requests to reduce console spam
-    if (config.url?.includes('/login') || config.url?.includes('/register')) {
-      console.log('[API Request]', config.method?.toUpperCase(), config.url);
-      console.log('[API Request] withCredentials:', config.withCredentials);
-      console.log('[API Request] Current cookies:', document.cookie);
-    }
     return config;
   },
   (error) => Promise.reject(error)
@@ -58,7 +52,6 @@ api.interceptors.response.use(
       const shouldSkipRefresh = noRefreshEndpoints.some(endpoint => originalRequest.url?.includes(endpoint));
       
       if (shouldSkipRefresh) {
-        console.log('[API] Auth endpoint failed, not attempting refresh');
         refreshAttempts = 0;
         useUserStore.getState().logout();
         if (!window.location.pathname.includes('/login')) {
@@ -78,14 +71,11 @@ api.interceptors.response.use(
       refreshAttempts++;
 
       try {
-        console.log(`[API] Attempting token refresh (attempt ${refreshAttempts}/${MAX_REFRESH_ATTEMPTS})...`);
         await api.post('/auth/refresh-token');
-        console.log('[API] Token refresh successful');
         refreshAttempts = 0;
         processQueue(null);
         return api(originalRequest);
       } catch (refreshError) {
-        console.log('[API] Token refresh failed:', refreshError);
         refreshAttempts = 0;
         processQueue(refreshError, null);
         useUserStore.getState().logout();
@@ -100,7 +90,6 @@ api.interceptors.response.use(
 
     // If we've hit the refresh limit, logout immediately
     if (refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
-      console.log('[API] Max refresh attempts exceeded, logging out');
       refreshAttempts = 0;
       useUserStore.getState().logout();
       if (!window.location.pathname.includes('/login')) {
@@ -157,7 +146,6 @@ export const reviewsAPI = {
 };
 
 export const handleAPIError = (error, defaultMessage = 'An unexpected error occurred.') => {
-  console.error('API Error:', error);
   if (error?.message) {
     return error.message;
   }

@@ -207,7 +207,9 @@ export default function ProductDetails() {
           url: window.location.href,
         });
       } catch (error) {
-        console.log('Error sharing:', error);
+        // Sharing failed, fall back to copying URL
+        navigator.clipboard.writeText(window.location.href);
+        toast.success('Product link copied to clipboard!');
       }
     } else {
       // Fallback to copying URL

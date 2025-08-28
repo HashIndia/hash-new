@@ -42,7 +42,6 @@ export default function Header() {
     e.preventDefault();
     if (searchQuery.trim()) {
       // In real app, navigate to search results
-      console.log('Search for:', searchQuery);
     }
   };
 
@@ -55,7 +54,7 @@ export default function Header() {
       try {
         await authAPI.logout();
       } catch (error) {
-        console.warn('Backend logout failed, but user state cleared:', error);
+        // Backend logout failed, but user state cleared
       }
       
       toast.success('Logged out successfully.');

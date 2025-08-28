@@ -14,32 +14,27 @@ export default function AuthInitializer() {
     const initialize = async () => {
       try {
         // Initialize products first (doesn't require auth)
-        console.log('[AuthInitializer] Initializing products...');
         await initializeProducts();
 
         // Only check auth if we have stored authentication state
         if (!isAuthenticated || !user) {
-          console.log('[AuthInitializer] No stored auth state, skipping check');
           setIsInitialized(true);
           return;
         }
 
-        console.log('[AuthInitializer] Checking authentication with backend...');
         const response = await authAPI.getCurrentUser();
 
         if (isMounted && response.data.user) {
           setUser(response.data.user);
-          console.log('[AuthInitializer] User authenticated');
           
           // Load user's wishlist
           try {
             const wishlistResponse = await authAPI.getWishlist();
             if (wishlistResponse.data.wishlist) {
               setWishlist(wishlistResponse.data.wishlist);
-              console.log('[AuthInitializer] Wishlist loaded');
             }
           } catch (wishlistError) {
-            console.log('[AuthInitializer] Failed to load wishlist:', wishlistError.message);
+            // Wishlist loading failed
           }
 
           // Load user's addresses
@@ -47,18 +42,15 @@ export default function AuthInitializer() {
             const addressResponse = await authAPI.getAddresses();
             if (addressResponse.data.addresses) {
               setAddresses(addressResponse.data.addresses);
-              console.log('[AuthInitializer] Addresses loaded');
             }
           } catch (addressError) {
-            console.log('[AuthInitializer] Failed to load addresses:', addressError.message);
+            // Address loading failed
           }
         } else if (isMounted) {
-          console.log('[AuthInitializer] No user data received');
           logout();
         }
       } catch (error) {
         if (isMounted) {
-          console.log('[AuthInitializer] Initialization failed:', error.message);
           // Don't logout on product loading failure, only on auth failure
           if (isAuthenticated) {
             logout();

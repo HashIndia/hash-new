@@ -103,14 +103,9 @@ const useCustomerStore = create((set, get) => ({
         ...params
       };
 
-      console.log('[Customer Store] Loading customers from API...');
-      console.log('[Customer Store] Query params:', queryParams);
-      
       const response = await customersAPI.getAllCustomers(queryParams);
-      console.log('[Customer Store] API Response:', response);
       
       const customers = response.data?.customers || response.customers || [];
-      console.log('[Customer Store] Raw customers:', customers);
       
       // Transform customers to ensure they have the expected format
       const transformedCustomers = customers.map(customer => ({
@@ -129,8 +124,6 @@ const useCustomerStore = create((set, get) => ({
         }
       }));
       
-      console.log('[Customer Store] Transformed customers:', transformedCustomers);
-      
       set({
         customers: transformedCustomers,
         pagination: {
@@ -142,11 +135,8 @@ const useCustomerStore = create((set, get) => ({
         isLoading: false
       });
       
-      console.log('[Customer Store] Store updated with', transformedCustomers.length, 'customers');
     } catch (error) {
       const errorMessage = handleAPIError(error);
-      console.error('Failed to load customers:', error);
-      console.error('Error details:', error.response?.data || error.message);
       set({ isLoading: false, error: errorMessage, customers: [] });
     }
   },

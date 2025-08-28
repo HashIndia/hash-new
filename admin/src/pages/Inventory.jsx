@@ -51,10 +51,8 @@ const Inventory = () => {
         };
         
         const response = await productsAPI.getProducts(params);
-        console.log('Products API response:', response);
         setProducts(response?.data?.products || []);
       } catch (error) {
-        console.error('Error fetching products:', error);
         toast.error('Failed to fetch products');
         setProducts([]);
       } finally {

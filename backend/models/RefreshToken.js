@@ -38,10 +38,7 @@ const refreshTokenSchema = new mongoose.Schema({
 
 // More robust validation with better error messages
 refreshTokenSchema.pre('validate', function(next) {
-  console.log('[RefreshToken] Validating token with user:', this.user, 'admin:', this.admin);
-  
   if (!this.user && !this.admin) {
-    console.error('[RefreshToken] Validation failed - no user or admin associated');
     return next(new Error('A refresh token must be associated with a user or an admin.'));
   }
   next();

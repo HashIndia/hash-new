@@ -82,18 +82,14 @@ export default function Register() {
     setIsLoading(true);
     setErrors({});
     
-    console.log('Frontend: Registration form submitted with data:', form);
     try {
-      console.log('Frontend: Attempting to call authAPI.register...');
       const response = await authAPI.register(form);
-      console.log('Frontend: API call successful, response:', response);
       
       toast.success(response.message || 'OTP sent to your email!');
       // Store the token and navigate to the OTP verification page
       navigate('/verify-otp', { state: { registrationToken: response.data.registrationToken } });
 
     } catch (error) {
-      console.error('Frontend: API call failed. Error:', error);
       if (error.status === 400 && error.data?.errors) {
         // Handle validation errors from the backend
         const newErrors = {};

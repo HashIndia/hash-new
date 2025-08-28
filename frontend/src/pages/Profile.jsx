@@ -22,7 +22,6 @@ export default function Profile() {
       if (!user || dataLoaded) return;
 
       try {
-        console.log("[Profile] Fetching user data...");
         const [addressRes, orderRes] = await Promise.all([
           authAPI.getAddresses(),
           ordersAPI.getUserOrders(),
@@ -32,11 +31,9 @@ export default function Profile() {
           setAddresses(addressRes.data.addresses || []);
           setOrders(orderRes.data.orders || []);
           setDataLoaded(true);
-          console.log("[Profile] User data loaded successfully");
         }
       } catch (error) {
         if (isMounted) {
-          console.error("Failed to fetch user profile data:", error);
           // Don't retry automatically on error
         }
       }

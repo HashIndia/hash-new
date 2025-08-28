@@ -26,12 +26,10 @@ export const register = catchAsync(async (req, res, next) => {
 
   // Generate OTP
   const otp = User.generateOTP();
-  console.log(`[DEV] Registration OTP for ${email}: ${otp}`);
 
   // Send OTP email
   const emailResult = await emailService.sendOTPEmail({ name, email }, otp);
   if (!emailResult.success) {
-    console.error('❌ authController: Failed to send critical OTP email. Reason:', emailResult.error.message);
     return next(new AppError('Failed to send OTP. Please try again.', 500));
   }
 
@@ -83,20 +81,14 @@ export const verifyOTP = catchAsync(async (req, res, next) => {
     status: 'active' // Explicitly set status to active
   });
 
-  console.log('[verifyOTP] Created user with ID:', newUser._id, 'Status:', newUser.status);
-
   // Send welcome email but do not block the request if it fails
   const welcomeEmailResult = await emailService.sendWelcomeEmail(newUser);
   if (!welcomeEmailResult.success) {
-    console.error('⚠️  Failed to send welcome email after verification, but user was created successfully. Reason:', welcomeEmailResult.error?.message);
+    // Email failure is logged but doesn't break the flow
   }
-
-  console.log('[verifyOTP] About to call createSendTokens');
   
   // Log the new user in
   await createSendTokens(newUser, 201, res, req);
-  
-  console.log('[verifyOTP] createSendTokens completed');
 });
 
 // Login user
@@ -112,12 +104,9 @@ export const login = catchAsync(async (req, res, next) => {
     return next(new AppError('Please provide email and password!', 400));
   }
 
-  console.log('[login] Attempting login for:', email);
-
   const user = await User.findOne({ email }).select('+password +loginAttempts +lockUntil');
 
   if (!user || !(await user.correctPassword(password, user.password))) {
-    console.log('[login] Invalid credentials for:', email);
     if (user) await user.incLoginAttempts();
     return next(new AppError('Incorrect email or password', 401));
   }
@@ -131,8 +120,6 @@ export const login = catchAsync(async (req, res, next) => {
   user.lastLogin = Date.now();
   await user.save({ validateBeforeSave: false });
 
-  console.log('[login] Login successful for:', email);
-
   // Create and send tokens
   await createSendTokens(user, 200, res, req);
 });
@@ -141,8 +128,6 @@ export const login = catchAsync(async (req, res, next) => {
 export const refreshToken = catchAsync(async (req, res, next) => {
   const token = req.cookies.userRefreshToken;
   
-  console.log('[refreshToken] Refresh token request, token present:', !!token);
-  
   if (!token) {
     return next(new AppError('You are not logged in.', 401));
   }
@@ -150,19 +135,16 @@ export const refreshToken = catchAsync(async (req, res, next) => {
   const refreshTokenDoc = await RefreshToken.findOne({ token }).populate('user');
 
   if (!refreshTokenDoc || !refreshTokenDoc.user) {
-    console.log('[refreshToken] Invalid refresh token');
     clearAuthCookies(res, 'user');
     return next(new AppError('Invalid session. Please log in again.', 401));
   }
 
   if (refreshTokenDoc.expires < new Date()) {
-    console.log('[refreshToken] Refresh token expired');
     await refreshTokenDoc.deleteOne();
     clearAuthCookies(res, 'user');
     return next(new AppError('Session expired. Please log in again.', 401));
   }
 
-  console.log('[refreshToken] Refresh successful for:', refreshTokenDoc.user.email);
   await createSendTokens(refreshTokenDoc.user, 200, res, req);
 });
 
@@ -184,13 +166,10 @@ export const logout = catchAsync(async (req, res, next) => {
 
 // Logout from all devices
 export const logoutAll = catchAsync(async (req, res, next) => {
-  console.log('[logoutAll] Processing logout from all devices');
-  
   try {
     await RefreshToken.deleteMany({ user: req.user._id });
-    console.log('[logoutAll] All refresh tokens deleted');
   } catch (error) {
-    console.log('[logoutAll] Error deleting refresh tokens:', error.message);
+    // Log error silently
   }
   
   clearAuthCookies(res, 'user');
@@ -227,12 +206,10 @@ export const resendOTP = catchAsync(async (req, res, next) => {
 
   // Generate new OTP
   const newOtp = User.generateOTP();
-  console.log(`[DEV] Resend OTP for ${email}: ${newOtp}`);
 
   // Send OTP email
   const emailResult = await emailService.sendOTPEmail({ name, email }, newOtp);
   if (!emailResult.success) {
-    console.error('❌ authController: Failed to send OTP email. Reason:', emailResult.error.message);
     return next(new AppError('Failed to send OTP. Please try again.', 500));
   }
 
@@ -334,8 +311,6 @@ export const updatePassword = catchAsync(async (req, res, next) => {
 
 // Get current user
 export const getMe = catchAsync(async (req, res, next) => {
-  console.log('[getMe] Getting current user:', req.user?.email);
-  
   res.status(200).json({
     status: 'success',
     data: { user: req.user }
@@ -359,8 +334,6 @@ export const updateMe = catchAsync(async (req, res, next) => {
 
 // Get user addresses
 export const getAddresses = catchAsync(async (req, res, next) => {
-  console.log('[getAddresses] Getting addresses for user:', req.user.email);
-  
   const user = await User.findById(req.user.id);
   res.status(200).json({
     status: 'success',
@@ -370,9 +343,6 @@ export const getAddresses = catchAsync(async (req, res, next) => {
 
 // Add new address
 export const addAddress = catchAsync(async (req, res, next) => {
-  console.log('[addAddress] Adding address for user:', req.user.email);
-  console.log('[addAddress] Address data:', req.body);
-  
   const user = await User.findById(req.user.id);
   const newAddress = { ...req.body, _id: new Date().getTime().toString() };
   
@@ -454,8 +424,6 @@ export const removeFromWishlist = catchAsync(async (req, res, next) => {
 
 // Get user orders
 export const getUserOrders = catchAsync(async (req, res, next) => {
-  console.log('[getUserOrders] Getting orders for user:', req.user.email);
-  
   // For now, return empty array until you implement Order model
   const orders = [];
   const total = 0;

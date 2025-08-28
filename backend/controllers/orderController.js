@@ -7,8 +7,6 @@ import emailService from '../services/emailService.js';
 
 // Get user's orders
 export const getUserOrders = catchAsync(async (req, res, next) => {
-  console.log('[getUserOrders] Getting orders for user:', req.user.email);
-  
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;

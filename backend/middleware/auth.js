@@ -12,11 +12,6 @@ const protect = (userType = 'user') =>
     const prefix = userType === 'admin' ? 'admin' : 'user';
     const cookieName = `${prefix}AccessToken`;
 
-    // Don't log on every request to avoid spam
-    if (req.url.includes('/me') || req.url.includes('/addresses')) {
-      console.log('[auth] Checking authentication for:', userType, 'URL:', req.url);
-    }
-
     if (req.cookies && req.cookies[cookieName]) {
       token = req.cookies[cookieName];
     }
@@ -50,7 +45,6 @@ const protect = (userType = 'user') =>
       if (!currentUser.status) {
         currentUser.status = 'active';
         await currentUser.save({ validateBeforeSave: false });
-        console.log('[auth] Updated user status to active for:', currentUser.email);
       } else {
         clearAuthCookies(res, userType);
         return next(new AppError('Your account is inactive or suspended. Please contact support.', 403));
@@ -67,8 +61,6 @@ export const protectAdmin = protect('admin');
 // Middleware to restrict access to specific roles
 export const restrictTo = (...roles) => {
   return (req, res, next) => {
-    console.log(`[restrictTo] Checking if user role '${req.user.role}' is in allowed roles:`, roles);
-    
     // Map 'admin' and 'superadmin' to actual model values
     const allowedRoles = roles.map(role => {
       if (role === 'admin') return ['admin', 'super_admin'];
@@ -77,13 +69,11 @@ export const restrictTo = (...roles) => {
     }).flat();
     
     if (!allowedRoles.includes(req.user.role)) {
-      console.log(`[restrictTo] Access denied. User role '${req.user.role}' not in allowed roles:`, allowedRoles);
       return next(
         new AppError('You do not have permission to perform this action.', 403)
       );
     }
     
-    console.log(`[restrictTo] Access granted for role:`, req.user.role);
     next();
   };
 };

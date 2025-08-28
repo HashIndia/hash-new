@@ -17,8 +17,6 @@ import crypto from 'crypto';
 export const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
   
-  console.log('[admin login] Attempting login for:', email);
-  
   if (!email || !password) {
     return next(new AppError('Please provide email and password!', 400));
   }
@@ -26,16 +24,10 @@ export const login = catchAsync(async (req, res, next) => {
   const admin = await Admin.findOne({ email }).select('+password +loginAttempts +lockUntil');
   
   if (!admin) {
-    console.log('[admin login] Admin not found for email:', email);
     return next(new AppError('Invalid credentials', 401));
   }
 
-  console.log('[admin login] Admin found, checking password...');
-  console.log('[admin login] Admin status:', admin.status);
-  console.log('[admin login] Admin role:', admin.role);
-
   if (!(await admin.correctPassword(password, admin.password))) {
-    console.log('[admin login] Invalid password for admin:', email);
     if (admin.incLoginAttempts) await admin.incLoginAttempts();
     return next(new AppError('Invalid credentials', 401));
   }
@@ -48,8 +40,6 @@ export const login = catchAsync(async (req, res, next) => {
   admin.loginAttempts = 0;
   admin.lastLogin = Date.now();
   await admin.save({ validateBeforeSave: false });
-
-  console.log('[admin login] Login successful for:', email);
 
   await createSendTokens(admin, 200, res, req, 'admin');
 });
@@ -76,8 +66,6 @@ export const logoutAll = catchAsync(async (req, res, next) => {
 export const refreshToken = catchAsync(async (req, res, next) => {
   const token = req.cookies.adminRefreshToken;
   
-  console.log('[admin refreshToken] Refresh token request, token present:', !!token);
-  
   if (!token) {
     return next(new AppError('You are not logged in.', 401));
   }
@@ -85,26 +73,21 @@ export const refreshToken = catchAsync(async (req, res, next) => {
   const refreshTokenDoc = await RefreshToken.findOne({ token }).populate('admin');
 
   if (!refreshTokenDoc || !refreshTokenDoc.admin) {
-    console.log('[admin refreshToken] Invalid refresh token');
     clearAuthCookies(res, 'admin');
     return next(new AppError('Invalid session. Please log in again.', 401));
   }
 
   if (refreshTokenDoc.expires < new Date()) {
-    console.log('[admin refreshToken] Refresh token expired');
     await refreshTokenDoc.deleteOne();
     clearAuthCookies(res, 'admin');
     return next(new AppError('Session expired. Please log in again.', 401));
   }
 
-  console.log('[admin refreshToken] Refresh successful for:', refreshTokenDoc.admin.email);
   await createSendTokens(refreshTokenDoc.admin, 200, res, req, 'admin');
 });
 
 // Get current admin profile
 export const getMe = (req, res, next) => {
-  console.log('[admin getMe] Getting current admin:', req.user?.email);
-  
   res.status(200).json({
     status: 'success',
     data: {
@@ -342,8 +325,6 @@ export const sendBroadcastEmail = catchAsync(async (req, res, next) => {
     return next(new AppError('No users found to send email to', 400));
   }
 
-  console.log(`[Broadcast Email] Sending to ${users.length} users`);
-
   let successCount = 0;
   let failCount = 0;
   const failedEmails = [];
@@ -399,8 +380,6 @@ export const sendTargetedEmail = catchAsync(async (req, res, next) => {
   if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
     return next(new AppError('Please provide at least one recipient email', 400));
   }
-
-  console.log(`[Targeted Email] Sending to ${recipients.length} recipients`);
 
   let successCount = 0;
   let failCount = 0;

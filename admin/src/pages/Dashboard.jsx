@@ -180,7 +180,6 @@ export default function Dashboard() {
   // Fetch dashboard data from API
   const fetchDashboardData = useCallback(async () => {
     try {
-      console.log('[Dashboard] Fetching data...');
       // Fetch all data in parallel with error handling
       const [ordersResult, customersResult, productsResult] = await Promise.all([
         ordersAPI.getOrders({ limit: 100 }).catch(() => ({ data: { orders: [] } })),
@@ -227,12 +226,10 @@ export default function Dashboard() {
       try {
         const response = await adminAuthAPI.getCurrentAdmin();
         setAdmin(response.data.user);
-        console.log('[Admin Dashboard] Admin authenticated:', response.data.user.email);
         
         // Fetch dashboard data after authentication
         await fetchDashboardData();
       } catch (error) {
-        console.log('[Admin Dashboard] Not authenticated, redirecting to login');
         navigate('/admin/login');
       } finally {
         setLoading(false);
