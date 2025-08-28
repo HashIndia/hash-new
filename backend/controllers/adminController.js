@@ -387,3 +387,17 @@ export const sendBroadcastEmail = catchAsync(async (req, res, next) => {
     }
   });
 });
+
+// Get user count for debugging
+export const getUserCount = catchAsync(async (req, res, next) => {
+  const userCount = await User.countDocuments();
+  const activeUsers = await User.countDocuments({ status: { $ne: 'inactive' } });
+  
+  res.status(200).json({
+    status: 'success',
+    data: {
+      totalUsers: userCount,
+      activeUsers: activeUsers
+    }
+  });
+});

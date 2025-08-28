@@ -26,11 +26,14 @@ import {
   SelectValue,
 } from '../components/ui/select';
 import useCustomerStore from '../stores/useCustomerStore';
+import CustomerModal from '../components/CustomerModal';
 import { format } from 'date-fns';
 
 const Customers = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showBroadcastModal, setShowBroadcastModal] = useState(false);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [customerToView, setCustomerToView] = useState(null);
   
   const {
     searchTerm,
@@ -43,7 +46,8 @@ const Customers = () => {
     selectCustomer,
     selectAllCustomers,
     deselectAllCustomers,
-    initialize
+    initialize,
+    loadCustomer
   } = useCustomerStore();
 
   // Initialize customers on component mount
@@ -99,6 +103,22 @@ const Customers = () => {
     } else {
       selectAllCustomers();
     }
+  };
+
+  const handleViewCustomer = async (customer) => {
+    try {
+      setCustomerToView(customer);
+      setShowCustomerModal(true);
+      // Load full customer details
+      await loadCustomer(customer.id || customer._id);
+    } catch (error) {
+      console.error('Failed to load customer details:', error);
+    }
+  };
+
+  const handleCloseCustomerModal = () => {
+    setShowCustomerModal(false);
+    setCustomerToView(null);
   };
 
   const getCustomerTypeColor = (tags) => {
@@ -309,7 +329,10 @@ const Customers = () => {
                       </div>
                       <div className="text-center">
                         <p className="text-sm text-gray-600">
-                          {format(new Date(customer.lastOrder), 'MMM dd')}
+                          {customer.lastOrder 
+                            ? format(new Date(customer.lastOrder), 'MMM dd')
+                            : 'No orders'
+                          }
                         </p>
                         <p className="text-xs text-gray-500">Last Order</p>
                       </div>
@@ -319,7 +342,7 @@ const Customers = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setSelectedCustomer(customer)}
+                        onClick={() => handleViewCustomer(customer)}
                       >
                         <Eye className="w-3 h-3 mr-1" />
                         View
@@ -327,7 +350,7 @@ const Customers = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setSelectedCustomer(customer)}
+                        onClick={() => handleViewCustomer(customer)}
                       >
                         <Edit className="w-3 h-3 mr-1" />
                         Edit
@@ -335,16 +358,11 @@ const Customers = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        disabled={!customer.preferences.emailNotifications}
+                        disabled={!customer.preferences?.emailNotifications}
+                        title={customer.preferences?.emailNotifications ? "Send Email" : "Email notifications disabled"}
                       >
-                        <Mail className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={!customer.preferences.smsNotifications}
-                      >
-                        <MessageSquare className="w-3 h-3" />
+                        <Mail className="w-3 h-3 mr-1" />
+                        Email
                       </Button>
                     </div>
                   </div>
@@ -353,18 +371,10 @@ const Customers = () => {
                 {/* Customer Preferences */}
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <div className="flex items-center space-x-4 text-sm text-gray-600">
-                    <span>Preferences:</span>
+                    <span>Communication:</span>
                     <div className="flex items-center space-x-2">
-                      <Mail className={`w-4 h-4 ${customer.preferences.emailNotifications ? 'text-green-600' : 'text-gray-400'}`} />
-                      <span>Email</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <MessageSquare className={`w-4 h-4 ${customer.preferences.smsNotifications ? 'text-green-600' : 'text-gray-400'}`} />
-                      <span>SMS</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Phone className={`w-4 h-4 ${customer.preferences.whatsappNotifications ? 'text-green-600' : 'text-gray-400'}`} />
-                      <span>WhatsApp</span>
+                      <Mail className={`w-4 h-4 ${customer.preferences?.emailNotifications ? 'text-green-600' : 'text-gray-400'}`} />
+                      <span>Email {customer.preferences?.emailNotifications ? 'Enabled' : 'Disabled'}</span>
                     </div>
                   </div>
                 </div>
@@ -398,6 +408,14 @@ const Customers = () => {
             </Button>
           </div>
         </div>
+      )}
+
+      {/* Customer Detail Modal */}
+      {showCustomerModal && customerToView && (
+        <CustomerModal 
+          customer={customerToView}
+          onClose={handleCloseCustomerModal}
+        />
       )}
     </div>
   );

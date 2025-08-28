@@ -99,15 +99,40 @@ const useCustomerStore = create((set, get) => ({
         ...filters,
         page: pagination.page,
         limit: pagination.limit,
+        _t: Date.now(), // Add timestamp to prevent caching
         ...params
       };
 
       console.log('[Customer Store] Loading customers from API...');
+      console.log('[Customer Store] Query params:', queryParams);
+      
       const response = await customersAPI.getAllCustomers(queryParams);
       console.log('[Customer Store] API Response:', response);
       
+      const customers = response.data?.customers || response.customers || [];
+      console.log('[Customer Store] Raw customers:', customers);
+      
+      // Transform customers to ensure they have the expected format
+      const transformedCustomers = customers.map(customer => ({
+        ...customer,
+        id: customer._id || customer.id, // Ensure 'id' field exists
+        status: customer.status || 'active', // Ensure status field exists
+        totalOrders: customer.totalOrders || 0,
+        totalSpent: customer.totalSpent || 0,
+        tags: customer.tags || [],
+        lastOrder: customer.lastOrder || null, // Handle missing lastOrder
+        lastLogin: customer.lastLogin || customer.createdAt, // Use createdAt as fallback
+        preferences: customer.preferences || {
+          emailNotifications: true,
+          smsNotifications: true,
+          whatsappNotifications: false
+        }
+      }));
+      
+      console.log('[Customer Store] Transformed customers:', transformedCustomers);
+      
       set({
-        customers: response.data?.customers || [],
+        customers: transformedCustomers,
         pagination: {
           page: response.page || 1,
           limit: response.limit || 10,
@@ -116,9 +141,12 @@ const useCustomerStore = create((set, get) => ({
         },
         isLoading: false
       });
+      
+      console.log('[Customer Store] Store updated with', transformedCustomers.length, 'customers');
     } catch (error) {
       const errorMessage = handleAPIError(error);
       console.error('Failed to load customers:', error);
+      console.error('Error details:', error.response?.data || error.message);
       set({ isLoading: false, error: errorMessage, customers: [] });
     }
   },
@@ -145,9 +173,11 @@ const useCustomerStore = create((set, get) => ({
       
       set(state => ({
         customers: state.customers.map(customer =>
-          customer._id === customerId ? updatedCustomer : customer
+          (customer._id === customerId || customer.id === customerId) ? 
+          { ...customer, status } : customer
         ),
-        selectedCustomer: state.selectedCustomer?._id === customerId ? updatedCustomer : state.selectedCustomer,
+        selectedCustomer: (state.selectedCustomer?._id === customerId || state.selectedCustomer?.id === customerId) ? 
+          { ...state.selectedCustomer, status } : state.selectedCustomer,
         isLoading: false
       }));
       
@@ -231,7 +261,7 @@ const useCustomerStore = create((set, get) => ({
   
   selectAllCustomers: () => {
     const state = get();
-    const allCustomerIds = state.customers.map(c => c.id);
+    const allCustomerIds = state.customers.map(c => c.id || c._id);
     set({ selectedCustomers: allCustomerIds });
   },
   
@@ -243,7 +273,7 @@ const useCustomerStore = create((set, get) => ({
   getSelectedCustomers: () => {
     const state = get();
     return state.customers.filter(customer => 
-      state.selectedCustomers.includes(customer.id)
+      state.selectedCustomers.includes(customer.id || customer._id)
     );
   },
   
@@ -251,9 +281,9 @@ const useCustomerStore = create((set, get) => ({
   getCustomerStats: () => {
     const state = get();
     const total = state.customers.length;
-    const vip = state.customers.filter(c => c.tags.includes('VIP')).length;
+    const vip = state.customers.filter(c => c.tags && c.tags.includes('VIP')).length;
     const active = state.customers.filter(c => c.status === 'active').length;
-    const totalRevenue = state.customers.reduce((sum, c) => sum + c.totalSpent, 0);
+    const totalRevenue = state.customers.reduce((sum, c) => sum + (c.totalSpent || 0), 0);
     
     return { total, vip, active, totalRevenue };
   },
@@ -261,7 +291,9 @@ const useCustomerStore = create((set, get) => ({
   // Utility Actions
   getCustomerById: (customerId) => {
     const { customers } = get();
-    return customers.find(customer => customer._id === customerId);
+    return customers.find(customer => 
+      customer._id === customerId || customer.id === customerId
+    );
   },
 
   getCustomersByStatus: (status) => {

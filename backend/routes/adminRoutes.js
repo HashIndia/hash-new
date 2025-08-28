@@ -21,6 +21,7 @@ router.get('/dashboard/stats', adminController.getDashboardStats);
 // User Management
 router.get('/users', restrictTo('admin', 'superadmin'), adminController.getAllUsers);
 router.get('/users/:id', restrictTo('admin', 'superadmin'), adminController.getUser);
+router.get('/users/count', restrictTo('admin', 'superadmin'), adminController.getUserCount);
 
 // Order Management
 router.get('/orders', restrictTo('admin', 'superadmin'), adminController.getAllOrders);

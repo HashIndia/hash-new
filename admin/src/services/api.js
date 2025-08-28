@@ -7,6 +7,9 @@ const adminApi = axios.create({
   withCredentials: true, // Include cookies in requests
   headers: {
     'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
+    'Expires': '0'
   },
 });
 
