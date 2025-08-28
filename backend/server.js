@@ -54,14 +54,18 @@ const connectDB = async () => {
 
 connectDB();
 
-// CORS Configuration - Very permissive for development
-app.use(cors({
-  origin: true, // Allow all origins in development
+// CORS Configuration
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? [process.env.FRONTEND_URL, process.env.ADMIN_URL]
+    : true, // Allow all origins in development
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'Cache-Control', 'Pragma', 'Expires'],
   exposedHeaders: ['Set-Cookie'],
-}));
+};
+
+app.use(cors(corsOptions));
 
 // Handle preflight requests
 app.options('*', cors());
@@ -75,41 +79,39 @@ app.use(express.urlencoded({ extended: true }));
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
-}
-
-// Debug middleware
-app.use((req, res, next) => {
-  if (req.path.includes('/api/')) {
-    console.log(`[${req.method}] ${req.path}`);
-    console.log('[DEBUG] Request cookies:', req.cookies);
-    console.log('[DEBUG] Request headers:', req.headers.cookie);
-  }
-  next();
-});
-
-// Debug middleware to log responses
-app.use((req, res, next) => {
-  const originalSend = res.send;
-  const originalJson = res.json;
   
-  res.send = function(data) {
-    if (req.path.includes('/auth/')) {
-      console.log('[Response] Headers being sent:', this.getHeaders());
+  // Debug middleware only in development
+  app.use((req, res, next) => {
+    if (req.path.includes('/api/')) {
+      console.log(`[${req.method}] ${req.path}`);
+      console.log('[DEBUG] Request cookies:', req.cookies);
+      console.log('[DEBUG] Request headers:', req.headers.cookie);
     }
-    return originalSend.call(this, data);
-  };
-  
-  res.json = function(data) {
-    if (req.path.includes('/auth/')) {
-      console.log('[Response] Headers being sent:', this.getHeaders());
-    }
-    return originalJson.call(this, data);
-  };
-  
-  next();
-});
+    next();
+  });
 
-// Routes
+  // Debug middleware to log responses
+  app.use((req, res, next) => {
+    const originalSend = res.send;
+    const originalJson = res.json;
+    
+    res.send = function(data) {
+      if (req.path.includes('/auth/')) {
+        console.log('[Response] Headers being sent:', this.getHeaders());
+      }
+      return originalSend.call(this, data);
+    };
+
+    res.json = function(data) {
+      if (req.path.includes('/auth/')) {
+        console.log('[Response] Headers being sent:', this.getHeaders());
+      }
+      return originalJson.call(this, data);
+    };
+    
+    next();
+  });
+}// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
@@ -129,9 +131,11 @@ app.use('/api/admin', adminRoutes);
 // Health check
 app.get('/health', (req, res) => {
   res.status(200).json({ 
-    status: 'OK', 
-    message: 'Server is running',
-    cookies: req.cookies 
+    status: 'success', 
+    message: 'Hash Store API is running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    version: '1.0.0'
   });
 });
 

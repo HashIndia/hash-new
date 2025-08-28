@@ -53,13 +53,13 @@ export const generateRefreshToken = async (user, userType, ip, userAgent) => {
 export const setAuthCookies = (res, accessToken, refreshToken, userType) => {
   const prefix = userType === 'admin' ? 'admin' : 'user';
   
-  // Very explicit cookie options for debugging
+  // Cookie options based on environment
   const cookieOptions = {
     httpOnly: true,
-    secure: false, // Always false for localhost
-    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-origin in production
     path: '/',
-    domain: undefined // No domain restriction for localhost
+    domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : undefined
   };
   
   // Set access token cookie
