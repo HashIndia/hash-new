@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import useUserStore from "../stores/useUserStore";
+import ReviewModal from "../components/ReviewModal";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ordersAPI } from "../services/api";
@@ -10,6 +11,7 @@ export default function Orders() {
   const { orders, setOrders, user } = useUserStore();
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [reviewModal, setReviewModal] = useState({ isOpen: false, product: null, orderId: null });
 
   // Load orders when component mounts
   useEffect(() => {
@@ -231,9 +233,24 @@ export default function Orders() {
                             <div className="flex-1">
                               <h5 className="font-medium text-foreground">{item.name}</h5>
                               <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
+                              {item.size && <p className="text-sm text-muted-foreground">Size: {item.size}</p>}
                             </div>
                             <div className="text-right">
                               <div className="font-semibold text-hash-purple">₹{item.price}</div>
+                              {order.status === 'delivered' && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="mt-2"
+                                  onClick={() => setReviewModal({ 
+                                    isOpen: true, 
+                                    product: item.product || item,
+                                    orderId: order._id || order.id
+                                  })}
+                                >
+                                  Write Review
+                                </Button>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -289,6 +306,17 @@ export default function Orders() {
           </Card>
         </motion.div>
       </motion.div>
+
+      {/* Review Modal */}
+      <ReviewModal
+        isOpen={reviewModal.isOpen}
+        onClose={() => setReviewModal({ isOpen: false, product: null, orderId: null })}
+        product={reviewModal.product}
+        orderId={reviewModal.orderId}
+        onReviewSubmitted={() => {
+          toast.success("Thank you for your review!");
+        }}
+      />
     </div>
   );
 } 

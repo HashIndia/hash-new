@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Star, ThumbsUp, User, Calendar } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
+import { reviewsAPI } from '../services/api';
 
 const ReviewsList = ({ productId, onReviewsLoaded }) => {
   const [reviews, setReviews] = useState([]);
@@ -19,23 +20,17 @@ const ReviewsList = ({ productId, onReviewsLoaded }) => {
   const fetchReviews = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `/api/reviews/product/${productId}?page=${currentPage}&limit=5&sort=${sortBy}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        }
-      );
+      const response = await reviewsAPI.getProductReviews(productId, {
+        page: currentPage,
+        limit: 5,
+        sort: sortBy
+      });
 
-      if (response.ok) {
-        const data = await response.json();
-        setReviews(data.data.reviews || []);
-        setTotalPages(data.totalPages || 1);
-        
-        if (onReviewsLoaded) {
-          onReviewsLoaded(data.totalReviews || 0);
-        }
+      setReviews(response.data.reviews || []);
+      setTotalPages(response.totalPages || 1);
+      
+      if (onReviewsLoaded) {
+        onReviewsLoaded(response.totalReviews || 0);
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);
@@ -75,16 +70,16 @@ const ReviewsList = ({ productId, onReviewsLoaded }) => {
           <Card key={i} className="p-4">
             <div className="animate-pulse">
               <div className="flex items-center space-x-3 mb-3">
-                <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                <div className="w-10 h-10 bg-muted rounded-full"></div>
                 <div className="flex-1">
-                  <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                  <div className="h-4 bg-muted rounded w-1/4 mb-2"></div>
+                  <div className="h-3 bg-muted rounded w-1/3"></div>
                 </div>
               </div>
               <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-200 rounded w-full"></div>
-                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                <div className="h-4 bg-muted rounded w-3/4"></div>
+                <div className="h-3 bg-muted rounded w-full"></div>
+                <div className="h-3 bg-muted rounded w-2/3"></div>
               </div>
             </div>
           </Card>
@@ -148,7 +143,7 @@ const ReviewsList = ({ productId, onReviewsLoaded }) => {
                         {review.rating}/5
                       </span>
                       {review.isVerifiedPurchase && (
-                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                        <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full border border-green-500/30">
                           Verified Purchase
                         </span>
                       )}

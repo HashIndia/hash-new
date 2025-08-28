@@ -8,7 +8,7 @@ import useAuthStore from '../stores/useAuthStore';
 import toast from 'react-hot-toast';
 
 const Login = () => {
-  const [email, setEmail] = useState('admin@example.com');
+  const [email, setEmail] = useState('admin@hash.com');
   const [password, setPassword] = useState('admin123');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -17,12 +17,12 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  const from = location.state?.from?.pathname || '/admin';
+  const from = location.state?.from?.pathname || '/';
 
   // Check if already logged in
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/admin/dashboard');
+      navigate('/');
     }
   }, [isAuthenticated, navigate]);
 
@@ -36,7 +36,7 @@ const Login = () => {
       
       if (result.success) {
         toast.success('Login successful!');
-        navigate('/admin/dashboard');
+        navigate('/');
       } else {
         toast.error(result.error || 'Login failed. Please check your credentials.');
       }

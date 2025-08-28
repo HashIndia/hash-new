@@ -117,14 +117,14 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/reviews', reviewRoutes);
 
-// Admin Routes
-app.use('/api/admin', adminRoutes);
+// Admin Routes - Mount specific routes first, then general ones
 app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/admin/products', adminProductRoutes);
 app.use('/api/admin/orders', adminOrderRoutes);
 app.use('/api/admin/customers', adminCustomerRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
 app.use('/api/admin/campaigns', adminCampaignRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

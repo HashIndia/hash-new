@@ -45,6 +45,56 @@ export default function ProductDetails() {
     }
   }, [wishlist, product]);
 
+  // Helper functions for variant system
+  const getAvailableSizes = () => {
+    if (!safeProduct?.variants?.length) return [];
+    const sizes = safeProduct.variants
+      .filter(variant => variant.stock > 0)
+      .map(variant => variant.size);
+    const uniqueSizes = [...new Set(sizes)];
+    return uniqueSizes;
+  };
+
+  const getAvailableColors = () => {
+    if (!safeProduct?.variants?.length) return [];
+    const colors = safeProduct.variants
+      .filter(variant => variant.stock > 0)
+      .map(variant => variant.color);
+    const uniqueColors = colors.reduce((acc, color) => {
+      const exists = acc.find(c => c.hex === color.hex);
+      if (!exists) acc.push(color);
+      return acc;
+    }, []);
+    return uniqueColors;
+  };
+
+  const getSizesForColor = (colorHex) => {
+    if (!safeProduct?.variants?.length) return [];
+    return safeProduct.variants
+      .filter(variant => variant.color.hex === colorHex && variant.stock > 0)
+      .map(variant => variant.size);
+  };
+
+  const getColorsForSize = (size) => {
+    if (!safeProduct?.variants?.length) return [];
+    const colors = safeProduct.variants
+      .filter(variant => variant.size === size && variant.stock > 0)
+      .map(variant => variant.color);
+    return colors.reduce((acc, color) => {
+      const exists = acc.find(c => c.hex === color.hex);
+      if (!exists) acc.push(color);
+      return acc;
+    }, []);
+  };
+
+  const getVariantStock = (size, colorHex) => {
+    if (!safeProduct?.variants?.length) return 0;
+    const variant = safeProduct.variants.find(v => 
+      v.size === size && v.color.hex === colorHex
+    );
+    return variant ? variant.stock : 0;
+  };
+
   // Default/safe product structure
   const safeProduct = product ? {
     _id: product._id,
@@ -57,8 +107,7 @@ export default function ProductDetails() {
              [{ url: '/placeholder-image.jpg', isPrimary: true }],
     stock: product.stock || 0,
     category: product.category || 'General',
-    sizeVariants: product.sizeVariants || [],
-    colors: product.colors || [],
+    variants: product.variants || [],
     sizeChart: product.sizeChart || { hasChart: false },
     brand: product.brand || 'Unknown Brand',
     reviewStats: product.reviewStats || { averageRating: 0, totalReviews: 0 },
@@ -113,31 +162,31 @@ export default function ProductDetails() {
   };
 
   const handleAddToCart = () => {
-    // Check if product has size variants
-    if (safeProduct.sizeVariants && safeProduct.sizeVariants.length > 0) {
+    // Check if product has variants
+    if (safeProduct.variants && safeProduct.variants.length > 0) {
       if (!selectedSize) {
         toast.error('Please select a size');
         return;
       }
       
-      // Check stock for selected size
-      const sizeVariant = safeProduct.sizeVariants.find(v => v.size === selectedSize);
-      if (!sizeVariant || sizeVariant.stock === 0) {
-        toast.error('Selected size is out of stock');
+      if (!selectedColor) {
+        toast.error('Please select a color');
         return;
       }
       
-      if (quantity > sizeVariant.stock) {
-        toast.error(`Only ${sizeVariant.stock} items available for size ${selectedSize}`);
+      // Check stock for selected variant
+      const variantStock = getVariantStock(selectedSize, selectedColor);
+      if (variantStock === 0) {
+        toast.error('Selected combination is out of stock');
+        return;
+      }
+      
+      if (quantity > variantStock) {
+        toast.error(`Only ${variantStock} items available for this combination`);
         return;
       }
     } else if (safeProduct.stock === 0) {
       toast.error('This product is out of stock');
-      return;
-    }
-
-    if (safeProduct.colors && safeProduct.colors.length > 0 && !selectedColor) {
-      toast.error('Please select a color');
       return;
     }
 
@@ -293,7 +342,7 @@ export default function ProductDetails() {
             </motion.div>
 
             {/* Size Selection */}
-            {safeProduct.sizeVariants && safeProduct.sizeVariants.length > 0 && (
+            {safeProduct.variants && safeProduct.variants.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold text-foreground">Size</h3>
@@ -310,14 +359,23 @@ export default function ProductDetails() {
                   )}
                 </div>
                 <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                  {safeProduct.sizeVariants.map((variant) => {
-                    const isAvailable = variant.stock > 0;
-                    const isSelected = selectedSize === variant.size;
+                  {getAvailableSizes().map((size) => {
+                    const availableColors = getColorsForSize(size);
+                    const isAvailable = availableColors.length > 0;
+                    const isSelected = selectedSize === size;
                     
                     return (
                       <button
-                        key={variant.size}
-                        onClick={() => isAvailable && setSelectedSize(variant.size)}
+                        key={size}
+                        onClick={() => {
+                          if (isAvailable) {
+                            setSelectedSize(size);
+                            // Reset color selection if current color is not available for this size
+                            if (selectedColor && !availableColors.find(c => c.hex === selectedColor)) {
+                              setSelectedColor('');
+                            }
+                          }
+                        }}
                         disabled={!isAvailable}
                         className={`
                           px-3 py-2 border-2 rounded-lg transition-all text-sm font-medium
@@ -329,9 +387,9 @@ export default function ProductDetails() {
                           }
                         `}
                       >
-                        <div>{variant.size}</div>
+                        <div>{size}</div>
                         <div className="text-xs opacity-75">
-                          {isAvailable ? `${variant.stock} left` : 'Out'}
+                          {isAvailable ? `${availableColors.length} color${availableColors.length > 1 ? 's' : ''}` : 'Out'}
                         </div>
                       </button>
                     );
@@ -339,58 +397,78 @@ export default function ProductDetails() {
                 </div>
                 {selectedSize && (
                   <div className="mt-2 text-sm text-muted-foreground">
-                    Selected size: {selectedSize} 
-                    {(() => {
-                      const variant = safeProduct.sizeVariants.find(v => v.size === selectedSize);
-                      return variant ? ` (${variant.stock} available)` : '';
-                    })()}
+                    Selected size: {selectedSize}
                   </div>
                 )}
               </div>
             )}
 
             {/* Color Selection */}
-            {safeProduct.colors && safeProduct.colors.length > 0 && (
+            {safeProduct.variants && safeProduct.variants.length > 0 && (
               <div>
                 <h3 className="font-semibold text-foreground mb-3">Color</h3>
                 <div className="flex gap-3 flex-wrap">
-                  {safeProduct.colors.map((color) => (
-                    <button
-                      key={color.name || color}
-                      onClick={() => setSelectedColor(color.name || color)}
-                      className={`
-                        flex items-center gap-2 px-4 py-2 border-2 rounded-lg transition-all
-                        ${selectedColor === (color.name || color)
-                          ? 'border-hash-purple bg-hash-purple text-white'
-                          : 'border-border hover:border-hash-purple/50 text-foreground'
-                        }
-                      `}
-                    >
-                      {color.hex && (
+                  {(selectedSize ? getColorsForSize(selectedSize) : getAvailableColors()).map((color) => {
+                    const isSelected = selectedColor === color.hex;
+                    const isAvailable = selectedSize ? 
+                      getSizesForColor(color.hex).includes(selectedSize) : 
+                      getSizesForColor(color.hex).length > 0;
+                    
+                    return (
+                      <button
+                        key={color.hex}
+                        onClick={() => {
+                          if (isAvailable) {
+                            setSelectedColor(color.hex);
+                          }
+                        }}
+                        disabled={!isAvailable}
+                        className={`
+                          flex items-center gap-2 px-4 py-2 border-2 rounded-lg transition-all
+                          ${isSelected
+                            ? 'border-hash-purple bg-hash-purple text-white'
+                            : isAvailable
+                            ? 'border-border hover:border-hash-purple/50 text-foreground'
+                            : 'border-border bg-muted text-muted-foreground cursor-not-allowed opacity-50'
+                          }
+                        `}
+                      >
                         <div 
                           className="w-4 h-4 rounded-full border border-gray-300"
                           style={{ backgroundColor: color.hex }}
                         />
-                      )}
-                      <span>{color.name || color}</span>
-                    </button>
-                  ))}
+                        <span>{color.name}</span>
+                        {selectedSize && (
+                          <span className="text-xs opacity-75">
+                            ({getVariantStock(selectedSize, color.hex)} available)
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
+                {selectedColor && (
+                  <div className="mt-2 text-sm text-muted-foreground">
+                    Selected color: {getAvailableColors().find(c => c.hex === selectedColor)?.name || 'Color'}
+                    {selectedSize && selectedColor && (
+                      <span> - {getVariantStock(selectedSize, selectedColor)} available</span>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
             {/* Stock Status */}
             <div className="flex items-center gap-2">
-              {safeProduct.sizeVariants && safeProduct.sizeVariants.length > 0 ? (
-                selectedSize ? (
+              {safeProduct.variants && safeProduct.variants.length > 0 ? (
+                selectedSize && selectedColor ? (
                   (() => {
-                    const variant = safeProduct.sizeVariants.find(v => v.size === selectedSize);
-                    const stock = variant ? variant.stock : 0;
+                    const stock = getVariantStock(selectedSize, selectedColor);
                     return (
                       <>
                         <div className={`w-3 h-3 rounded-full ${stock > 0 ? 'bg-hash-green' : 'bg-destructive'}`}></div>
                         <span className={`text-sm font-medium ${stock > 0 ? 'text-hash-green' : 'text-destructive'}`}>
-                          {stock > 0 ? `${stock} items in stock (Size ${selectedSize})` : `Size ${selectedSize} out of stock`}
+                          {stock > 0 ? `${stock} items in stock` : 'Selected combination out of stock'}
                         </span>
                       </>
                     );
@@ -398,7 +476,9 @@ export default function ProductDetails() {
                 ) : (
                   <>
                     <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <span className="text-sm font-medium text-yellow-600">Select a size to check availability</span>
+                    <span className="text-sm font-medium text-yellow-600">
+                      {!selectedSize ? 'Select a size and color to check availability' : 'Select a color to check availability'}
+                    </span>
                   </>
                 )
               ) : (

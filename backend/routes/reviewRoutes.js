@@ -8,12 +8,12 @@ import {
   deleteReview,
   getReviewableProducts
 } from '../controllers/reviewController.js';
-import { protect } from '../middleware/auth.js';
+import { protectUser } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // All routes require authentication
-router.use(protect);
+router.use(protectUser);
 
 // Get reviewable products for user
 router.get('/reviewable', getReviewableProducts);
@@ -27,7 +27,7 @@ router.post('/',
     body('productId').notEmpty().withMessage('Product ID is required'),
     body('orderId').notEmpty().withMessage('Order ID is required'),
     body('rating').isInt({ min: 1, max: 5 }).withMessage('Rating must be between 1 and 5'),
-    body('title').trim().isLength({ min: 1, max: 100 }).withMessage('Title must be between 1 and 100 characters'),
+    body('title').optional().trim().isLength({ min: 1, max: 100 }).withMessage('Title must be between 1 and 100 characters'),
     body('comment').trim().isLength({ min: 1, max: 1000 }).withMessage('Comment must be between 1 and 1000 characters')
   ],
   createReview

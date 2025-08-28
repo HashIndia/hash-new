@@ -41,22 +41,30 @@ const productSchema = new mongoose.Schema({
     min: [0, 'Stock cannot be negative'],
     default: 0
   },
-  // Size variants with individual stock
-  sizeVariants: [{
+  // Inventory management - size-color combinations
+  variants: [{
     size: {
       type: String,
       required: true,
       enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '28', '30', '32', '34', '36', '38', '40', '42', '6', '7', '8', '9', '10', '11', '12', 'ONE_SIZE']
     },
+    color: {
+      name: { type: String, required: true },
+      hex: { type: String, required: true }
+    },
     stock: {
       type: Number,
       required: true,
-      min: [0, 'Size stock cannot be negative'],
+      min: [0, 'Variant stock cannot be negative'],
       default: 0
     },
     price: {
-      type: Number, // Optional different price for different sizes
-      min: [0, 'Size price cannot be negative']
+      type: Number, // Optional different price for different variants
+      min: [0, 'Variant price cannot be negative']
+    },
+    sku: {
+      type: String, // Optional SKU for this specific variant
+      trim: true
     }
   }],
   // Size chart information
@@ -81,12 +89,6 @@ const productSchema = new mongoose.Schema({
     }],
     guidelines: [String] // Array of sizing guidelines
   },
-  // Colors available
-  colors: [{
-    name: String,
-    hex: String,
-    images: [String] // Images for this color variant
-  }],
   images: [{
     url: { type: String, required: true },
     alt: { type: String, default: '' },
@@ -167,18 +169,34 @@ productSchema.virtual('currentPrice').get(function() {
   return this.price;
 });
 
-// Virtual for total stock across all sizes
+// Virtual for total stock across all variants
 productSchema.virtual('totalStock').get(function() {
-  if (this.sizeVariants && this.sizeVariants.length > 0) {
-    return this.sizeVariants.reduce((total, variant) => total + variant.stock, 0);
+  if (this.variants && this.variants.length > 0) {
+    return this.variants.reduce((total, variant) => total + variant.stock, 0);
   }
   return this.stock;
 });
 
 // Virtual for available sizes
 productSchema.virtual('availableSizes').get(function() {
-  if (this.sizeVariants && this.sizeVariants.length > 0) {
-    return this.sizeVariants.filter(variant => variant.stock > 0).map(variant => variant.size);
+  if (this.variants && this.variants.length > 0) {
+    const sizesWithStock = this.variants.filter(variant => variant.stock > 0);
+    return [...new Set(sizesWithStock.map(variant => variant.size))];
+  }
+  return [];
+});
+
+// Virtual for available colors
+productSchema.virtual('availableColors').get(function() {
+  if (this.variants && this.variants.length > 0) {
+    const colorsWithStock = this.variants.filter(variant => variant.stock > 0);
+    return colorsWithStock.reduce((colors, variant) => {
+      const existingColor = colors.find(c => c.hex === variant.color.hex);
+      if (!existingColor) {
+        colors.push(variant.color);
+      }
+      return colors;
+    }, []);
   }
   return [];
 });
@@ -192,32 +210,88 @@ productSchema.methods.isOnSale = function() {
   return now >= this.saleStartDate && now <= this.saleEndDate;
 };
 
-// Method to get stock for specific size
-productSchema.methods.getStockForSize = function(size) {
-  if (this.sizeVariants && this.sizeVariants.length > 0) {
-    const variant = this.sizeVariants.find(v => v.size === size);
+// Method to get stock for specific size-color combination
+productSchema.methods.getVariantStock = function(size, colorHex) {
+  if (this.variants && this.variants.length > 0) {
+    const variant = this.variants.find(v => v.size === size && v.color.hex === colorHex);
     return variant ? variant.stock : 0;
+  }
+  return 0;
+};
+
+// Method to get available sizes for a specific color
+productSchema.methods.getSizesForColor = function(colorHex) {
+  if (this.variants && this.variants.length > 0) {
+    const sizesForColor = this.variants
+      .filter(v => v.color.hex === colorHex && v.stock > 0)
+      .map(v => v.size);
+    return [...new Set(sizesForColor)];
+  }
+  return [];
+};
+
+// Method to get available colors for a specific size
+productSchema.methods.getColorsForSize = function(size) {
+  if (this.variants && this.variants.length > 0) {
+    const colorsForSize = this.variants
+      .filter(v => v.size === size && v.stock > 0)
+      .map(v => v.color);
+    return colorsForSize.reduce((colors, color) => {
+      const exists = colors.find(c => c.hex === color.hex);
+      if (!exists) colors.push(color);
+      return colors;
+    }, []);
+  }
+  return [];
+};
+
+// Method to update stock for specific size-color combination
+productSchema.methods.updateVariantStock = function(size, colorHex, quantity) {
+  if (this.variants && this.variants.length > 0) {
+    const variant = this.variants.find(v => v.size === size && v.color.hex === colorHex);
+    if (variant) {
+      variant.stock = Math.max(0, variant.stock - quantity);
+      return true;
+    }
+    return false;
+  }
+  // Fallback to legacy method
+  this.updateSizeStock(size, quantity);
+  return true;
+};
+
+// Method to get stock for specific size (total across all colors)
+productSchema.methods.getStockForSize = function(size) {
+  if (this.variants && this.variants.length > 0) {
+    const variantsForSize = this.variants.filter(v => v.size === size);
+    return variantsForSize.reduce((total, variant) => total + variant.stock, 0);
   }
   return this.stock;
 };
 
-// Method to update stock for specific size
-productSchema.methods.updateSizeStock = function(size, quantity) {
-  if (this.sizeVariants && this.sizeVariants.length > 0) {
-    const variant = this.sizeVariants.find(v => v.size === size);
+// Method to update stock for specific variant
+productSchema.methods.updateVariantStock = function(size, colorHex, quantity) {
+  if (this.variants && this.variants.length > 0) {
+    const variant = this.variants.find(v => v.size === size && v.color.hex === colorHex);
     if (variant) {
       variant.stock = Math.max(0, variant.stock - quantity);
+      return true;
     }
-  } else {
-    this.stock = Math.max(0, this.stock - quantity);
   }
+  return false;
 };
 
-// Pre-save middleware to generate SKU if not provided
+// Pre-save middleware to generate SKU and calculate total stock
 productSchema.pre('save', function(next) {
   if (!this.sku) {
     this.sku = `HASH-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
   }
+  
+  // Auto-calculate total stock from variants if variants exist
+  if (this.variants && this.variants.length > 0) {
+    this.stock = this.variants.reduce((total, variant) => total + variant.stock, 0);
+  }
+  
   next();
 });
 

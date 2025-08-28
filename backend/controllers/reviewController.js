@@ -3,11 +3,32 @@ import Product from '../models/Product.js';
 import Order from '../models/Order.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
+import { validationResult } from 'express-validator';
 
 // Create a new review
 export const createReview = catchAsync(async (req, res, next) => {
+  console.log('=== CREATE REVIEW DEBUG ===');
+  console.log('Request body:', req.body);
+  console.log('User ID:', req.user?.id);
+  console.log('Body keys:', Object.keys(req.body));
+  console.log('Body values:', Object.values(req.body));
+  
+  // Check for validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log('Validation errors:', errors.array());
+    return next(new AppError('Validation failed: ' + errors.array().map(err => err.msg).join(', '), 400));
+  }
+  
   const { productId, orderId, rating, title, comment, images = [] } = req.body;
   const userId = req.user.id;
+
+  console.log('Extracted values:');
+  console.log('- productId:', productId);
+  console.log('- orderId:', orderId);
+  console.log('- rating:', rating);
+  console.log('- title:', title);
+  console.log('- comment:', comment);
 
   // Check if user has purchased this product
   const order = await Order.findOne({
@@ -37,7 +58,7 @@ export const createReview = catchAsync(async (req, res, next) => {
     user: userId,
     order: orderId,
     rating,
-    title,
+    title: title || '',
     comment,
     images,
     status: 'approved' // Auto-approve for now, can add moderation later

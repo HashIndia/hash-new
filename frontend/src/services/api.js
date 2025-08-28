@@ -147,6 +147,15 @@ export const paymentsAPI = {
   verifyPayment: (orderId) => api.get(`/payments/verify/${orderId}`),
 };
 
+export const reviewsAPI = {
+  getProductReviews: (productId, params = {}) => api.get(`/reviews/product/${productId}`, { params }),
+  createReview: (reviewData) => api.post('/reviews', reviewData),
+  getUserReviews: (params = {}) => api.get('/reviews/user', { params }),
+  updateReview: (reviewId, reviewData) => api.patch(`/reviews/${reviewId}`, reviewData),
+  deleteReview: (reviewId) => api.delete(`/reviews/${reviewId}`),
+  getReviewStats: (productId) => api.get(`/reviews/stats/${productId}`),
+};
+
 export const handleAPIError = (error, defaultMessage = 'An unexpected error occurred.') => {
   console.error('API Error:', error);
   if (error?.message) {

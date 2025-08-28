@@ -216,15 +216,17 @@ export const createProduct = catchAsync(async (req, res, next) => {
     tags: Array.isArray(req.body.tags) ? req.body.tags : [],
     isFeatures: Boolean(req.body.isFeatures) || false,
     
-    // Size variants handling
-    sizeVariants: Array.isArray(req.body.sizeVariants) ? req.body.sizeVariants.map(variant => ({
+    // New unified variants system
+    variants: Array.isArray(req.body.variants) ? req.body.variants.map(variant => ({
       size: variant.size,
+      color: {
+        name: variant.color?.name || '',
+        hex: variant.color?.hex || '#000000'
+      },
       stock: parseInt(variant.stock) || 0,
-      price: variant.price ? parseFloat(variant.price) : undefined
+      price: variant.price ? parseFloat(variant.price) : undefined,
+      sku: variant.sku || ''
     })) : [],
-    
-    // Colors handling
-    colors: Array.isArray(req.body.colors) ? req.body.colors : [],
     
     // Size chart handling
     sizeChart: req.body.sizeChart || {
@@ -235,7 +237,14 @@ export const createProduct = catchAsync(async (req, res, next) => {
     }
   };
 
+  // If variants are provided, calculate total stock from variants
+  if (productData.variants.length > 0) {
+    productData.stock = productData.variants.reduce((total, variant) => total + variant.stock, 0);
+  }
+
   console.log('Processed product data:', productData);
+  console.log('Variants being saved:', productData.variants);
+  console.log('Calculated total stock:', productData.stock);
 
   try {
     const product = await Product.create(productData);
