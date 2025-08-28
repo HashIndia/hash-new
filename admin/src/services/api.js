@@ -89,6 +89,11 @@ export const analyticsAPI = {
   getSalesData: (params) => adminApi.get('/admin/analytics/revenue', { params }),
 };
 
+// Broadcast API for admin
+export const broadcastAPI = {
+  sendBroadcastEmail: (emailData) => adminApi.post('/admin/broadcast/email', emailData),
+};
+
 // Error handling utility
 export const handleAPIError = (error, defaultMessage = 'An unexpected error occurred.') => {
   console.error('API Error:', error);

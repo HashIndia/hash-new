@@ -29,6 +29,10 @@ import toast from 'react-hot-toast';
 const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [otpLoading, setOTPLoading] = useState(false);
+  const [otp, setOTP] = useState('');
+  const [currentOrderForOTP, setCurrentOrderForOTP] = useState(null);
   
   // Real state from API
   const [orders, setOrders] = useState([]);
@@ -76,6 +80,59 @@ const Orders = () => {
       console.error('Error updating order status:', error);
       toast.error('Failed to update order status');
     }
+  };
+
+  const handleGenerateOTP = async (orderId) => {
+    try {
+      setOTPLoading(true);
+      await ordersAPI.generateOTP(orderId);
+      setCurrentOrderForOTP(orderId);
+      setShowOTPModal(true);
+      toast.success('OTP generated and sent to customer');
+    } catch (error) {
+      console.error('Error generating OTP:', error);
+      toast.error('Failed to generate OTP');
+    } finally {
+      setOTPLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async () => {
+    if (!otp || otp.length !== 6) {
+      toast.error('Please enter a valid 6-digit OTP');
+      return;
+    }
+
+    try {
+      setOTPLoading(true);
+      await ordersAPI.verifyOTP(currentOrderForOTP, otp);
+      
+      // Update the order status to delivered
+      setOrders(prev => prev.map(order => 
+        order._id === currentOrderForOTP ? { ...order, status: 'delivered' } : order
+      ));
+      
+      // Update selected order if it's the one being delivered
+      if (selectedOrder && selectedOrder._id === currentOrderForOTP) {
+        setSelectedOrder({ ...selectedOrder, status: 'delivered' });
+      }
+      
+      toast.success('Order delivered successfully!');
+      setShowOTPModal(false);
+      setOTP('');
+      setCurrentOrderForOTP(null);
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      toast.error(error.message || 'Invalid OTP');
+    } finally {
+      setOTPLoading(false);
+    }
+  };
+
+  const closeOTPModal = () => {
+    setShowOTPModal(false);
+    setOTP('');
+    setCurrentOrderForOTP(null);
   };
 
   const getStatusIcon = (status) => {
@@ -215,10 +272,11 @@ const Orders = () => {
                       {order.status === 'shipped' && (
                         <Button
                           size="sm"
-                          onClick={() => handleStatusChange(order._id, 'delivered')}
+                          onClick={() => handleGenerateOTP(order._id)}
+                          disabled={otpLoading}
                         >
                           <CheckCircle className="w-3 h-3 mr-1" />
-                          Mark as Delivered
+                          {otpLoading ? 'Generating OTP...' : 'Generate Delivery OTP'}
                         </Button>
                       )}
                     </div>
@@ -364,9 +422,10 @@ const Orders = () => {
                   {selectedOrder.status === 'shipped' && (
                     <Button
                       size="sm"
-                      onClick={() => handleStatusChange(selectedOrder._id, 'delivered')}
+                      onClick={() => handleGenerateOTP(selectedOrder._id)}
+                      disabled={otpLoading}
                     >
-                      Mark as Delivered
+                      {otpLoading ? 'Generating OTP...' : 'Generate Delivery OTP'}
                     </Button>
                   )}
                   {selectedOrder.status !== 'cancelled' && selectedOrder.status !== 'delivered' && (
@@ -379,6 +438,81 @@ const Orders = () => {
                     </Button>
                   )}
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* OTP Verification Modal */}
+      {showOTPModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full">
+            <div className="p-6 border-b">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold">Verify Delivery OTP</h2>
+                <button
+                  onClick={closeOTPModal}
+                  className="text-gray-500 hover:text-gray-700 text-xl"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Delivery Verification</h3>
+                <p className="text-gray-600 text-sm">
+                  OTP has been sent to the customer's email. Please collect the OTP from the customer and enter it below to confirm delivery.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Enter 6-digit OTP
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Enter OTP"
+                  value={otp}
+                  onChange={(e) => setOTP(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  className="text-center text-2xl tracking-wider"
+                  maxLength={6}
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={closeOTPModal}
+                  disabled={otpLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={handleVerifyOTP}
+                  disabled={otpLoading || otp.length !== 6}
+                >
+                  {otpLoading ? 'Verifying...' : 'Verify & Deliver'}
+                </Button>
+              </div>
+
+              <div className="text-center">
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={() => handleGenerateOTP(currentOrderForOTP)}
+                  disabled={otpLoading}
+                  className="text-blue-600"
+                >
+                  Resend OTP
+                </Button>
               </div>
             </div>
           </div>

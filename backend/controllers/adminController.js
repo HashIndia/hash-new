@@ -5,11 +5,13 @@ import User from '../models/User.js';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import RefreshToken from '../models/RefreshToken.js';
+import emailService from '../services/emailService.js';
 import { 
   createSendTokens, 
   clearAuthCookies 
 } from '../utils/tokenUtils.js';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 
 // Admin Login
 export const login = catchAsync(async (req, res, next) => {
@@ -223,5 +225,165 @@ export const updateOrderStatus = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: { order },
+  });
+});
+
+// Generate OTP for delivery verification
+export const generateDeliveryOTP = catchAsync(async (req, res, next) => {
+  const order = await Order.findById(req.params.id).populate('user', 'email name');
+  
+  if (!order) {
+    return next(new AppError('No order found with that ID', 404));
+  }
+
+  if (order.status !== 'shipped') {
+    return next(new AppError('Order must be shipped before generating delivery OTP', 400));
+  }
+
+  // Generate 6-digit OTP
+  const otp = crypto.randomInt(100000, 999999).toString();
+  const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  // Save OTP to order
+  order.deliveryOTP = otp;
+  order.deliveryOTPExpires = otpExpires;
+  order.deliveryOTPVerified = false;
+  await order.save();
+
+  // Send OTP via email
+  try {
+    await emailService.sendEmail({
+      to: order.user.email,
+      subject: 'Delivery OTP - Order Ready for Delivery',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Delivery OTP</h2>
+          <p>Hello ${order.user.name || 'Customer'},</p>
+          <p>Your order #${order.orderNumber || order._id.toString().slice(-8)} is ready for delivery.</p>
+          <p>Please share this OTP with the delivery person:</p>
+          <div style="background: #f5f5f5; padding: 20px; text-align: center; margin: 20px 0;">
+            <h1 style="color: #007bff; font-size: 36px; margin: 0; letter-spacing: 5px;">${otp}</h1>
+          </div>
+          <p style="color: #666; font-size: 14px;">This OTP is valid for 10 minutes only.</p>
+          <p style="color: #666; font-size: 14px;">Do not share this OTP with anyone other than the delivery person.</p>
+        </div>
+      `
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Delivery OTP generated and sent to customer',
+      data: {
+        orderId: order._id,
+        otpSentTo: order.user.email,
+        expiresAt: otpExpires
+      }
+    });
+  } catch (error) {
+    console.error('Error sending OTP email:', error);
+    return next(new AppError('Failed to send OTP email', 500));
+  }
+});
+
+// Verify OTP and mark order as delivered
+export const verifyDeliveryOTP = catchAsync(async (req, res, next) => {
+  const { otp } = req.body;
+  
+  if (!otp) {
+    return next(new AppError('Please provide OTP', 400));
+  }
+
+  const order = await Order.findById(req.params.id).select('+deliveryOTP +deliveryOTPExpires');
+  
+  if (!order) {
+    return next(new AppError('No order found with that ID', 404));
+  }
+
+  if (!order.deliveryOTP) {
+    return next(new AppError('No OTP generated for this order', 400));
+  }
+
+  if (order.deliveryOTPExpires < new Date()) {
+    return next(new AppError('OTP has expired. Please generate a new one.', 400));
+  }
+
+  if (order.deliveryOTP !== otp) {
+    return next(new AppError('Invalid OTP', 400));
+  }
+
+  // OTP is valid, mark order as delivered
+  order.status = 'delivered';
+  order.deliveredAt = new Date();
+  order.deliveryOTPVerified = true;
+  order.deliveryOTP = undefined; // Clear OTP for security
+  order.deliveryOTPExpires = undefined;
+  
+  await order.save();
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Order delivered successfully',
+    data: { order }
+  });
+});
+
+// Send broadcast email to all users
+export const sendBroadcastEmail = catchAsync(async (req, res, next) => {
+  const { subject, message, htmlContent } = req.body;
+  
+  if (!subject || !message) {
+    return next(new AppError('Please provide subject and message', 400));
+  }
+
+  // Get all users
+  const users = await User.find({ status: { $ne: 'inactive' } }).select('email name');
+  
+  if (users.length === 0) {
+    return next(new AppError('No users found to send email to', 400));
+  }
+
+  console.log(`[Broadcast Email] Sending to ${users.length} users`);
+
+  let successCount = 0;
+  let failCount = 0;
+  const failedEmails = [];
+
+  // Send emails to all users
+  for (const user of users) {
+    try {
+      await emailService.sendEmail({
+        to: user.email,
+        subject: subject,
+        text: message,
+        html: htmlContent || `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">Hello ${user.name || 'Customer'},</h2>
+            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              ${message.replace(/\n/g, '<br>')}
+            </div>
+            <p style="color: #666; font-size: 14px;">
+              Best regards,<br>
+              Hash Store Team
+            </p>
+          </div>
+        `
+      });
+      successCount++;
+    } catch (error) {
+      console.error(`Failed to send email to ${user.email}:`, error);
+      failCount++;
+      failedEmails.push(user.email);
+    }
+  }
+
+  res.status(200).json({
+    status: 'success',
+    message: `Broadcast email sent successfully`,
+    data: {
+      totalUsers: users.length,
+      successCount,
+      failCount,
+      failedEmails: failCount > 0 ? failedEmails : undefined
+    }
   });
 });

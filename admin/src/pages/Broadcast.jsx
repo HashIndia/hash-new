@@ -24,13 +24,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
+import { broadcastAPI } from '../services/api';
 import useBroadcastStore from '../stores/useBroadcastStore';
 import useCustomerStore from '../stores/useCustomerStore';
 import { format } from 'date-fns';
+import toast from 'react-hot-toast';
 
 const Broadcast = () => {
   const [activeTab, setActiveTab] = useState('campaigns');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
+  
+  // Email broadcast state
+  const [emailData, setEmailData] = useState({
+    subject: '',
+    message: ''
+  });
   
   const {
     campaigns,
@@ -103,6 +113,32 @@ const Broadcast = () => {
     }
   };
 
+  const handleSendBroadcastEmail = async () => {
+    if (!emailData.subject.trim() || !emailData.message.trim()) {
+      toast.error('Please fill in both subject and message');
+      return;
+    }
+
+    try {
+      setEmailLoading(true);
+      const response = await broadcastAPI.sendBroadcastEmail(emailData);
+      
+      toast.success(`Email sent successfully to ${response.data.successCount} users!`);
+      
+      if (response.data.failCount > 0) {
+        toast.error(`Failed to send to ${response.data.failCount} users`);
+      }
+      
+      setShowEmailModal(false);
+      setEmailData({ subject: '', message: '' });
+    } catch (error) {
+      console.error('Error sending broadcast email:', error);
+      toast.error('Failed to send broadcast email');
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -111,13 +147,22 @@ const Broadcast = () => {
           <h1 className="text-3xl font-bold text-gray-900">Broadcast Center</h1>
           <p className="text-gray-600 mt-1">Create and manage your marketing campaigns</p>
         </div>
-        <Button
-          onClick={handleCreateCampaign}
-          className="bg-blue-600 hover:bg-blue-700"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Create Campaign
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            onClick={() => setShowEmailModal(true)}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            <Mail className="w-4 h-4 mr-2" />
+            Send Email to All Users
+          </Button>
+          <Button
+            onClick={handleCreateCampaign}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create Campaign
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -372,6 +417,79 @@ const Broadcast = () => {
           </div>
         </div>
       </Card>
+
+      {/* Email Broadcast Modal */}
+      {showEmailModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-lg w-full">
+            <div className="p-6 border-b">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold">Send Email to All Users</h2>
+                <button
+                  onClick={() => setShowEmailModal(false)}
+                  className="text-gray-500 hover:text-gray-700 text-xl"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="text-center mb-4">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Mail className="w-8 h-8 text-green-600" />
+                </div>
+                <p className="text-gray-600 text-sm">
+                  This will send an email to all registered users in the system.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Subject
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Enter email subject"
+                  value={emailData.subject}
+                  onChange={(e) => setEmailData(prev => ({ ...prev, subject: e.target.value }))}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Message
+                </label>
+                <textarea
+                  placeholder="Enter your message here..."
+                  value={emailData.message}
+                  onChange={(e) => setEmailData(prev => ({ ...prev, message: e.target.value }))}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  rows={6}
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowEmailModal(false)}
+                  disabled={emailLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  onClick={handleSendBroadcastEmail}
+                  disabled={emailLoading || !emailData.subject.trim() || !emailData.message.trim()}
+                >
+                  {emailLoading ? 'Sending...' : 'Send to All Users'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

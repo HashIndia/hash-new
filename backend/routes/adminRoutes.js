@@ -26,6 +26,9 @@ router.get('/users/:id', restrictTo('admin', 'superadmin'), adminController.getU
 router.get('/orders', restrictTo('admin', 'superadmin'), adminController.getAllOrders);
 router.patch('/orders/:id/status', restrictTo('admin', 'superadmin'), adminController.updateOrderStatus);
 
+// Broadcast Management
+router.post('/broadcast/email', restrictTo('admin', 'superadmin'), adminController.sendBroadcastEmail);
+
 // Temporary route to create admin (remove after creating admin)
 router.post('/create-admin', async (req, res) => {
   try {

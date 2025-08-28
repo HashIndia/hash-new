@@ -3,7 +3,9 @@ import { protectAdmin, restrictTo } from '../../middleware/auth.js';
 import { 
   getAllOrders, 
   getOrder, 
-  updateOrderStatus 
+  updateOrderStatus,
+  generateDeliveryOTP,
+  verifyDeliveryOTP
 } from '../../controllers/adminController.js';
 
 const router = express.Router();
@@ -25,5 +27,15 @@ router.get('/:id', getOrder);
 // @desc    Update order status (admin)
 // @access  Private (Admin)
 router.patch('/:id/status', restrictTo('admin', 'super_admin'), updateOrderStatus);
+
+// @route   POST /api/admin/orders/:id/generate-otp
+// @desc    Generate delivery OTP (admin)
+// @access  Private (Admin)
+router.post('/:id/generate-otp', restrictTo('admin', 'super_admin'), generateDeliveryOTP);
+
+// @route   POST /api/admin/orders/:id/verify-otp
+// @desc    Verify delivery OTP (admin)
+// @access  Private (Admin)
+router.post('/:id/verify-otp', restrictTo('admin', 'super_admin'), verifyDeliveryOTP);
 
 export default router;

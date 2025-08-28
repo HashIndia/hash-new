@@ -4,5 +4,5 @@ import useAuthStore from '../stores/useAuthStore';
 export default function ProtectedRoute({ children }) {
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
 
-  return isAuthenticated ? children : <Navigate to="/admin/login" replace />;
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
 }

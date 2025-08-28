@@ -102,22 +102,24 @@ const useCustomerStore = create((set, get) => ({
         ...params
       };
 
+      console.log('[Customer Store] Loading customers from API...');
       const response = await customersAPI.getAllCustomers(queryParams);
+      console.log('[Customer Store] API Response:', response);
       
       set({
-        customers: response.data.customers,
+        customers: response.data?.customers || [],
         pagination: {
-          page: response.page,
+          page: response.page || 1,
           limit: response.limit || 10,
-          total: response.total,
-          totalPages: response.totalPages
+          total: response.total || 0,
+          totalPages: response.totalPages || 1
         },
         isLoading: false
       });
     } catch (error) {
       const errorMessage = handleAPIError(error);
       console.error('Failed to load customers:', error);
-      set({ isLoading: false, error: errorMessage });
+      set({ isLoading: false, error: errorMessage, customers: [] });
     }
   },
 

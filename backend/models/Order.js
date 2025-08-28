@@ -77,7 +77,19 @@ const orderSchema = new mongoose.Schema({
   },
   trackingNumber: String,
   deliveredAt: Date,
-  estimatedDelivery: Date
+  estimatedDelivery: Date,
+  deliveryOTP: {
+    type: String,
+    select: false // Don't include in regular queries for security
+  },
+  deliveryOTPExpires: {
+    type: Date,
+    select: false
+  },
+  deliveryOTPVerified: {
+    type: Boolean,
+    default: false
+  }
 }, {
   timestamps: true,
   toJSON: { virtuals: true },
