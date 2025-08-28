@@ -13,6 +13,8 @@ import './services/emailService.js';
 // Import routes
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 
 // Import admin routes
 import adminAuthRoutes from './routes/admin/auth.js';
@@ -107,6 +109,8 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Admin Routes
 app.use('/api/admin/auth', adminAuthRoutes);

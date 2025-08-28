@@ -137,9 +137,14 @@ export const productsAPI = {
 };
 
 export const ordersAPI = {
-  getUserOrders: (params = {}) => api.get('/auth/orders', { params }), // Changed to use auth route
+  getUserOrders: (params = {}) => api.get('/orders', { params }),
   createOrder: (orderData) => api.post('/orders', orderData),
   getOrder: (orderId) => api.get(`/orders/${orderId}`),
+};
+
+export const paymentsAPI = {
+  createPaymentOrder: (orderData) => api.post('/payments/create-order', orderData),
+  verifyPayment: (orderId) => api.get(`/payments/verify/${orderId}`),
 };
 
 export const handleAPIError = (error, defaultMessage = 'An unexpected error occurred.') => {

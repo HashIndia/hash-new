@@ -151,11 +151,58 @@ export const getUser = catchAsync(async (req, res, next) => {
 
 // --- Order Management ---
 export const getAllOrders = catchAsync(async (req, res, next) => {
-  const orders = await Order.find().populate('user', 'name email');
+  const { page = 1, limit = 10, status, search } = req.query;
+  
+  // Build query
+  let query = {};
+  
+  // Filter by status if provided
+  if (status && status !== 'all') {
+    query.status = status;
+  }
+  
+  // Search functionality
+  if (search) {
+    query.$or = [
+      { orderNumber: { $regex: search, $options: 'i' } },
+      { 'shippingAddress.name': { $regex: search, $options: 'i' } },
+      { 'shippingAddress.phone': { $regex: search, $options: 'i' } }
+    ];
+  }
+  
+  const skip = (page - 1) * limit;
+  
+  const orders = await Order.find(query)
+    .populate('user', 'name email')
+    .populate('items.product', 'name images price')
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(parseInt(limit));
+    
+  const total = await Order.countDocuments(query);
+  
   res.status(200).json({
     status: 'success',
     results: orders.length,
+    total,
+    page: parseInt(page),
+    totalPages: Math.ceil(total / limit),
     data: { orders },
+  });
+});
+
+export const getOrder = catchAsync(async (req, res, next) => {
+  const order = await Order.findById(req.params.id)
+    .populate('user', 'name email')
+    .populate('items.product', 'name images price');
+
+  if (!order) {
+    return next(new AppError('No order found with that ID', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: { order },
   });
 });
 

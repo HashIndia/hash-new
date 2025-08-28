@@ -5,7 +5,7 @@ import useProductStore from '../stores/useProductStore';
 
 export default function AuthInitializer() {
   const [isInitialized, setIsInitialized] = useState(false);
-  const { user, isAuthenticated, setUser, setWishlist, logout } = useUserStore();
+  const { user, isAuthenticated, setUser, setWishlist, setAddresses, logout } = useUserStore();
   const { initialize: initializeProducts } = useProductStore();
 
   useEffect(() => {
@@ -40,6 +40,17 @@ export default function AuthInitializer() {
             }
           } catch (wishlistError) {
             console.log('[AuthInitializer] Failed to load wishlist:', wishlistError.message);
+          }
+
+          // Load user's addresses
+          try {
+            const addressResponse = await authAPI.getAddresses();
+            if (addressResponse.data.addresses) {
+              setAddresses(addressResponse.data.addresses);
+              console.log('[AuthInitializer] Addresses loaded');
+            }
+          } catch (addressError) {
+            console.log('[AuthInitializer] Failed to load addresses:', addressError.message);
           }
         } else if (isMounted) {
           console.log('[AuthInitializer] No user data received');

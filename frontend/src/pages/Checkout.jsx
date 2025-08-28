@@ -6,29 +6,46 @@ import useCartStore from "../stores/useCartStore";
 import useUserStore from "../stores/useUserStore";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { authAPI, ordersAPI } from "../services/api";
+import { authAPI, ordersAPI, paymentsAPI } from "../services/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { load } from "cashfree-pg-sdk-javascript";
 
 export default function Checkout() {
-  const { items, clearCart } = useCartStore();
+  const { items, clearCart, getCartTotal, getShippingCost, getTax, getGrandTotal } = useCartStore();
   const { user, addresses, setAddresses } = useUserStore();
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [paymentMethod, setPaymentMethod] = useState('online');
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Load addresses when component mounts
+  useEffect(() => {
+    const loadAddresses = async () => {
+      if (user && (!addresses || addresses.length === 0)) {
+        try {
+          const response = await authAPI.getAddresses();
+          setAddresses(response.data.addresses || []);
+        } catch (error) {
+          console.error('Failed to load addresses:', error);
+        }
+      }
+    };
+    
+    loadAddresses();
+  }, [user, setAddresses]);
+
   useEffect(() => {
     if (addresses.length > 0) {
-      setSelectedAddress(addresses[0].id);
+      setSelectedAddress(addresses[0]._id || addresses[0].id);
     }
   }, [addresses]);
 
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const shipping = subtotal > 999 ? 0 : 99;
-  const tax = Math.round(subtotal * 0.18);
-  const total = subtotal + shipping + tax;
+  const subtotal = getCartTotal();
+  const shipping = getShippingCost();
+  const tax = getTax();
+  const total = getGrandTotal();
 
   const handleAddAddress = async (addressData) => {
     setIsLoading(true);
@@ -36,7 +53,7 @@ export default function Checkout() {
       const response = await authAPI.addAddress(addressData);
       const newAddress = response.data.address;
       setAddresses([...addresses, newAddress]);
-      setSelectedAddress(newAddress._id);
+      setSelectedAddress(newAddress._id || newAddress.id);
       setShowAddressForm(false);
       toast.success("Address added successfully!");
     } catch (error) {
@@ -57,33 +74,87 @@ export default function Checkout() {
     }
 
     setIsLoading(true);
-    const orderData = {
-      items: items.map(item => ({
-        productId: item.id,
-        quantity: item.qty,
-        price: item.price,
-        name: item.name,
-        image: item.images?.[0],
-        size: item.selectedSize,
-        color: item.selectedColor,
-      })),
-      shippingAddress: addresses.find(addr => addr.id === selectedAddress),
-      paymentMethod,
-      subtotal,
-      shipping,
-      tax,
-      total,
-    };
-
+    
     try {
-      const response = await ordersAPI.createOrder(orderData);
-      toast.success("Order placed successfully!");
-      clearCart();
-      navigate(`/orders/${response.data.order._id}`);
+      // First create the order
+      const orderData = {
+        items: items.map(item => ({
+          product: item.product._id,
+          quantity: item.quantity,
+          price: item.price,
+          name: item.product.name,
+          image: item.product.images?.[0],
+          size: item.size,
+          color: item.color,
+        })),
+        shippingAddress: addresses.find(addr => (addr._id || addr.id) === selectedAddress),
+        paymentMethod,
+        totalAmount: total,
+        shippingCost: shipping,
+        taxAmount: tax,
+      };
+
+      const orderResponse = await ordersAPI.createOrder(orderData);
+      const order = orderResponse.data.order;
+      
+      if (paymentMethod === 'cod') {
+        // For COD, just show success and navigate
+        toast.success("Order placed successfully!");
+        clearCart();
+        navigate('/order-success', { 
+          state: { 
+            orderId: order._id,
+            orderNumber: order.orderNumber || 'N/A',
+            paymentMethod: 'cod',
+            status: 'confirmed'
+          }
+        });
+      } else {
+        // For online payment, integrate Cashfree
+        await initiatePayment(order._id, total);
+      }
     } catch (error) {
       toast.error(error.message || "Failed to place order. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const initiatePayment = async (orderId, amount) => {
+    try {
+      // Create payment order
+      const paymentResponse = await paymentsAPI.createPaymentOrder({
+        orderId,
+        amount
+      });
+
+      const { paymentSessionId } = paymentResponse.data;
+
+      // Initialize Cashfree SDK
+      const cashfree = await load({
+        mode: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox'
+      });
+
+      // Checkout options
+      const checkoutOptions = {
+        paymentSessionId: paymentSessionId,
+        returnUrl: `${window.location.origin}/order-success?order_id=${orderId}`,
+      };
+
+      // Open Cashfree checkout
+      cashfree.checkout(checkoutOptions).then((result) => {
+        if (result.error) {
+          console.error('Payment failed:', result.error);
+          toast.error('Payment failed. Please try again.');
+        } else if (result.redirect) {
+          console.log('Payment successful, redirecting...');
+          // Handle success - the returnUrl will handle the redirect
+        }
+      });
+
+    } catch (error) {
+      console.error('Payment initialization failed:', error);
+      toast.error('Failed to initialize payment. Please try again.');
     }
   };
 
@@ -142,7 +213,7 @@ export default function Checkout() {
                   <div className="space-y-3 mb-4">
                     {addresses.map((address, idx) => (
                       <motion.label 
-                        key={address.id || idx} 
+                        key={address._id || address.id || idx} 
                         className="flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors duration-200"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
@@ -150,8 +221,8 @@ export default function Checkout() {
                         <input
                           type="radio"
                           name="address"
-                          checked={selectedAddress === address.id}
-                          onChange={() => setSelectedAddress(address.id)}
+                          checked={selectedAddress === (address._id || address.id)}
+                          onChange={() => setSelectedAddress(address._id || address.id)}
                           className="mt-1"
                         />
                         <div className="flex-1">
@@ -205,8 +276,7 @@ export default function Checkout() {
                   {/* Payment Method Selection */}
                   <div className="grid grid-cols-1 gap-3">
                     {[
-                      { id: 'card', icon: '💳', label: 'Credit/Debit Card' },
-                      { id: 'upi', icon: '📱', label: 'UPI Payment' },
+                      { id: 'online', icon: '💳', label: 'Online Payment (Card/UPI/Net Banking)' },
                       { id: 'cod', icon: '💰', label: 'Cash on Delivery' }
                     ].map((method) => (
                       <motion.label 
@@ -351,15 +421,15 @@ export default function Checkout() {
                         transition={{ duration: 0.3 }}
                       >
                         <img
-                          src={item.images?.[0] || 'https://placehold.co/60x60/64748b/fff?text=Item'}
-                          alt={item.name}
+                          src={item.product.images?.[0] || 'https://placehold.co/60x60/64748b/fff?text=Item'}
+                          alt={item.product.name}
                           className="w-12 h-12 object-cover rounded"
                         />
                         <div className="flex-1">
-                          <div className="font-medium text-sm text-slate-900">{item.name}</div>
-                          <div className="text-xs text-slate-600">Qty: {item.qty}</div>
+                          <div className="font-medium text-sm text-slate-900">{item.product.name}</div>
+                          <div className="text-xs text-slate-600">Qty: {item.quantity}</div>
                         </div>
-                        <div className="font-semibold text-slate-900">₹{item.price * item.qty}</div>
+                        <div className="font-semibold text-slate-900">₹{item.price * item.quantity}</div>
                       </motion.div>
                     ))}
                   </div>

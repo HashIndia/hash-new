@@ -1,12 +1,35 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import useUserStore from "../stores/useUserStore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { ordersAPI } from "../services/api";
+import toast from "react-hot-toast";
 
 export default function Orders() {
-  const { orders } = useUserStore();
+  const { orders, setOrders, user } = useUserStore();
   const [expandedOrder, setExpandedOrder] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Load orders when component mounts
+  useEffect(() => {
+    const loadOrders = async () => {
+      if (!user) return;
+      
+      setIsLoading(true);
+      try {
+        const response = await ordersAPI.getUserOrders();
+        setOrders(response.data.orders || []);
+      } catch (error) {
+        console.error('Failed to load orders:', error);
+        toast.error('Failed to load orders');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadOrders();
+  }, [user, setOrders]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -49,6 +72,17 @@ export default function Orders() {
       default: return '📦';
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading your orders...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (orders.length === 0) {
     return (
@@ -97,7 +131,7 @@ export default function Orders() {
         <div className="max-w-4xl mx-auto space-y-6">
           {orders.map((order) => (
             <motion.div
-              key={order.id}
+              key={order._id || order.id}
               variants={itemVariants}
               layout
             >
@@ -106,14 +140,14 @@ export default function Orders() {
                   <div className="flex items-center justify-between mb-6">
                     <div>
                       <h3 className="text-lg font-semibold text-slate-900">
-                        Order #{order.id}
+                        Order #{order.orderNumber || order._id}
                       </h3>
-                      <p className="text-slate-600">Placed on {order.date}</p>
+                      <p className="text-slate-600">Placed on {new Date(order.createdAt).toLocaleDateString()}</p>
                     </div>
                     
                     <div className="text-right">
                       <div className="text-xl font-bold text-slate-900 mb-2">
-                        ₹{order.total}
+                        ₹{order.totalAmount}
                       </div>
                       <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(order.status)}`}>
                         <span>{getStatusIcon(order.status)}</span>
@@ -151,9 +185,9 @@ export default function Orders() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
+                      onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}
                     >
-                      {expandedOrder === order.id ? 'Hide Details' : 'View Details'}
+                      {expandedOrder === order._id ? 'Hide Details' : 'View Details'}
                     </Button>
                     
                     {order.status === 'delivered' && (
@@ -174,7 +208,7 @@ export default function Orders() {
                   </div>
 
                   {/* Expanded Order Details */}
-                  {expandedOrder === order.id && (
+                  {expandedOrder === order._id && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
@@ -184,16 +218,16 @@ export default function Orders() {
                     >
                       <h4 className="font-semibold text-slate-900 mb-4">Order Items</h4>
                       <div className="space-y-4">
-                        {order.items.map((item, index) => (
+                        {(order.items || []).map((item, index) => (
                           <div key={index} className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
                             <img
-                              src={`https://placehold.co/60x60/64748b/fff?text=Item`}
+                              src={item.image || item.product?.images?.[0] || `https://placehold.co/60x60/64748b/fff?text=Item`}
                               alt={item.name}
                               className="w-12 h-12 object-cover rounded-lg"
                             />
                             <div className="flex-1">
                               <h5 className="font-medium text-slate-900">{item.name}</h5>
-                              <p className="text-sm text-slate-600">Qty: {item.qty}</p>
+                              <p className="text-sm text-slate-600">Qty: {item.quantity}</p>
                             </div>
                             <div className="text-right">
                               <div className="font-semibold text-slate-900">₹{item.price}</div>
@@ -205,8 +239,10 @@ export default function Orders() {
                       <div className="mt-6 p-4 bg-slate-50 rounded-xl">
                         <h4 className="font-semibold text-slate-900 mb-3">Delivery Address</h4>
                         <div className="text-slate-600">
-                          <p>{order.address.line1}</p>
-                          <p>{order.address.city}, {order.address.state} - {order.address.zip}</p>
+                          <p>{order.shippingAddress?.line1}</p>
+                          {order.shippingAddress?.line2 && <p>{order.shippingAddress.line2}</p>}
+                          <p>{order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.pincode}</p>
+                          {order.shippingAddress?.landmark && <p>Near: {order.shippingAddress.landmark}</p>}
                         </div>
                       </div>
                     </motion.div>
@@ -234,7 +270,7 @@ export default function Orders() {
           <Card>
             <CardContent className="p-6 text-center">
               <div className="text-3xl font-bold text-slate-900 mb-2">
-                ₹{orders.reduce((sum, order) => sum + order.total, 0)}
+                ₹{orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0)}
               </div>
               <div className="text-slate-600">Total Spent</div>
             </CardContent>
