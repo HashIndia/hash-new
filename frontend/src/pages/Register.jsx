@@ -126,28 +126,35 @@ export default function Register() {
   const passwordStrength = getPasswordStrength(form.password);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-background via-card to-background flex items-center justify-center p-6 relative">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_80%_20%,hsl(var(--hash-blue))_0%,transparent_50%),radial-gradient(circle_at_40%_40%,hsl(var(--hash-pink))_0%,transparent_50%)] opacity-5"></div>
+      
+      <div className="w-full max-w-md relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">Create Account</h1>
-          <p className="text-slate-600">Join us and start your fashion journey</p>
+          {/* Logo */}
+          <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-hash-purple via-hash-blue to-hash-pink rounded-2xl flex items-center justify-center shadow-lg">
+            <span className="text-2xl font-bold text-white font-space">#</span>
+          </div>
+          <h1 className="text-3xl font-bold text-foreground mb-2 font-space">Join HASH</h1>
+          <p className="text-muted-foreground">Start your style journey with us</p>
         </div>
 
-        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+        <Card className="bg-card/80 backdrop-blur-xl border border-border shadow-2xl shadow-hash-purple/10">
           <CardHeader className="space-y-1 pb-6">
-            <CardTitle className="text-2xl font-semibold text-center text-slate-800">
-              Sign Up
+            <CardTitle className="text-2xl font-semibold text-center text-foreground font-space">
+              Create Account
             </CardTitle>
-            <CardDescription className="text-center text-sm text-slate-500">
-              Enter your details to get started.
+            <CardDescription className="text-center text-sm text-muted-foreground">
+              Enter your details to get started with HASH.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Name Field */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">
+                <label className="text-sm font-medium text-foreground">
                   Full Name
                 </label>
                 <Input
@@ -156,10 +163,10 @@ export default function Register() {
                   placeholder="Enter your full name"
                   value={form.name}
                   onChange={handleChange}
-                  className={`h-12 ${errors.name ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-slate-400'}`}
+                  className={`h-12 ${errors.name ? 'border-destructive focus:ring-destructive' : 'border-border focus:ring-hash-purple'}`}
                 />
                 {errors.name && (
-                  <p className="text-sm text-red-600 flex items-center gap-1">
+                  <p className="text-sm text-destructive flex items-center gap-1">
                     <AlertCircle className="w-4 h-4" /> {errors.name}
                   </p>
                 )}
@@ -167,7 +174,7 @@ export default function Register() {
 
               {/* Email Field */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">
+                <label className="text-sm font-medium text-foreground">
                   Email Address
                 </label>
                 <Input
@@ -176,10 +183,10 @@ export default function Register() {
                   placeholder="Enter your email"
                   value={form.email}
                   onChange={handleChange}
-                  className={`h-12 ${errors.email ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-slate-400'}`}
+                  className={`h-12 ${errors.email ? 'border-destructive focus:ring-destructive' : 'border-border focus:ring-hash-purple'}`}
                 />
                 {errors.email && (
-                  <p className="text-sm text-red-600 flex items-center gap-1">
+                  <p className="text-sm text-destructive flex items-center gap-1">
                     <AlertCircle className="w-4 h-4" /> {errors.email}
                   </p>
                 )}
@@ -187,7 +194,7 @@ export default function Register() {
 
               {/* Phone Field */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">
+                <label className="text-sm font-medium text-foreground">
                   Phone Number
                 </label>
                 <Input
@@ -196,10 +203,10 @@ export default function Register() {
                   placeholder="Enter your phone number"
                   value={form.phone}
                   onChange={handleChange}
-                  className={`h-12 ${errors.phone ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-slate-400'}`}
+                  className={`h-12 ${errors.phone ? 'border-destructive focus:ring-destructive' : 'border-border focus:ring-hash-purple'}`}
                 />
                 {errors.phone && (
-                  <p className="text-sm text-red-600 flex items-center gap-1">
+                  <p className="text-sm text-destructive flex items-center gap-1">
                     <AlertCircle className="w-4 h-4" /> {errors.phone}
                   </p>
                 )}
@@ -207,7 +214,7 @@ export default function Register() {
 
               {/* Password Field */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">
+                <label className="text-sm font-medium text-foreground">
                   Password
                 </label>
                 <div className="relative">
@@ -217,12 +224,12 @@ export default function Register() {
                     placeholder="Create a password"
                     value={form.password}
                     onChange={handleChange}
-                    className={`h-12 pr-12 ${errors.password ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-slate-400'}`}
+                    className={`h-12 pr-12 ${errors.password ? 'border-destructive focus:ring-destructive' : 'border-border focus:ring-hash-purple'}`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {showPassword ? "🙈" : "👁️"}
                   </button>
@@ -230,18 +237,18 @@ export default function Register() {
                 {form.password && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <div className="flex-1 bg-slate-200 rounded-full h-2">
+                      <div className="flex-1 bg-muted rounded-full h-2">
                         <div 
                           className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
                           style={{ width: `${(passwordStrength.strength + 1) * 25}%` }}
                         ></div>
                       </div>
-                      <span className="text-xs text-slate-600">{passwordStrength.text}</span>
+                      <span className="text-xs text-muted-foreground">{passwordStrength.text}</span>
                     </div>
                   </div>
                 )}
                 {errors.password && (
-                  <p className="text-sm text-red-600 flex items-center gap-1">
+                  <p className="text-sm text-destructive flex items-center gap-1">
                     <AlertCircle className="w-4 h-4" /> {errors.password}
                   </p>
                 )}
@@ -249,7 +256,7 @@ export default function Register() {
 
               {/* Confirm Password Field */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">
+                <label className="text-sm font-medium text-foreground">
                   Confirm Password
                 </label>
                 <Input
@@ -258,10 +265,10 @@ export default function Register() {
                   placeholder="Confirm your password"
                   value={form.confirmPassword}
                   onChange={handleChange}
-                  className={`h-12 ${errors.confirmPassword ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-slate-400'}`}
+                  className={`h-12 ${errors.confirmPassword ? 'border-destructive focus:ring-destructive' : 'border-border focus:ring-hash-purple'}`}
                 />
                 {errors.confirmPassword && (
-                  <p className="text-sm text-red-600 flex items-center gap-1">
+                  <p className="text-sm text-destructive flex items-center gap-1">
                     <AlertCircle className="w-4 h-4" /> {errors.confirmPassword}
                   </p>
                 )}
@@ -272,16 +279,16 @@ export default function Register() {
                 <input
                   type="checkbox"
                   id="terms"
-                  className="mt-1 w-4 h-4 text-slate-600 border-slate-300 rounded focus:ring-slate-500"
+                  className="mt-1 w-4 h-4 text-hash-purple border-border rounded focus:ring-hash-purple"
                   required
                 />
-                <label htmlFor="terms" className="text-sm text-slate-600">
+                <label htmlFor="terms" className="text-sm text-muted-foreground">
                   I agree to the{" "}
-                  <a href="/terms" className="text-slate-800 underline hover:text-slate-600">
+                  <a href="/terms" className="text-hash-purple underline hover:text-hash-blue transition-colors">
                     Terms of Service
                   </a>{" "}
                   and{" "}
-                  <a href="/privacy" className="text-slate-800 underline hover:text-slate-600">
+                  <a href="/privacy" className="text-hash-purple underline hover:text-hash-blue transition-colors">
                     Privacy Policy
                   </a>
                 </label>
@@ -289,7 +296,7 @@ export default function Register() {
 
               {/* Submit Button */}
               <Button 
-                className="w-full h-12 text-base font-semibold bg-slate-800 hover:bg-slate-900 transition-all duration-300 shadow-lg hover:shadow-xl" 
+                className="w-full h-12 text-base font-semibold bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue transition-all duration-300 shadow-lg hover:shadow-xl shadow-hash-purple/25" 
                 type="submit"
                 disabled={isLoading}
               >
@@ -305,10 +312,10 @@ export default function Register() {
             </form>
 
             {/* Sign In Link */}
-            <div className="text-center mt-6 pt-4 border-t border-slate-100">
-              <p className="text-sm text-slate-600">
+            <div className="text-center mt-6 pt-4 border-t border-border">
+              <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
-                <a href="/login" className="font-semibold text-slate-800 hover:text-slate-600 underline underline-offset-2 transition-colors">
+                <a href="/login" className="font-semibold text-hash-purple hover:text-hash-blue underline underline-offset-2 transition-colors">
                   Sign in
                 </a>
               </p>
@@ -318,7 +325,7 @@ export default function Register() {
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             By creating an account, you agree to receive marketing emails from us.
           </p>
         </div>

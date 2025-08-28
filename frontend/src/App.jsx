@@ -22,13 +22,18 @@ import Wishlist from './pages/Wishlist';
 
 export default function App() {
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-gray-50">
+    <div className="min-h-screen flex flex-col font-inter bg-background text-foreground dark">
       <AuthInitializer />
       <Toaster 
         position="top-center"
         reverseOrder={false}
         toastOptions={{
           duration: 3000,
+          style: {
+            background: 'hsl(var(--card))',
+            color: 'hsl(var(--foreground))',
+            border: '1px solid hsl(var(--border))',
+          },
         }}
       />
       <Header />

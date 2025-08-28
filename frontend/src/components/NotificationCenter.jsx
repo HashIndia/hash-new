@@ -1,215 +1,191 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, X, Package, Heart, ShoppingCart, User, AlertCircle } from 'lucide-react';
+import { X, Package, Heart, ShoppingCart, User, AlertCircle, Truck, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import useUserStore from '../stores/useUserStore';
+import useNotificationStore from '../stores/useNotificationStore';
 
-const NotificationCenter = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
+const NotificationCenter = ({ isOpen, onClose }) => {
   const { user } = useUserStore();
+  const { 
+    notifications, 
+    markAsRead, 
+    markAllAsRead, 
+    removeNotification, 
+    clearAllNotifications,
+    createOrderNotification 
+  } = useNotificationStore();
 
-  // Mock notification data - replace with real API calls
+  // Icon mapping for notifications
+  const iconMap = {
+    Package,
+    Heart,
+    ShoppingCart,
+    User,
+    AlertCircle,
+    Truck,
+    CheckCircle,
+    XCircle
+  };
+
+  // Demo: Create some initial real-looking notifications for demo purposes
   useEffect(() => {
-    if (user) {
-      const mockNotifications = [
-        {
-          id: 1,
-          type: 'order',
-          title: 'Order Shipped',
-          message: 'Your order #ORD-123 has been shipped and is on the way!',
-          time: '2 hours ago',
-          read: false,
-          icon: Package
-        },
-        {
-          id: 2,
-          type: 'wishlist',
-          title: 'Price Drop',
-          message: 'An item in your wishlist is now 20% off!',
-          time: '1 day ago',
-          read: false,
-          icon: Heart
-        },
-        {
-          id: 3,
-          type: 'cart',
-          title: 'Cart Reminder',
-          message: 'You have items waiting in your cart',
-          time: '2 days ago',
-          read: true,
-          icon: ShoppingCart
-        },
-        {
-          id: 4,
-          type: 'account',
-          title: 'Profile Updated',
-          message: 'Your profile information has been successfully updated',
-          time: '3 days ago',
-          read: true,
-          icon: User
-        }
-      ];
-      setNotifications(mockNotifications);
+    if (user && notifications.length === 0) {
+      // Simulate some recent order notifications
+      setTimeout(() => {
+        createOrderNotification('ORD-' + Math.random().toString(36).substr(2, 6).toUpperCase(), 'shipped', 2499);
+      }, 1000);
+      
+      setTimeout(() => {
+        createOrderNotification('ORD-' + Math.random().toString(36).substr(2, 6).toUpperCase(), 'delivered', 1899);
+      }, 1500);
+      
+      setTimeout(() => {
+        createOrderNotification('ORD-' + Math.random().toString(36).substr(2, 6).toUpperCase(), 'confirmed', 1299);
+      }, 2000);
     }
-  }, [user]);
+  }, [user, notifications.length, createOrderNotification]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const markAsRead = (id) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === id 
-          ? { ...notification, read: true }
-          : notification
-      )
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, read: true }))
-    );
-  };
-
-  const removeNotification = (id) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
-
   const getNotificationColor = (type) => {
     switch (type) {
-      case 'order': return 'text-blue-600';
-      case 'wishlist': return 'text-red-600';
-      case 'cart': return 'text-green-600';
-      case 'account': return 'text-purple-600';
-      default: return 'text-gray-600';
+      case 'order': return 'text-hash-blue';
+      case 'wishlist': return 'text-hash-pink';
+      case 'cart': return 'text-hash-green';
+      case 'account': return 'text-hash-purple';
+      default: return 'text-muted-foreground';
     }
+  };
+
+  const formatTimeAgo = (timestamp) => {
+    const now = new Date();
+    const notificationTime = new Date(timestamp);
+    const diffInHours = Math.floor((now - notificationTime) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    return `${Math.floor(diffInDays / 7)}w ago`;
   };
 
   if (!user) return null;
 
   return (
-    <div className="relative">
-      {/* Notification Bell */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-600 hover:text-gray-800 transition-colors"
-      >
-        <Bell className="w-6 h-6" />
-        {unreadCount > 0 && (
-          <Badge 
-            variant="destructive" 
-            className="absolute -top-1 -right-1 w-5 h-5 text-xs flex items-center justify-center p-0"
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40"
+            onClick={onClose}
+          />
+          
+          {/* Panel */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+            className="absolute right-0 top-12 w-80 z-50"
           >
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </Badge>
-        )}
-      </button>
-
-      {/* Notification Panel */}
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40"
-              onClick={() => setIsOpen(false)}
-            />
-            
-            {/* Panel */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              className="absolute right-0 top-12 w-80 z-50"
-            >
-              <Card className="shadow-lg">
-                <CardContent className="p-0">
-                  {/* Header */}
-                  <div className="p-4 border-b flex justify-between items-center">
-                    <h3 className="font-semibold">Notifications</h3>
+            <Card className="shadow-lg bg-card/90 backdrop-blur-sm border border-border">
+              <CardContent className="p-0">
+                {/* Header */}
+                <div className="p-4 border-b border-border flex justify-between items-center bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple text-white rounded-t-lg">
+                  <h3 className="font-semibold font-space">Notifications</h3>
+                  <div className="flex items-center gap-2">
                     {unreadCount > 0 && (
                       <Button 
                         variant="ghost" 
                         size="sm"
                         onClick={markAllAsRead}
-                        className="text-blue-600 hover:text-blue-800"
+                        className="text-white hover:text-white hover:bg-white/20 h-8 px-2 text-xs"
                       >
                         Mark all read
                       </Button>
                     )}
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={onClose}
+                      className="text-white hover:text-white hover:bg-white/20 h-8 w-8 p-0"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
                   </div>
+                </div>
 
-                  {/* Notifications List */}
-                  <div className="max-h-96 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <div className="p-8 text-center text-gray-500">
-                        <Bell className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                        <p>No notifications yet</p>
-                      </div>
-                    ) : (
-                      notifications.map((notification) => {
-                        const Icon = notification.icon;
-                        return (
-                          <motion.div
-                            key={notification.id}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className={`p-4 border-b hover:bg-gray-50 transition-colors ${
-                              !notification.read ? 'bg-blue-50' : ''
-                            }`}
-                          >
-                            <div className="flex gap-3">
-                              <div className={`p-2 rounded-full bg-gray-100 ${getNotificationColor(notification.type)}`}>
-                                <Icon className="w-4 h-4" />
+                {/* Notifications List */}
+                <div className="max-h-96 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="p-8 text-center text-muted-foreground">
+                      <Package className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
+                      <p>No notifications yet</p>
+                      <p className="text-xs mt-1">We'll notify you about order updates</p>
+                    </div>
+                  ) : (
+                    notifications.map((notification) => {
+                      const Icon = iconMap[notification.icon] || Package;
+                      return (
+                        <motion.div
+                          key={notification.id}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className={`p-4 border-b border-border hover:bg-accent/50 transition-colors ${
+                            !notification.read ? 'bg-hash-purple/5' : ''
+                          }`}
+                        >
+                          <div className="flex gap-3">
+                            <div className={`p-2 rounded-full bg-accent/50 ${getNotificationColor(notification.type)}`}>
+                              <Icon className="w-4 h-4" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex justify-between items-start">
+                                <h4 className={`text-sm font-medium ${!notification.read ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                  {notification.title}
+                                </h4>
+                                <button
+                                  onClick={() => removeNotification(notification.id)}
+                                  className="text-muted-foreground hover:text-foreground ml-2"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex justify-between items-start">
-                                  <h4 className={`text-sm font-medium ${!notification.read ? 'text-gray-900' : 'text-gray-700'}`}>
-                                    {notification.title}
-                                  </h4>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {notification.message}
+                              </p>
+                              <div className="flex justify-between items-center mt-2">
+                                <span className="text-xs text-muted-foreground">
+                                  {formatTimeAgo(notification.timestamp)}
+                                </span>
+                                {!notification.read && (
                                   <button
-                                    onClick={() => removeNotification(notification.id)}
-                                    className="text-gray-400 hover:text-gray-600 ml-2"
+                                    onClick={() => markAsRead(notification.id)}
+                                    className="text-xs text-hash-purple hover:text-hash-blue"
                                   >
-                                    <X className="w-4 h-4" />
+                                    Mark as read
                                   </button>
-                                </div>
-                                <p className="text-sm text-gray-600 mt-1">
-                                  {notification.message}
-                                </p>
-                                <div className="flex justify-between items-center mt-2">
-                                  <span className="text-xs text-gray-500">
-                                    {notification.time}
-                                  </span>
-                                  {!notification.read && (
-                                    <button
-                                      onClick={() => markAsRead(notification.id)}
-                                      className="text-xs text-blue-600 hover:text-blue-800"
-                                    >
-                                      Mark as read
-                                    </button>
-                                  )}
-                                </div>
+                                )}
                               </div>
                             </div>
-                          </motion.div>
-                        );
-                      })
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 };
 

@@ -5,6 +5,7 @@ import { Button } from "../components/ui/button";
 import useUserStore from "../stores/useUserStore";
 import AddressForm from "../components/AddressForm";
 import toast from "react-hot-toast";
+import { motion } from "framer-motion";
 
 export default function Profile() {
   const { user, addresses, orders, setAddresses, setOrders } = useUserStore();
@@ -96,113 +97,166 @@ export default function Profile() {
   };
 
   if (!user) {
-    return <div>Loading profile...</div>;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hash-purple mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading profile...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">My Profile</h1>
+    <motion.div 
+      className="min-h-screen bg-background py-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
+    >
+      <div className="container mx-auto px-4">
+        <h1 className="text-4xl font-bold text-foreground mb-8 text-center font-space">My Profile</h1>
 
-      {(showAddressForm || editingAddress) && (
-        <div className="mb-6">
-          <AddressForm
-            onSubmit={editingAddress ? handleEditAddress : handleAddAddress}
-            onCancel={() => {
-              setShowAddressForm(false);
-              setEditingAddress(null);
-            }}
-            initialData={editingAddress}
-            isLoading={isLoading}
-          />
-        </div>
-      )}
+        {(showAddressForm || editingAddress) && (
+          <motion.div 
+            className="mb-6"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <AddressForm
+              onSubmit={editingAddress ? handleEditAddress : handleAddAddress}
+              onCancel={() => {
+                setShowAddressForm(false);
+                setEditingAddress(null);
+              }}
+              initialData={editingAddress}
+              isLoading={isLoading}
+            />
+          </motion.div>
+        )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>My Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>
-              <strong>Name:</strong> {user.name}
-            </p>
-            <p>
-              <strong>Email:</strong> {user.email}
-            </p>
-            <p>
-              <strong>Phone:</strong> {user.phone}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="md:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>My Addresses</CardTitle>
-            <Button onClick={() => setShowAddressForm(true)}>Add Address</Button>
-          </CardHeader>
-          <CardContent>
-            {addresses.length > 0 ? (
-              <div className="space-y-4">
-                {addresses.map((addr) => (
-                  <div key={addr._id} className="border rounded-lg p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium">{addr.name}</p>
-                        <p>
-                          {addr.line1}, {addr.line2 && `${addr.line2},`}{" "}
-                          {addr.city}
-                        </p>
-                        <p>
-                          {addr.state} - {addr.pincode}
-                        </p>
-                        <p>Phone: {addr.phone}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setEditingAddress(addr)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDeleteAddress(addr._id)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            <Card className="bg-card/80 backdrop-blur-sm border border-border shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple text-white rounded-t-lg">
+                <CardTitle className="font-space">My Details</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <strong className="text-foreground">Name:</strong> 
+                    <span className="text-muted-foreground">{user.name}</span>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p>No addresses found.</p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="md:col-span-3">
-          <CardHeader>
-            <CardTitle>Recent Orders</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {orders.length > 0 ? (
-              orders.slice(0, 5).map((order) => (
-                <div key={order._id} className="border-b last:border-b-0 py-2">
-                  <p>
-                    Order #{order.orderNumber} -{" "}
-                    <strong>{order.status}</strong> - ₹{order.total}
-                  </p>
+                  <div className="flex items-center gap-3">
+                    <strong className="text-foreground">Email:</strong> 
+                    <span className="text-muted-foreground">{user.email}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <strong className="text-foreground">Phone:</strong> 
+                    <span className="text-muted-foreground">{user.phone}</span>
+                  </div>
                 </div>
-              ))
-            ) : (
-              <p>No orders found.</p>
-            )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            className="md:col-span-2"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <Card className="bg-card/80 backdrop-blur-sm border border-border shadow-lg">
+              <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple text-white rounded-t-lg">
+                <CardTitle className="font-space">My Addresses</CardTitle>
+                <Button 
+                  onClick={() => setShowAddressForm(true)}
+                  className="bg-white/20 hover:bg-white/30 text-white border border-white/30"
+                >
+                  Add Address
+                </Button>
+              </CardHeader>
+              <CardContent className="p-6">
+                {addresses.length > 0 ? (
+                  <div className="space-y-4">
+                    {addresses.map((addr) => (
+                      <div key={addr._id} className="border border-border rounded-lg p-4 bg-accent/30">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium text-foreground">{addr.name}</p>
+                            <p className="text-muted-foreground">
+                              {addr.line1}, {addr.line2 && `${addr.line2},`}{" "}
+                              {addr.city}
+                            </p>
+                            <p className="text-muted-foreground">
+                              {addr.state} - {addr.pincode}
+                            </p>
+                            <p className="text-muted-foreground">Phone: {addr.phone}</p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setEditingAddress(addr)}
+                              className="border-hash-purple text-hash-purple hover:bg-hash-purple hover:text-white"
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteAddress(addr._id)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">No addresses found.</p>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            className="md:col-span-3"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            <Card className="bg-card/80 backdrop-blur-sm border border-border shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple text-white rounded-t-lg">
+                <CardTitle className="font-space">Recent Orders</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                {orders.length > 0 ? (
+                  <div className="space-y-3">
+                    {orders.slice(0, 5).map((order) => (
+                      <div key={order._id} className="border-b border-border pb-3 last:border-b-0 p-3 bg-accent/20 rounded-lg">
+                        <p className="text-foreground">
+                          Order #{order.orderNumber} -{" "}
+                          <strong className="text-hash-purple">{order.status}</strong> - 
+                          <span className="text-hash-blue font-semibold ml-1">₹{order.total}</span>
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">No orders found.</p>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

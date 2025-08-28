@@ -3,6 +3,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { X } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function AddressForm({ onSubmit, onCancel, initialData = null, isLoading = false }) {
   const [formData, setFormData] = useState({
@@ -49,132 +50,149 @@ export default function AddressForm({ onSubmit, onCancel, initialData = null, is
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>{initialData ? 'Edit Address' : 'Add New Address'}</CardTitle>
-        <Button variant="ghost" size="sm" onClick={onCancel}>
-          <X className="w-4 h-4" />
-        </Button>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Card className="w-full max-w-2xl mx-auto bg-card/80 backdrop-blur-sm border border-border shadow-lg">
+        <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple text-white rounded-t-lg">
+          <CardTitle className="font-space">{initialData ? 'Edit Address' : 'Add New Address'}</CardTitle>
+          <Button variant="ghost" size="sm" onClick={onCancel} className="text-white hover:bg-white/20">
+            <X className="w-4 h-4" />
+          </Button>
+        </CardHeader>
+        <CardContent className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-foreground">Address Type</label>
+                <select
+                  name="type"
+                  value={formData.type}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-background border border-border rounded-md text-foreground focus:border-hash-purple focus:outline-none"
+                >
+                  <option value="home">Home</option>
+                  <option value="work">Work</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-foreground">Full Name</label>
+                <Input
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Enter full name"
+                  className={errors.name ? 'border-destructive' : 'border-border focus:border-hash-purple'}
+                />
+                {errors.name && <p className="text-destructive text-sm mt-1">{errors.name}</p>}
+              </div>
+            </div>
+
             <div>
-              <label className="block text-sm font-medium mb-1">Address Type</label>
-              <select
-                name="type"
-                value={formData.type}
+              <label className="block text-sm font-medium mb-1 text-foreground">Phone Number</label>
+              <Input
+                name="phone"
+                value={formData.phone}
                 onChange={handleChange}
-                className="w-full p-2 border rounded-md"
+                placeholder="Enter phone number"
+                className={errors.phone ? 'border-destructive' : 'border-border focus:border-hash-purple'}
+              />
+              {errors.phone && <p className="text-destructive text-sm mt-1">{errors.phone}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1 text-foreground">Address Line 1</label>
+              <Input
+                name="line1"
+                value={formData.line1}
+                onChange={handleChange}
+                placeholder="House/Flat number, Building name"
+                className={errors.line1 ? 'border-destructive' : 'border-border focus:border-hash-purple'}
+              />
+              {errors.line1 && <p className="text-destructive text-sm mt-1">{errors.line1}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1 text-foreground">Address Line 2 (Optional)</label>
+              <Input
+                name="line2"
+                value={formData.line2}
+                onChange={handleChange}
+                placeholder="Street, Area, Colony"
+                className="border-border focus:border-hash-purple"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-foreground">City</label>
+                <Input
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  placeholder="Enter city"
+                  className={errors.city ? 'border-destructive' : 'border-border focus:border-hash-purple'}
+                />
+                {errors.city && <p className="text-destructive text-sm mt-1">{errors.city}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-foreground">State</label>
+                <Input
+                  name="state"
+                  value={formData.state}
+                  onChange={handleChange}
+                  placeholder="Enter state"
+                  className={errors.state ? 'border-destructive' : 'border-border focus:border-hash-purple'}
+                />
+                {errors.state && <p className="text-destructive text-sm mt-1">{errors.state}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-foreground">Pincode</label>
+                <Input
+                  name="pincode"
+                  value={formData.pincode}
+                  onChange={handleChange}
+                  placeholder="Enter pincode"
+                  className={errors.pincode ? 'border-destructive' : 'border-border focus:border-hash-purple'}
+                />
+                {errors.pincode && <p className="text-destructive text-sm mt-1">{errors.pincode}</p>}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1 text-foreground">Landmark (Optional)</label>
+              <Input
+                name="landmark"
+                value={formData.landmark}
+                onChange={handleChange}
+                placeholder="Near landmark"
+                className="border-border focus:border-hash-purple"
+              />
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button 
+                type="submit" 
+                disabled={isLoading} 
+                className="flex-1 bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue text-white shadow-lg shadow-hash-purple/25"
               >
-                <option value="home">Home</option>
-                <option value="work">Work</option>
-                <option value="other">Other</option>
-              </select>
+                {isLoading ? 'Saving...' : (initialData ? 'Update Address' : 'Save Address')}
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={onCancel}
+                className="border-border hover:bg-accent"
+              >
+                Cancel
+              </Button>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Full Name</label>
-              <Input
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Enter full name"
-                className={errors.name ? 'border-red-500' : ''}
-              />
-              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Phone Number</label>
-            <Input
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="Enter phone number"
-              className={errors.phone ? 'border-red-500' : ''}
-            />
-            {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Address Line 1</label>
-            <Input
-              name="line1"
-              value={formData.line1}
-              onChange={handleChange}
-              placeholder="House/Flat number, Building name"
-              className={errors.line1 ? 'border-red-500' : ''}
-            />
-            {errors.line1 && <p className="text-red-500 text-sm mt-1">{errors.line1}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Address Line 2 (Optional)</label>
-            <Input
-              name="line2"
-              value={formData.line2}
-              onChange={handleChange}
-              placeholder="Street, Area, Colony"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">City</label>
-              <Input
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                placeholder="Enter city"
-                className={errors.city ? 'border-red-500' : ''}
-              />
-              {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">State</label>
-              <Input
-                name="state"
-                value={formData.state}
-                onChange={handleChange}
-                placeholder="Enter state"
-                className={errors.state ? 'border-red-500' : ''}
-              />
-              {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Pincode</label>
-              <Input
-                name="pincode"
-                value={formData.pincode}
-                onChange={handleChange}
-                placeholder="Enter pincode"
-                className={errors.pincode ? 'border-red-500' : ''}
-              />
-              {errors.pincode && <p className="text-red-500 text-sm mt-1">{errors.pincode}</p>}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Landmark (Optional)</label>
-            <Input
-              name="landmark"
-              value={formData.landmark}
-              onChange={handleChange}
-              placeholder="Near landmark"
-            />
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            <Button type="submit" disabled={isLoading} className="flex-1">
-              {isLoading ? 'Saving...' : (initialData ? 'Update Address' : 'Save Address')}
-            </Button>
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+          </form>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }

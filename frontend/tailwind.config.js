@@ -7,12 +7,26 @@ export default {
   ],
   theme: {
   	extend: {
+      fontFamily: {
+        'inter': ['Inter', 'sans-serif'],
+        'space': ['Space Grotesk', 'sans-serif'],
+      },
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+        // HASH Brand Colors
+        hash: {
+          purple: 'hsl(var(--hash-purple))',
+          blue: 'hsl(var(--hash-blue))',
+          pink: 'hsl(var(--hash-pink))',
+          green: 'hsl(var(--hash-green))',
+          orange: 'hsl(var(--hash-orange))',
+          gray: 'hsl(var(--hash-gray))',
+          dark: 'hsl(var(--hash-dark))',
+        },
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

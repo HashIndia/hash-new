@@ -55,11 +55,11 @@ export default function Orders() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'delivered': return 'bg-green-100 text-green-800 border-green-200';
-      case 'shipped': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'processing': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-slate-100 text-slate-800 border-slate-200';
+      case 'delivered': return 'bg-hash-green/10 text-hash-green border border-hash-green/20';
+      case 'shipped': return 'bg-hash-blue/10 text-hash-blue border border-hash-blue/20';
+      case 'processing': return 'bg-hash-orange/10 text-hash-orange border border-hash-orange/20';
+      case 'cancelled': return 'bg-destructive/10 text-destructive border border-destructive/20';
+      default: return 'bg-muted text-muted-foreground border border-border';
     }
   };
 
@@ -75,10 +75,10 @@ export default function Orders() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your orders...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hash-purple mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading your orders...</p>
         </div>
       </div>
     );
@@ -86,7 +86,7 @@ export default function Orders() {
 
   if (orders.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <motion.div 
           className="text-center"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -94,15 +94,15 @@ export default function Orders() {
           transition={{ duration: 0.6 }}
         >
           <div className="text-6xl mb-4">📦</div>
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">No Orders Yet</h2>
-          <p className="text-slate-600 mb-8 max-w-md mx-auto">
+          <h2 className="text-3xl font-bold text-foreground mb-4 font-space">No Orders Yet</h2>
+          <p className="text-muted-foreground mb-8 max-w-md mx-auto">
             You haven't placed any orders yet. Start shopping to see your order history here!
           </p>
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Button asChild size="lg">
+            <Button asChild size="lg" className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue text-white shadow-lg shadow-hash-purple/25">
               <a href="/shop">Start Shopping</a>
             </Button>
           </motion.div>
@@ -112,7 +112,7 @@ export default function Orders() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+    <div className="min-h-screen bg-background">
       <motion.div 
         className="container mx-auto py-12 px-6"
         variants={containerVariants}
@@ -124,8 +124,8 @@ export default function Orders() {
           className="text-center mb-12"
           variants={itemVariants}
         >
-          <h1 className="text-4xl font-bold text-slate-900 mb-4">Order History</h1>
-          <p className="text-slate-600">Track your orders and view purchase history</p>
+          <h1 className="text-4xl font-bold text-foreground mb-4 font-space">Order History</h1>
+          <p className="text-muted-foreground">Track your orders and view purchase history</p>
         </motion.div>
 
         <div className="max-w-4xl mx-auto space-y-6">
@@ -135,21 +135,21 @@ export default function Orders() {
               variants={itemVariants}
               layout
             >
-              <Card className="hover:shadow-lg transition-all duration-300">
+              <Card className="bg-card/80 backdrop-blur-sm border border-border hover:shadow-lg transition-all duration-300 shadow-lg">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-900">
+                      <h3 className="text-lg font-semibold text-foreground">
                         Order #{order.orderNumber || order._id}
                       </h3>
-                      <p className="text-slate-600">Placed on {new Date(order.createdAt).toLocaleDateString()}</p>
+                      <p className="text-muted-foreground">Placed on {new Date(order.createdAt).toLocaleDateString()}</p>
                     </div>
                     
                     <div className="text-right">
-                      <div className="text-xl font-bold text-slate-900 mb-2">
+                      <div className="text-xl font-bold text-hash-purple mb-2">
                         ₹{order.totalAmount}
                       </div>
-                      <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(order.status)}`}>
+                      <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
                         <span>{getStatusIcon(order.status)}</span>
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </span>
@@ -159,20 +159,20 @@ export default function Orders() {
                   {/* Order Progress */}
                   {order.status !== 'cancelled' && (
                     <div className="mb-6">
-                      <div className="flex items-center justify-between text-sm text-slate-600 mb-2">
+                      <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
                         <span>Order Progress</span>
                         <span>{order.status === 'delivered' ? '100%' : order.status === 'shipped' ? '66%' : '33%'}%</span>
                       </div>
-                      <div className="w-full bg-slate-200 rounded-full h-2">
+                      <div className="w-full bg-muted rounded-full h-2">
                         <div 
-                          className="bg-slate-800 h-2 rounded-full transition-all duration-500"
+                          className="bg-gradient-to-r from-hash-purple to-hash-blue h-2 rounded-full transition-all duration-500"
                           style={{ 
                             width: order.status === 'delivered' ? '100%' : 
                                    order.status === 'shipped' ? '66%' : '33%' 
                           }}
                         ></div>
                       </div>
-                      <div className="flex justify-between mt-2 text-xs text-slate-500">
+                      <div className="flex justify-between mt-2 text-xs text-muted-foreground">
                         <span>Ordered</span>
                         <span>Shipped</span>
                         <span>Delivered</span>
@@ -214,31 +214,31 @@ export default function Orders() {
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="mt-6 pt-6 border-t border-slate-200"
+                      className="mt-6 pt-6 border-t border-border"
                     >
-                      <h4 className="font-semibold text-slate-900 mb-4">Order Items</h4>
+                      <h4 className="font-semibold text-foreground mb-4">Order Items</h4>
                       <div className="space-y-4">
                         {(order.items || []).map((item, index) => (
-                          <div key={index} className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
+                          <div key={index} className="flex items-center gap-4 p-4 bg-accent/50 rounded-xl border border-border">
                             <img
                               src={item.image || item.product?.images?.[0] || `https://placehold.co/60x60/64748b/fff?text=Item`}
                               alt={item.name}
                               className="w-12 h-12 object-cover rounded-lg"
                             />
                             <div className="flex-1">
-                              <h5 className="font-medium text-slate-900">{item.name}</h5>
-                              <p className="text-sm text-slate-600">Qty: {item.quantity}</p>
+                              <h5 className="font-medium text-foreground">{item.name}</h5>
+                              <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                             </div>
                             <div className="text-right">
-                              <div className="font-semibold text-slate-900">₹{item.price}</div>
+                              <div className="font-semibold text-hash-purple">₹{item.price}</div>
                             </div>
                           </div>
                         ))}
                       </div>
                       
-                      <div className="mt-6 p-4 bg-slate-50 rounded-xl">
-                        <h4 className="font-semibold text-slate-900 mb-3">Delivery Address</h4>
-                        <div className="text-slate-600">
+                      <div className="mt-6 p-4 bg-accent/50 rounded-xl border border-border">
+                        <h4 className="font-semibold text-foreground mb-3">Delivery Address</h4>
+                        <div className="text-muted-foreground">
                           <p>{order.shippingAddress?.line1}</p>
                           {order.shippingAddress?.line2 && <p>{order.shippingAddress.line2}</p>}
                           <p>{order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.pincode}</p>
@@ -258,30 +258,30 @@ export default function Orders() {
           className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto"
           variants={itemVariants}
         >
-          <Card>
+          <Card className="bg-card/80 backdrop-blur-sm border border-border">
             <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-slate-900 mb-2">
+              <div className="text-3xl font-bold text-hash-purple mb-2">
                 {orders.length}
               </div>
-              <div className="text-slate-600">Total Orders</div>
+              <div className="text-muted-foreground">Total Orders</div>
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="bg-card/80 backdrop-blur-sm border border-border">
             <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-slate-900 mb-2">
+              <div className="text-3xl font-bold text-hash-blue mb-2">
                 ₹{orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0)}
               </div>
-              <div className="text-slate-600">Total Spent</div>
+              <div className="text-muted-foreground">Total Spent</div>
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="bg-card/80 backdrop-blur-sm border border-border">
             <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-slate-900 mb-2">
+              <div className="text-3xl font-bold text-hash-green mb-2">
                 {orders.filter(order => order.status === 'delivered').length}
               </div>
-              <div className="text-slate-600">Delivered</div>
+              <div className="text-muted-foreground">Delivered</div>
             </CardContent>
           </Card>
         </motion.div>

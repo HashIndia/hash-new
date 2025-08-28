@@ -4,6 +4,7 @@ import { Input } from "../components/ui/input";
 import AddressForm from "../components/AddressForm";
 import useCartStore from "../stores/useCartStore";
 import useUserStore from "../stores/useUserStore";
+import useNotificationStore from "../stores/useNotificationStore";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { authAPI, ordersAPI, paymentsAPI } from "../services/api";
@@ -14,6 +15,7 @@ import { load } from "cashfree-pg-sdk-javascript";
 export default function Checkout() {
   const { items, clearCart, getCartTotal, getShippingCost, getTax, getGrandTotal } = useCartStore();
   const { user, addresses, setAddresses } = useUserStore();
+  const { createOrderNotification } = useNotificationStore();
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('online');
   const [showAddressForm, setShowAddressForm] = useState(false);
@@ -100,6 +102,14 @@ export default function Checkout() {
       if (paymentMethod === 'cod') {
         // For COD, just show success and navigate
         toast.success("Order placed successfully!");
+        
+        // Create notification for order confirmation
+        createOrderNotification(
+          order.orderNumber || order._id, 
+          'confirmed', 
+          total
+        );
+        
         clearCart();
         navigate('/order-success', { 
           state: { 
@@ -164,17 +174,17 @@ export default function Checkout() {
 
   if (isLoading && !showAddressForm) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="spinner-lg mb-4"></div>
-          <p className="text-gray-600">Processing your order...</p>
+          <p className="text-muted-foreground">Processing your order...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-indigo-50/10">
+    <div className="min-h-screen bg-gradient-to-br from-background via-card to-background">
       <motion.div 
         className="container mx-auto py-12 px-6"
         initial={{ opacity: 0, y: 20 }}
@@ -182,7 +192,7 @@ export default function Checkout() {
         transition={{ duration: 0.6 }}
       >
         <motion.h1 
-          className="text-4xl font-bold mb-8 text-center text-slate-800"
+          className="text-4xl font-bold mb-8 text-center text-foreground font-space"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -199,22 +209,22 @@ export default function Checkout() {
             transition={{ duration: 0.6, delay: 0.3 }}
           >
             {/* Delivery Address */}
-            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <Card className="shadow-lg bg-card/80 backdrop-blur-sm border border-border">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <span className="bg-slate-800 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">1</span>
+                <CardTitle className="flex items-center gap-2 font-space">
+                  <span className="bg-gradient-to-r from-hash-purple to-hash-blue text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">1</span>
                   Delivery Address
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {addresses.length === 0 ? (
-                  <div className="text-slate-500 mb-4">No addresses saved. Please add one.</div>
+                  <div className="text-muted-foreground mb-4">No addresses saved. Please add one.</div>
                 ) : (
                   <div className="space-y-3 mb-4">
                     {addresses.map((address, idx) => (
                       <motion.label 
                         key={address._id || address.id || idx} 
-                        className="flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors duration-200"
+                        className="flex items-start gap-3 p-3 border-2 border-border rounded-lg cursor-pointer hover:bg-accent transition-colors duration-200"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
@@ -223,11 +233,11 @@ export default function Checkout() {
                           name="address"
                           checked={selectedAddress === (address._id || address.id)}
                           onChange={() => setSelectedAddress(address._id || address.id)}
-                          className="mt-1"
+                          className="mt-1 text-hash-purple focus:ring-hash-purple"
                         />
                         <div className="flex-1">
-                          <div className="font-medium text-slate-900">{address.line1}</div>
-                          <div className="text-sm text-slate-600">{address.city}, {address.state} - {address.zip}</div>
+                          <div className="font-medium text-foreground">{address.line1}</div>
+                          <div className="text-sm text-muted-foreground">{address.city}, {address.state} - {address.zip}</div>
                         </div>
                       </motion.label>
                     ))}
@@ -253,7 +263,7 @@ export default function Checkout() {
                       <Button 
                         variant="outline" 
                         onClick={() => setShowAddressForm(true)}
-                        className="w-full border-2 border-slate-200 text-slate-600 hover:bg-slate-50"
+                        className="w-full border-2 border-border text-muted-foreground hover:bg-accent"
                       >
                         Add New Address
                       </Button>
@@ -264,10 +274,10 @@ export default function Checkout() {
             </Card>
 
             {/* Payment Method */}
-            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <Card className="shadow-lg bg-card/80 backdrop-blur-sm border border-border">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <span className="bg-slate-800 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">2</span>
+                <CardTitle className="flex items-center gap-2 font-space">
+                  <span className="bg-gradient-to-r from-hash-purple to-hash-blue text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">2</span>
                   Payment Method
                 </CardTitle>
               </CardHeader>
@@ -283,8 +293,8 @@ export default function Checkout() {
                         key={method.id}
                         className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
                           paymentMethod === method.id 
-                            ? 'border-slate-800 bg-slate-50' 
-                            : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                            ? 'border-hash-purple bg-hash-purple/5' 
+                            : 'border-border hover:border-hash-purple/50 hover:bg-accent'
                         }`}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
@@ -298,7 +308,7 @@ export default function Checkout() {
                           className="sr-only"
                         />
                         <span className="text-2xl">{method.icon}</span>
-                        <span className="font-medium">{method.label}</span>
+                        <span className="font-medium text-foreground">{method.label}</span>
                       </motion.label>
                     ))}
                   </div>
@@ -312,9 +322,9 @@ export default function Checkout() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ duration: 0.3 }}
-                        className="space-y-4 p-4 bg-slate-50 rounded-lg"
+                        className="space-y-4 p-4 bg-accent/50 rounded-lg"
                       >
-                        <h4 className="font-semibold text-slate-900">Card Details</h4>
+                        <h4 className="font-semibold text-foreground">Card Details</h4>
                         <div className="grid grid-cols-1 gap-4">
                           <Input
                             placeholder="Card Number (1234 5678 9012 3456)"
@@ -401,10 +411,10 @@ export default function Checkout() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm sticky top-6">
+            <Card className="shadow-lg bg-card/80 backdrop-blur-sm sticky top-6 border border-border">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <span className="bg-slate-800 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">3</span>
+                <CardTitle className="flex items-center gap-2 font-space">
+                  <span className="bg-gradient-to-r from-hash-purple to-hash-blue text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">3</span>
                   Order Summary
                 </CardTitle>
               </CardHeader>
@@ -415,7 +425,7 @@ export default function Checkout() {
                     {items.map(item => (
                       <motion.div 
                         key={item.id} 
-                        className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg"
+                        className="flex items-center gap-3 p-3 bg-accent/50 rounded-lg"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3 }}
@@ -426,31 +436,31 @@ export default function Checkout() {
                           className="w-12 h-12 object-cover rounded"
                         />
                         <div className="flex-1">
-                          <div className="font-medium text-sm text-slate-900">{item.product.name}</div>
-                          <div className="text-xs text-slate-600">Qty: {item.quantity}</div>
+                          <div className="font-medium text-sm text-foreground">{item.product.name}</div>
+                          <div className="text-xs text-muted-foreground">Qty: {item.quantity}</div>
                         </div>
-                        <div className="font-semibold text-slate-900">₹{item.price * item.quantity}</div>
+                        <div className="font-semibold text-hash-purple">${item.price * item.quantity}</div>
                       </motion.div>
                     ))}
                   </div>
 
                   {/* Price Breakdown */}
-                  <div className="border-t pt-4 space-y-2">
-                    <div className="flex justify-between text-slate-600">
+                  <div className="border-t border-border pt-4 space-y-2">
+                    <div className="flex justify-between text-muted-foreground">
                       <span>Subtotal</span>
-                      <span>₹{subtotal}</span>
+                      <span>${subtotal}</span>
                     </div>
-                    <div className="flex justify-between text-slate-600">
+                    <div className="flex justify-between text-muted-foreground">
                       <span>Shipping</span>
-                      <span>{shipping === 0 ? 'FREE' : `₹${shipping}`}</span>
+                      <span>{shipping === 0 ? 'FREE' : `$${shipping}`}</span>
                     </div>
-                    <div className="flex justify-between text-slate-600">
+                    <div className="flex justify-between text-muted-foreground">
                       <span>Tax (18%)</span>
-                      <span>₹{tax}</span>
+                      <span>${tax}</span>
                     </div>
-                    <div className="border-t pt-2 flex justify-between font-bold text-lg text-slate-900">
+                    <div className="border-t border-border pt-2 flex justify-between font-bold text-lg text-foreground">
                       <span>Total</span>
-                      <span>₹{total}</span>
+                      <span>${total}</span>
                     </div>
                   </div>
 
@@ -462,9 +472,9 @@ export default function Checkout() {
                     <Button
                       onClick={handlePlaceOrder}
                       disabled={isLoading}
-                      className="w-full py-4 text-lg font-semibold bg-slate-800 hover:bg-slate-900 shadow-lg hover:shadow-xl transition-all duration-300 disabled:bg-slate-400"
+                      className="w-full py-4 text-lg font-semibold bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 shadow-hash-purple/25"
                     >
-                      {isLoading ? 'Placing Order...' : `Place Order - ₹${total}`}
+                      {isLoading ? 'Placing Order...' : `Place Order - $${total}`}
                     </Button>
                   </motion.div>
                 </div>

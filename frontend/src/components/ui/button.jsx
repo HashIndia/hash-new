@@ -5,19 +5,19 @@ import { cva } from "class-variance-authority"
 import { cn } from "../../lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 transform hover:scale-105 active:scale-95",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hash-purple focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 transform hover:scale-105 active:scale-95",
   {
     variants: {
       variant: {
-        default: "bg-slate-900 text-slate-50 hover:bg-slate-800 shadow-lg hover:shadow-xl",
+        default: "bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue text-white shadow-lg hover:shadow-xl shadow-hash-purple/25",
         destructive:
-          "bg-red-500 text-slate-50 hover:bg-red-600 shadow-lg hover:shadow-xl",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg hover:shadow-xl",
         outline:
-          "border-2 border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 shadow-md hover:shadow-lg",
+          "border-2 border-hash-purple/30 bg-card/50 backdrop-blur-sm hover:bg-hash-purple/10 hover:border-hash-purple text-foreground hover:text-hash-purple shadow-md hover:shadow-lg hover:shadow-hash-purple/20",
         secondary:
-          "bg-slate-100 text-slate-900 hover:bg-slate-200 shadow-md hover:shadow-lg",
-        ghost: "hover:bg-slate-100 hover:text-slate-900",
-        link: "text-slate-900 underline-offset-4 hover:underline",
+          "bg-card/50 backdrop-blur-sm text-foreground hover:bg-hash-blue/10 hover:text-hash-blue border border-border hover:border-hash-blue/30 shadow-md hover:shadow-lg",
+        ghost: "hover:bg-hash-purple/10 hover:text-hash-purple transition-colors",
+        link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-6 py-3",

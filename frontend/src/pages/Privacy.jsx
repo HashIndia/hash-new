@@ -38,7 +38,7 @@ export default function Privacy() {
         </motion.div>
 
         <motion.div variants={itemVariants}>
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <Card className="shadow-lg bg-card/80 backdrop-blur-sm border border-border">
             <CardContent className="p-8">
               <div className="prose prose-slate max-w-none">
                 <motion.section className="mb-8" variants={itemVariants}>
