@@ -72,10 +72,19 @@ const useAuthStore = create(persist(
             isAuthenticated: true 
           });
         } catch (error) {
-          set({ 
-            user: null, 
-            isAuthenticated: false 
-          });
+          // If getCurrentAdmin fails, try refreshing the token
+          try {
+            const refreshResponse = await adminAuthAPI.refreshToken();
+            set({ 
+              user: refreshResponse.data.user,
+              isAuthenticated: true 
+            });
+          } catch (refreshError) {
+            set({ 
+              user: null, 
+              isAuthenticated: false 
+            });
+          }
         }
       },
 

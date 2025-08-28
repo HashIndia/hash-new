@@ -7,7 +7,6 @@ export default function AuthInitializer({ children }) {
 
   useEffect(() => {
     const initializeAuth = async () => {
-      console.log('[Admin AuthInitializer] Initializing auth...');
       await checkAuth();
       setIsInitialized(true);
     };

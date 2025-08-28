@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { body, validationResult } from 'express-validator';
 import Admin from '../../models/Admin.js';
 import { protectAdmin } from '../../middleware/auth.js';
+import { setAuthCookies, clearAuthCookies, generateTokens } from '../../utils/tokenUtils.js';
 
 const router = express.Router();
 
@@ -57,30 +58,21 @@ router.post('/login', [
       });
     }
 
-    // Create JWT token
-    const payload = {
+    // Generate tokens using centralized function
+    const { accessToken, refreshToken } = generateTokens({
       id: admin._id,
       email: admin.email,
       role: admin.role
-    };
+    }, 'admin');
 
-    const secret = process.env.ADMIN_JWT_SECRET || process.env.JWT_SECRET;
-    
-    const token = jwt.sign(payload, secret, { expiresIn: '8h' });
+    // Set cookies using centralized function
+    setAuthCookies(res, accessToken, refreshToken, 'admin');
     
     console.log('[Admin Login] Login successful for:', email);
-    
-    // Set cookie
-    res.cookie('adminAccessToken', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-      maxAge: 8 * 60 * 60 * 1000 // 8 hours
-    });
 
     res.json({
       status: 'success',
-      token,
+      token: accessToken,
       data: {
         user: {
           id: admin._id,
@@ -123,9 +115,8 @@ router.get('/me', protectAdmin, async (req, res) => {
 // @access  Private (Admin)
 router.post('/logout', protectAdmin, async (req, res) => {
   try {
-    // Clear admin cookies using the same pattern as existing auth
-    res.clearCookie('adminAccessToken');
-    res.clearCookie('adminRefreshToken');
+    // Clear admin cookies using centralized function
+    clearAuthCookies(res, 'admin');
     res.json({ 
       status: 'success',
       message: 'Logged out successfully' 
@@ -135,6 +126,65 @@ router.post('/logout', protectAdmin, async (req, res) => {
     res.status(500).json({ 
       status: 'error', 
       message: 'Server error' 
+    });
+  }
+});
+
+// @route   POST /api/admin/auth/refresh
+// @desc    Refresh admin access token
+// @access  Public (requires refresh token cookie)
+router.post('/refresh', async (req, res) => {
+  try {
+    const refreshToken = req.cookies.adminRefreshToken;
+    
+    if (!refreshToken) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Refresh token not found'
+      });
+    }
+
+    // Verify refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    
+    // Find admin
+    const admin = await Admin.findById(decoded.id);
+    if (!admin) {
+      clearAuthCookies(res, 'admin');
+      return res.status(401).json({
+        status: 'error',
+        message: 'Admin not found'
+      });
+    }
+
+    // Generate new tokens
+    const { accessToken, refreshToken: newRefreshToken } = generateTokens({
+      id: admin._id,
+      email: admin.email,
+      role: admin.role
+    }, 'admin');
+
+    // Set new cookies
+    setAuthCookies(res, accessToken, newRefreshToken, 'admin');
+
+    res.json({
+      status: 'success',
+      token: accessToken,
+      data: {
+        user: {
+          id: admin._id,
+          email: admin.email,
+          name: admin.name,
+          role: admin.role
+        }
+      }
+    });
+  } catch (err) {
+    console.error('Admin refresh token error:', err.message);
+    clearAuthCookies(res, 'admin');
+    res.status(401).json({
+      status: 'error',
+      message: 'Invalid refresh token'
     });
   }
 });

@@ -26,6 +26,7 @@ import adminOrderRoutes from './routes/admin/orders.js';
 import adminCustomerRoutes from './routes/admin/customers.js';
 import adminAnalyticsRoutes from './routes/admin/analytics.js';
 import adminCampaignRoutes from './routes/admin/campaigns.js';
+import debugRoutes from './routes/debugRoutes.js';
 
 import AppError from './utils/appError.js';
 import globalErrorHandler from './controllers/errorController.js';
@@ -112,6 +113,7 @@ if (process.env.NODE_ENV === 'development') {
     next();
   });
 }// Routes
+app.use('/api/debug', debugRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);

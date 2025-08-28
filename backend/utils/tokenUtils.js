@@ -49,6 +49,23 @@ export const generateRefreshToken = async (user, userType, ip, userAgent) => {
   return refreshToken.token;
 };
 
+// --- Generate Tokens ---
+export const generateTokens = (payload, userType = 'user') => {
+  const accessToken = generateAccessToken(payload.id, userType);
+  
+  // For refresh token, we use a simple JWT with longer expiration
+  const refreshSecret = process.env.JWT_REFRESH_SECRET;
+  const refreshExpiresIn = userType === 'admin' ? '30d' : '7d';
+  
+  if (!refreshSecret) {
+    throw new Error('JWT_REFRESH_SECRET environment variable is not set');
+  }
+  
+  const refreshToken = jwt.sign(payload, refreshSecret, { expiresIn: refreshExpiresIn });
+  
+  return { accessToken, refreshToken };
+};
+
 // --- Set Cookies ---
 export const setAuthCookies = (res, accessToken, refreshToken, userType) => {
   const prefix = userType === 'admin' ? 'admin' : 'user';
@@ -59,7 +76,8 @@ export const setAuthCookies = (res, accessToken, refreshToken, userType) => {
     secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-origin in production
     path: '/',
-    domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : undefined
+    // Don't set domain for cross-origin cookies - let browser handle it
+    domain: process.env.NODE_ENV === 'production' ? undefined : undefined
   };
   
   // Set access token cookie

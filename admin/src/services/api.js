@@ -13,20 +13,54 @@ const adminApi = axios.create({
   },
 });
 
-// Simple response interceptor - NO automatic token refresh
+// Response interceptor with token refresh
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 adminApi.interceptors.response.use(
   (response) => response.data,
   async (error) => {
-    console.log('[Admin API Error]', error.response?.status, error.config?.url);
+    const originalRequest = error.config;
     
-    // For 401 errors, just redirect to login - don't try to refresh
-    if (error.response?.status === 401) {
-      console.log('[Admin API] 401 error, redirecting to login');
-      localStorage.removeItem('admin-auth');
-      
-      // Only redirect if not already on login page
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(() => {
+          return adminApi(originalRequest);
+        }).catch(err => {
+          return Promise.reject(err);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        await adminApi.post('/admin/auth/refresh');
+        processQueue(null);
+        return adminApi(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError);
+        localStorage.removeItem('admin-auth');
+        
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
     
@@ -39,6 +73,7 @@ export const adminAuthAPI = {
   login: (credentials) => adminApi.post('/admin/auth/login', credentials),
   logout: () => adminApi.post('/admin/auth/logout'),
   getCurrentAdmin: () => adminApi.get('/admin/auth/me'),
+  refreshToken: () => adminApi.post('/admin/auth/refresh'),
 };
 
 // Products API for admin
