@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import useAuthStore from '../stores/useAuthStore';
+import toast from 'react-hot-toast';
 
 const Login = () => {
   const [email, setEmail] = useState('admin@example.com');
@@ -12,24 +13,36 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   
-  const login = useAuthStore(state => state.login);
-  const isLoading = useAuthStore(state => state.isLoading);
-  
+  const { login, isLoading, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   
   const from = location.state?.from?.pathname || '/admin';
 
+  // Check if already logged in
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/admin/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     
-    const result = await login({ email, password });
-    
-    if (result.success) {
-      navigate(from, { replace: true });
-    } else {
-      setError(result.error || 'Login failed');
+    try {
+      console.log('[Admin Login] Attempting login...');
+      const result = await login({ email, password });
+      
+      if (result.success) {
+        toast.success('Login successful!');
+        navigate('/admin/dashboard');
+      } else {
+        toast.error(result.error || 'Login failed. Please check your credentials.');
+      }
+    } catch (error) {
+      console.error('[Admin Login] Login failed:', error);
+      toast.error('Login failed. Please check your credentials.');
     }
   };
 
@@ -163,4 +176,4 @@ const Login = () => {
   );
 };
 
-export default Login; 
+export default Login;

@@ -1,17 +1,68 @@
 import { create } from 'zustand';
 import { ordersAPI, handleAPIError } from '../services/api.js';
 
+// Mock data for development
+const mockOrders = [
+  {
+    id: 'ORD001',
+    customerName: 'John Doe',
+    customerEmail: 'john@example.com',
+    customerPhone: '+1 234 567 8900',
+    customerAddress: '123 Main St, New York, NY 10001',
+    total: 140.36,
+    status: 'pending',
+    orderDate: new Date().toISOString(),
+    trackingNumber: null,
+    otpVerified: false,
+    items: [
+      { name: 'Cotton T-Shirt', quantity: 2, price: 29.99 },
+      { name: 'Denim Jeans', quantity: 1, price: 79.99 }
+    ],
+    notes: null
+  },
+  {
+    id: 'ORD002',
+    customerName: 'Jane Smith',
+    customerEmail: 'jane@example.com',
+    customerPhone: '+1 234 567 8901',
+    customerAddress: '456 Oak Ave, Los Angeles, CA 90210',
+    total: 97.18,
+    status: 'shipped',
+    orderDate: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+    trackingNumber: 'TRK123456789',
+    otpVerified: false,
+    items: [
+      { name: 'Summer Dress', quantity: 1, price: 59.99 },
+      { name: 'Leather Belt', quantity: 1, price: 39.99 }
+    ],
+    notes: 'Customer requested express shipping'
+  },
+  {
+    id: 'ORD003',
+    customerName: 'Bob Johnson',
+    customerEmail: 'bob@example.com',
+    customerPhone: '+1 234 567 8902',
+    customerAddress: '789 Pine St, Chicago, IL 60601',
+    total: 107.96,
+    status: 'delivered',
+    orderDate: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+    trackingNumber: 'TRK987654321',
+    otpVerified: true,
+    items: [
+      { name: 'Cotton T-Shirt', quantity: 1, price: 29.99 },
+      { name: 'Denim Jeans', quantity: 1, price: 79.99 }
+    ],
+    notes: null
+  }
+];
+
 const useOrderStore = create((set, get) => ({
   // State
-  orders: [],
-  selectedOrder: null,
-  filters: {
-    status: 'all',
-    paymentStatus: 'all',
-    search: '',
-    startDate: '',
-    endDate: ''
-  },
+  orders: mockOrders,
+  searchTerm: '',
+  statusFilter: 'all',
+  dateRange: 'all',
+  otps: {}, // Store OTPs for orders
   pagination: {
     page: 1,
     limit: 10,
@@ -210,6 +261,62 @@ const useOrderStore = create((set, get) => ({
   // Clear actions
   clearSelectedOrder: () => set({ selectedOrder: null }),
   clearError: () => set({ error: null }),
+
+  // New actions for mock data
+  setSearchTerm: (term) => set({ searchTerm: term }),
+  setStatusFilter: (status) => set({ statusFilter: status }),
+  setDateRange: (range) => set({ dateRange: range }),
+  
+  // Update order status
+  updateOrderStatus: (orderId, newStatus) => {
+    set(state => ({
+      orders: state.orders.map(order =>
+        order.id === orderId 
+          ? { ...order, status: newStatus, trackingNumber: newStatus === 'shipped' ? `TRK${Date.now()}` : order.trackingNumber }
+          : order
+      )
+    }));
+  },
+  
+  // Generate OTP for order
+  generateOTP: (orderId) => {
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    set(state => ({
+      otps: { ...state.otps, [orderId]: otp }
+    }));
+    return otp;
+  },
+  
+  // Verify OTP
+  verifyOTP: (orderId, enteredOTP) => {
+    const state = get();
+    const storedOTP = state.otps[orderId];
+    
+    if (storedOTP === enteredOTP) {
+      // Mark order as delivered and OTP verified
+      set(state => ({
+        orders: state.orders.map(order =>
+          order.id === orderId 
+            ? { ...order, status: 'delivered', otpVerified: true }
+            : order
+        ),
+        otps: { ...state.otps, [orderId]: null } // Clear OTP after verification
+      }));
+      return true;
+    }
+    return false;
+  },
+  
+  // Add note to order
+  addOrderNote: (orderId, note) => {
+    set(state => ({
+      orders: state.orders.map(order =>
+        order.id === orderId 
+          ? { ...order, notes: note }
+          : order
+      )
+    }));
+  }
 }));
 
-export default useOrderStore; 
+export default useOrderStore;

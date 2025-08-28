@@ -1,15 +1,8 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import useAuthStore from '../stores/useAuthStore';
 
-const ProtectedRoute = ({ children }) => {
+export default function ProtectedRoute({ children }) {
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-  const location = useLocation();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/admin/login" state={{ from: location }} replace />;
-  }
-
-  return children;
-};
-
-export default ProtectedRoute; 
+  return isAuthenticated ? children : <Navigate to="/admin/login" replace />;
+}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
@@ -36,19 +36,62 @@ const Customers = () => {
     searchTerm,
     statusFilter,
     selectedCustomers,
+    isLoading,
+    error,
     setSearchTerm,
     setStatusFilter,
     selectCustomer,
     selectAllCustomers,
     deselectAllCustomers,
-    getFilteredCustomers,
-    getSelectedCustomers,
-    getCustomerStats
+    initialize
   } = useCustomerStore();
 
-  const customers = getFilteredCustomers();
-  const stats = getCustomerStats();
-  const selectedCustomersList = getSelectedCustomers();
+  // Initialize customers on component mount
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  // Get raw customers from store
+  const allCustomers = useCustomerStore(state => state.customers || []);
+
+  // Memoize filtered customers to prevent infinite loops
+  const customers = useMemo(() => {
+    let filtered = [...allCustomers];
+    
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(customer =>
+        customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.phone?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Filter by status
+    if (statusFilter && statusFilter !== 'all') {
+      filtered = filtered.filter(customer => customer.status === statusFilter);
+    }
+    
+    // Sort by name
+    filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    
+    return filtered;
+  }, [allCustomers, searchTerm, statusFilter]);
+
+  // Memoize selected customers list
+  const selectedCustomersList = useMemo(() => {
+    return allCustomers.filter(customer => selectedCustomers.includes(customer.id));
+  }, [allCustomers, selectedCustomers]);
+
+  // Memoize customer stats
+  const stats = useMemo(() => {
+    const total = allCustomers.length;
+    const vip = allCustomers.filter(c => c.tags?.includes('VIP')).length;
+    const active = allCustomers.filter(c => c.status === 'active').length;
+    const totalRevenue = allCustomers.reduce((sum, c) => sum + (c.totalSpent || 0), 0);
+    
+    return { total, vip, active, totalRevenue };
+  }, [allCustomers]);
 
   const handleSelectAll = () => {
     if (selectedCustomers.length === customers.length) {
@@ -91,18 +134,35 @@ const Customers = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="p-6">
-          <div className="flex items-center">
-            <div className="bg-blue-500 p-3 rounded-lg">
-              <Users className="w-6 h-6 text-white" />
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="p-6">
+              <div className="animate-pulse">
+                <div className="flex items-center">
+                  <div className="bg-gray-300 w-12 h-12 rounded-lg"></div>
+                  <div className="ml-4 flex-1">
+                    <div className="h-4 bg-gray-300 rounded w-24 mb-2"></div>
+                    <div className="h-8 bg-gray-300 rounded w-16"></div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card className="p-6">
+            <div className="flex items-center">
+              <div className="bg-blue-500 p-3 rounded-lg">
+                <Users className="w-6 h-6 text-white" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Customers</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              </div>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Customers</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-            </div>
-          </div>
-        </Card>
+          </Card>
         
         <Card className="p-6">
           <div className="flex items-center">
@@ -139,7 +199,8 @@ const Customers = () => {
             </div>
           </div>
         </Card>
-      </div>
+        </div>
+      )}
 
       {/* Filters */}
       <Card className="p-6">
@@ -342,4 +403,4 @@ const Customers = () => {
   );
 };
 
-export default Customers; 
+export default Customers;

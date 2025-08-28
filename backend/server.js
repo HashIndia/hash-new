@@ -1,178 +1,166 @@
 import dotenv from 'dotenv';
-
-// Configure dotenv before any other imports
 dotenv.config();
 
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import helmet from 'helmet';
-import compression from 'compression';
-import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
+
+// Import services
+import './services/emailService.js';
 
 // Import routes
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
-import orderRoutes from './routes/orderRoutes.js';
-import adminRoutes from './routes/adminRoutes.js';
-import uploadRoutes from './routes/uploadRoutes.js';
 
-// Import middleware
-import { handleMulterError } from './middleware/upload.js';
-import globalErrorHandler from './middleware/errorHandler.js';
+// Import admin routes
+import adminAuthRoutes from './routes/admin/auth.js';
+import adminProductRoutes from './routes/admin/products.js';
+import adminOrderRoutes from './routes/admin/orders.js';
+import adminCustomerRoutes from './routes/admin/customers.js';
+import adminAnalyticsRoutes from './routes/admin/analytics.js';
+import adminCampaignRoutes from './routes/admin/campaigns.js';
+
+import AppError from './utils/appError.js';
+import globalErrorHandler from './controllers/errorController.js';
 
 const app = express();
 
-// Trust proxy for rate limiting and security
-app.set('trust proxy', 1);
-
-// Security middleware
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
-
-// CORS configuration
-const corsOptions = {
-  origin: [
-    process.env.FRONTEND_URL || 'http://localhost:5173',
-    process.env.ADMIN_URL || 'http://localhost:5174'
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
-};
-app.use(cors(corsOptions));
-
-// Handle preflight requests
-app.options('*', cors(corsOptions));
-
-// Compression middleware
-app.use(compression());
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
-  message: {
-    status: 'error',
-    message: 'Too many requests from this IP, please try again later.'
-  },
-  standardHeaders: true,
-  legacyHeaders: false
-});
-app.use('/api/', limiter);
-
-// Logging
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-} else {
-  app.use(morgan('combined'));
-}
-
-// Body parser middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(cookieParser());
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    message: 'Server is running',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
-  });
-});
-
-// Global health check route
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok', message: 'Backend is running!' });
-});
-
-// API routes
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/upload', uploadRoutes);
-
-// Webhook routes (before body parser)
-app.use('/api/webhooks', express.raw({ type: 'application/json' }), (req, res, next) => {
-  // Handle payment webhooks here
-  res.status(200).json({ received: true });
-});
-
-// Handle undefined routes
-app.all('*', (req, res, next) => {
-  res.status(404).json({
-    status: 'fail',
-    message: `Can't find ${req.originalUrl} on this server!`
-  });
-});
-
-// Global error handling middleware
-app.use(handleMulterError);
-app.use(globalErrorHandler);
-
-// Database connection
+// Database Connection
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    if (!process.env.MONGODB_URI) {
+      console.error('❌ MONGODB_URI not found in environment variables');
+      process.exit(1);
+    }
 
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+    });
+    
+    console.log(`✅ MongoDB Atlas Connected: ${conn.connection.host}`);
   } catch (error) {
-    console.error('Database connection failed:', error);
+    console.error('❌ MongoDB connection failed:', error.message);
     process.exit(1);
   }
 };
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err, promise) => {
-  console.log('Unhandled Promise Rejection:', err.message);
-  // Close server & exit process
-  server.close(() => {
-    process.exit(1);
+connectDB();
+
+// CORS Configuration - Very permissive for development
+app.use(cors({
+  origin: true, // Allow all origins in development
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  exposedHeaders: ['Set-Cookie'],
+}));
+
+// Handle preflight requests
+app.options('*', cors());
+
+// Parse cookies BEFORE other middleware
+app.use(cookieParser());
+
+// Body parsing
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true }));
+
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
+// Debug middleware
+app.use((req, res, next) => {
+  if (req.path.includes('/api/')) {
+    console.log(`[${req.method}] ${req.path}`);
+    console.log('[DEBUG] Request cookies:', req.cookies);
+    console.log('[DEBUG] Request headers:', req.headers.cookie);
+  }
+  next();
+});
+
+// Debug middleware to log responses
+app.use((req, res, next) => {
+  const originalSend = res.send;
+  const originalJson = res.json;
+  
+  res.send = function(data) {
+    if (req.path.includes('/auth/')) {
+      console.log('[Response] Headers being sent:', this.getHeaders());
+    }
+    return originalSend.call(this, data);
+  };
+  
+  res.json = function(data) {
+    if (req.path.includes('/auth/')) {
+      console.log('[Response] Headers being sent:', this.getHeaders());
+    }
+    return originalJson.call(this, data);
+  };
+  
+  next();
+});
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+
+// Admin Routes
+app.use('/api/admin/auth', adminAuthRoutes);
+app.use('/api/admin/products', adminProductRoutes);
+app.use('/api/admin/orders', adminOrderRoutes);
+app.use('/api/admin/customers', adminCustomerRoutes);
+app.use('/api/admin/analytics', adminAnalyticsRoutes);
+app.use('/api/admin/campaigns', adminCampaignRoutes);
+
+// Health check
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    message: 'Server is running',
+    cookies: req.cookies 
   });
 });
 
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.log('Uncaught Exception:', err.message);
-  console.log('Shutting down...');
-  process.exit(1);
+// 404 handler
+app.all('*', (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received. Shutting down gracefully...');
-  server.close(() => {
-    console.log('Process terminated!');
+// Global error handler
+app.use(globalErrorHandler);
+
+// Function to find available port
+const findAvailablePort = (port) => {
+  return new Promise((resolve) => {
+    const server = app.listen(port, () => {
+      server.close(() => resolve(port));
+    }).on('error', () => {
+      resolve(findAvailablePort(port + 1));
+    });
   });
-});
+};
 
-// Start server
-const PORT = process.env.PORT || 5000;
-let server;
-
+// Start server with port fallback
 const startServer = async () => {
   try {
-    await connectDB();
+    const PORT = process.env.PORT || 5000;
+    const availablePort = await findAvailablePort(PORT);
     
-    server = app.listen(PORT, () => {
-      console.log(`
-🚀 Server running in ${process.env.NODE_ENV} mode
-📍 Server running on port ${PORT}
-🔗 API Base URL: http://localhost:${PORT}/api
-🏥 Health Check: http://localhost:${PORT}/health
-      `);
+    app.listen(availablePort, () => {
+      console.log(`🚀 Server running on port ${availablePort}`);
+      console.log(`🌐 CORS enabled for all origins`);
+      
+      if (availablePort !== PORT) {
+        console.log(`⚠️  Port ${PORT} was in use, using port ${availablePort} instead`);
+        console.log(`📌 Update your frontend to use: http://localhost:${availablePort}/api`);
+      }
     });
   } catch (error) {
-    console.error('Failed to start server:', error);
+    console.error('❌ Failed to start server:', error);
     process.exit(1);
   }
 };

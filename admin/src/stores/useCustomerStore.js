@@ -1,10 +1,80 @@
 import { create } from 'zustand';
 import { customersAPI, handleAPIError } from '../services/api.js';
 
+// Mock data for development
+const mockCustomers = [
+  {
+    id: 'cust-1',
+    name: 'John Doe',
+    email: 'john@example.com',
+    phone: '+1 234 567 8900',
+    status: 'active',
+    tags: ['VIP', 'Loyal Customer'],
+    totalOrders: 15,
+    totalSpent: 2340.50,
+    lastOrder: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+    preferences: {
+      emailNotifications: true,
+      smsNotifications: true,
+      whatsappNotifications: false
+    }
+  },
+  {
+    id: 'cust-2',
+    name: 'Jane Smith',
+    email: 'jane@example.com',
+    phone: '+1 234 567 8901',
+    status: 'active',
+    tags: ['New Customer'],
+    totalOrders: 3,
+    totalSpent: 287.99,
+    lastOrder: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+    preferences: {
+      emailNotifications: true,
+      smsNotifications: false,
+      whatsappNotifications: true
+    }
+  },
+  {
+    id: 'cust-3',
+    name: 'Bob Johnson',
+    email: 'bob@example.com',
+    phone: '+1 234 567 8902',
+    status: 'active',
+    tags: ['Loyal Customer'],
+    totalOrders: 8,
+    totalSpent: 1150.75,
+    lastOrder: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
+    preferences: {
+      emailNotifications: false,
+      smsNotifications: true,
+      whatsappNotifications: true
+    }
+  },
+  {
+    id: 'cust-4',
+    name: 'Alice Brown',
+    email: 'alice@example.com',
+    phone: '+1 234 567 8903',
+    status: 'inactive',
+    tags: ['VIP'],
+    totalOrders: 25,
+    totalSpent: 4567.80,
+    lastOrder: new Date(Date.now() - 2592000000).toISOString(), // 30 days ago
+    preferences: {
+      emailNotifications: true,
+      smsNotifications: true,
+      whatsappNotifications: false
+    }
+  }
+];
+
 const useCustomerStore = create((set, get) => ({
   // State
   customers: [],
-  selectedCustomer: null,
+  searchTerm: '',
+  statusFilter: 'all',
+  selectedCustomers: [],
   filters: {
     search: '',
     status: 'all',
@@ -46,6 +116,7 @@ const useCustomerStore = create((set, get) => ({
       });
     } catch (error) {
       const errorMessage = handleAPIError(error);
+      console.error('Failed to load customers:', error);
       set({ isLoading: false, error: errorMessage });
     }
   },
@@ -144,6 +215,47 @@ const useCustomerStore = create((set, get) => ({
     }
   },
 
+  // Customer selection
+  selectCustomer: (customerId) => {
+    set(state => {
+      const isSelected = state.selectedCustomers.includes(customerId);
+      return {
+        selectedCustomers: isSelected
+          ? state.selectedCustomers.filter(id => id !== customerId)
+          : [...state.selectedCustomers, customerId]
+      };
+    });
+  },
+  
+  selectAllCustomers: () => {
+    const state = get();
+    const allCustomerIds = state.customers.map(c => c.id);
+    set({ selectedCustomers: allCustomerIds });
+  },
+  
+  deselectAllCustomers: () => {
+    set({ selectedCustomers: [] });
+  },
+  
+  // Get selected customers
+  getSelectedCustomers: () => {
+    const state = get();
+    return state.customers.filter(customer => 
+      state.selectedCustomers.includes(customer.id)
+    );
+  },
+  
+  // Get customer stats
+  getCustomerStats: () => {
+    const state = get();
+    const total = state.customers.length;
+    const vip = state.customers.filter(c => c.tags.includes('VIP')).length;
+    const active = state.customers.filter(c => c.status === 'active').length;
+    const totalRevenue = state.customers.reduce((sum, c) => sum + c.totalSpent, 0);
+    
+    return { total, vip, active, totalRevenue };
+  },
+
   // Utility Actions
   getCustomerById: (customerId) => {
     const { customers } = get();
@@ -192,6 +304,22 @@ const useCustomerStore = create((set, get) => ({
   // Clear actions
   clearSelectedCustomer: () => set({ selectedCustomer: null }),
   clearError: () => set({ error: null }),
+  
+  // Initialize store by loading customers
+  initialize: async () => {
+    const { loadCustomers } = get();
+    await loadCustomers();
+  },
+
+  // Stats helper
+  getCustomerStats: () => {
+    const { customers } = get();
+    const total = customers.length;
+    const active = customers.filter(c => c.status === 'active' || !c.status).length;
+    const verified = customers.filter(c => c.isPhoneVerified).length;
+    
+    return { total, active, verified };
+  }
 }));
 
-export default useCustomerStore; 
+export default useCustomerStore;

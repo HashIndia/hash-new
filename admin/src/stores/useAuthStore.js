@@ -11,30 +11,30 @@ const useAuthStore = create(persist(
     error: null,
 
     // Authentication Actions
-          login: async (credentials) => {
-        set({ isLoading: true, error: null });
-        try {
-          const response = await adminAuthAPI.login(credentials);
-          const { admin } = response.data;
-          
-          set({ 
-            user: admin, 
-            isAuthenticated: true, 
-            isLoading: false 
-          });
-          
-          return { success: true };
-        } catch (error) {
-          const errorMessage = handleAPIError(error);
-          set({ 
-            isLoading: false, 
-            error: errorMessage,
-            user: null,
-            isAuthenticated: false 
-          });
-          return { success: false, error: errorMessage };
-        }
-      },
+    login: async (credentials) => {
+      set({ isLoading: true, error: null });
+      try {
+        const response = await adminAuthAPI.login(credentials);
+        const { user } = response.data; // Backend returns { data: { user: admin } }
+        
+        set({ 
+          user, 
+          isAuthenticated: true, 
+          isLoading: false 
+        });
+        
+        return { success: true };
+      } catch (error) {
+        const errorMessage = handleAPIError(error);
+        set({ 
+          isLoading: false, 
+          error: errorMessage,
+          user: null,
+          isAuthenticated: false 
+        });
+        return { success: false, error: errorMessage };
+      }
+    },
 
           logout: async () => {
         try {
@@ -64,11 +64,11 @@ const useAuthStore = create(persist(
         }
       },
 
-          checkAuth: async () => {
+      checkAuth: async () => {
         try {
           const response = await adminAuthAPI.getCurrentAdmin();
           set({ 
-            user: response.data.admin, 
+            user: response.data.user, // Backend returns { data: { user: admin } }
             isAuthenticated: true 
           });
         } catch (error) {
@@ -91,4 +91,4 @@ const useAuthStore = create(persist(
   }
 ));
 
-export default useAuthStore; 
+export default useAuthStore;

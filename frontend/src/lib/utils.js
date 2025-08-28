@@ -1,4 +1,7 @@
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
 // Utility function for conditional classNames (shadcn/ui standard)
 export function cn(...inputs) {
-  return inputs.filter(Boolean).join(' ');
-} 
+  return twMerge(clsx(inputs));
+}

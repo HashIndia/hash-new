@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -20,33 +20,65 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
-import useInventoryStore from '../stores/useInventoryStore';
+import { productsAPI } from '../services/api';
+import toast from 'react-hot-toast';
+import AddProductModal from '../components/AddProductModal';
 
 const Inventory = () => {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'table'
+  const [viewMode, setViewMode] = useState('grid');
+  const [loading, setLoading] = useState(true);
 
-  const {
-    searchTerm,
-    selectedCategory,
-    sortBy,
-    setSearchTerm,
-    setSelectedCategory,
-    setSortBy,
-    getFilteredProducts,
-    getCategories,
-    deleteProduct,
-    addProduct,
-    updateProduct
-  } = useInventoryStore();
+  // Real state from API
+  const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [sortBy, setSortBy] = useState('name');
 
-  const products = getFilteredProducts();
-  const categories = getCategories();
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const params = {
+          search: searchTerm,
+          category: selectedCategory !== 'all' ? selectedCategory : undefined,
+          sort: sortBy
+        };
+        
+        const response = await productsAPI.getProducts(params);
+        console.log('Products API response:', response);
+        setProducts(response?.data?.products || []);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        toast.error('Failed to fetch products');
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleDeleteProduct = (id) => {
+    fetchProducts();
+  }, [searchTerm, selectedCategory, sortBy]);
+
+  // Memoize categories from real products
+  const categories = useMemo(() => {
+    const uniqueCategories = [...new Set(products.map(product => product.category))];
+    return uniqueCategories.filter(Boolean);
+  }, [products]);
+
+  const handleDeleteProduct = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
-      deleteProduct(id);
+      try {
+        await productsAPI.deleteProduct(id);
+        setProducts(prev => prev.filter(p => p._id !== id));
+        toast.success('Product deleted successfully');
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        toast.error('Failed to delete product');
+      }
     }
   };
 
@@ -57,8 +89,36 @@ const Inventory = () => {
     return { label: 'In Stock', color: 'bg-green-100 text-green-800' };
   };
 
+  const handleProductAdded = (newProduct) => {
+    setProducts(prev => [newProduct, ...prev]);
+  };
+
+  const handleEditProduct = (product) => {
+    setSelectedProduct(product);
+    setShowEditModal(true);
+  };
+
+  const handleProductUpdated = (updatedProduct) => {
+    setProducts(prev => prev.map(p => 
+      p._id === updatedProduct._id ? updatedProduct : p
+    ));
+    setShowEditModal(false);
+    setSelectedProduct(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -130,15 +190,25 @@ const Inventory = () => {
         </div>
       </Card>
 
-      {/* Products */}
-      {viewMode === 'grid' ? (
+      {/* Products Grid/Table */}
+      {products.length === 0 ? (
+        <div className="text-center py-12">
+          <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+          <p className="text-gray-600 mb-4">Try adjusting your search criteria or add a new product.</p>
+          <Button onClick={() => setShowAddModal(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Your First Product
+          </Button>
+        </div>
+      ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           <AnimatePresence>
             {products.map((product, index) => {
-              const stockStatus = getStockStatus(product.stock);
+              const stockStatus = getStockStatus(product.stock || 0);
               return (
                 <motion.div
-                  key={product.id}
+                  key={product._id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
@@ -147,7 +217,7 @@ const Inventory = () => {
                   <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                     <div className="aspect-w-1 aspect-h-1 bg-gray-200">
                       <img
-                        src={product.images[0] || 'https://via.placeholder.com/200'}
+                        src={product.images?.[0] || 'https://via.placeholder.com/200'}
                         alt={product.name}
                         className="w-full h-48 object-cover"
                       />
@@ -160,8 +230,8 @@ const Inventory = () => {
                         </span>
                       </div>
                       <p className="text-xs text-gray-600 mb-2">{product.category} • {product.sku}</p>
-                      <p className="text-lg font-bold text-gray-900 mb-2">${product.price}</p>
-                      <p className="text-sm text-gray-600 mb-3">Stock: {product.stock} units</p>
+                      <p className="text-lg font-bold text-gray-900 mb-2">₹{product.price}</p>
+                      <p className="text-sm text-gray-600 mb-3">Stock: {product.stock || 0} units</p>
                       
                       <div className="flex space-x-2">
                         <Button
@@ -175,7 +245,7 @@ const Inventory = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setSelectedProduct(product)}
+                          onClick={() => handleEditProduct(product)}
                         >
                           <Edit className="w-3 h-3 mr-1" />
                           Edit
@@ -183,7 +253,7 @@ const Inventory = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleDeleteProduct(product.id)}
+                          onClick={() => handleDeleteProduct(product._id)}
                           className="text-red-600 hover:text-red-700"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -224,13 +294,13 @@ const Inventory = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {products.map((product) => {
-                  const stockStatus = getStockStatus(product.stock);
+                  const stockStatus = getStockStatus(product.stock || 0);
                   return (
-                    <tr key={product.id} className="hover:bg-gray-50">
+                    <tr key={product._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <img
-                            src={product.images[0] || 'https://via.placeholder.com/40'}
+                            src={product.images?.[0] || 'https://via.placeholder.com/40'}
                             alt={product.name}
                             className="w-10 h-10 rounded-lg object-cover mr-3"
                           />
@@ -244,10 +314,10 @@ const Inventory = () => {
                         {product.category}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${product.price}
+                        ₹{product.price}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {product.stock}
+                        {product.stock || 0}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${stockStatus.color}`}>
@@ -265,14 +335,14 @@ const Inventory = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setSelectedProduct(product)}
+                          onClick={() => handleEditProduct(product)}
                         >
                           <Edit className="w-3 h-3" />
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleDeleteProduct(product.id)}
+                          onClick={() => handleDeleteProduct(product._id)}
                           className="text-red-600 hover:text-red-700"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -287,19 +357,25 @@ const Inventory = () => {
         </Card>
       )}
 
-      {products.length === 0 && (
-        <div className="text-center py-12">
-          <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-          <p className="text-gray-600 mb-4">Try adjusting your search criteria or add a new product.</p>
-          <Button onClick={() => setShowAddModal(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Your First Product
-          </Button>
-        </div>
-      )}
+      {/* Add Product Modal */}
+      <AddProductModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onProductAdded={handleProductAdded}
+      />
+
+      {/* Edit Product Modal */}
+      <AddProductModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedProduct(null);
+        }}
+        onProductAdded={handleProductUpdated}
+        editProduct={selectedProduct}
+      />
     </div>
   );
 };
 
-export default Inventory; 
+export default Inventory;

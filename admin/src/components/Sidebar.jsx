@@ -18,12 +18,12 @@ const Sidebar = ({ mobile = false, onClose }) => {
   const logout = useAuthStore(state => state.logout);
 
   const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-    { name: 'Inventory', href: '/admin/inventory', icon: Package },
-    { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
-    { name: 'Customers', href: '/admin/customers', icon: Users },
-    { name: 'Broadcast', href: '/admin/broadcast', icon: Megaphone },
-    { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { name: 'Inventory', href: '/inventory', icon: Package },
+    { name: 'Orders', href: '/orders', icon: ShoppingCart },
+    { name: 'Customers', href: '/customers', icon: Users },
+    { name: 'Broadcast', href: '/broadcast', icon: Megaphone },
+    { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   ];
 
   const handleLogout = () => {
@@ -55,7 +55,7 @@ const Sidebar = ({ mobile = false, onClose }) => {
       <nav className="flex-1 px-4 py-6 space-y-2">
         {navigation.map((item) => {
           const isActive = location.pathname === item.href ||
-                          (item.href !== '/admin' && location.pathname.startsWith(item.href));
+                          (item.href !== '/' && location.pathname.startsWith(item.href));
           
           return (
             <NavLink
@@ -98,7 +98,7 @@ const Sidebar = ({ mobile = false, onClose }) => {
       {/* Footer */}
       <div className="p-4 border-t border-gray-200 space-y-2">
         <NavLink
-          to="/admin/settings"
+          to="/settings"
           onClick={mobile ? onClose : undefined}
           className="flex items-center px-4 py-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors"
         >
@@ -118,4 +118,4 @@ const Sidebar = ({ mobile = false, onClose }) => {
   );
 };
 
-export default Sidebar; 
+export default Sidebar;

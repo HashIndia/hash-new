@@ -1,55 +1,5 @@
 import mongoose from 'mongoose';
 
-const reviewSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  name: {
-    type: String,
-    required: true
-  },
-  rating: {
-    type: Number,
-    required: true,
-    min: 1,
-    max: 5
-  },
-  comment: {
-    type: String,
-    required: true,
-    maxlength: 500
-  },
-  isVerifiedPurchase: {
-    type: Boolean,
-    default: false
-  }
-}, {
-  timestamps: true
-});
-
-const variantSchema = new mongoose.Schema({
-  size: String,
-  color: String,
-  stock: {
-    type: Number,
-    default: 0,
-    min: 0
-  },
-  price: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  sku: {
-    type: String,
-    unique: true,
-    sparse: true
-  },
-  images: [String]
-});
-
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -57,243 +7,115 @@ const productSchema = new mongoose.Schema({
     trim: true,
     maxlength: [100, 'Product name cannot exceed 100 characters']
   },
-  slug: {
-    type: String,
-    unique: true,
-    lowercase: true
-  },
   description: {
     type: String,
     required: [true, 'Product description is required'],
     maxlength: [2000, 'Description cannot exceed 2000 characters']
   },
-  shortDescription: {
-    type: String,
-    maxlength: [200, 'Short description cannot exceed 200 characters']
+  price: {
+    type: Number,
+    required: [true, 'Product price is required'],
+    min: [0, 'Price cannot be negative']
   },
   category: {
     type: String,
     required: [true, 'Product category is required'],
-    enum: ['T-Shirts', 'Jeans', 'Dresses', 'Shirts', 'Pants', 'Accessories', 'Shoes', 'Jackets']
+    enum: ['clothing', 'accessories', 'shoes', 'bags', 'electronics', 'home', 'beauty', 'sports']
   },
   subcategory: {
-    type: String
+    type: String,
+    trim: true
   },
   brand: {
     type: String,
-    required: [true, 'Brand is required']
-  },
-  price: {
-    type: Number,
-    required: [true, 'Price is required'],
-    min: [0, 'Price cannot be negative']
-  },
-  comparePrice: {
-    type: Number,
-    min: [0, 'Compare price cannot be negative']
-  },
-  cost: {
-    type: Number,
-    min: [0, 'Cost cannot be negative']
-  },
-  stock: {
-    type: Number,
-    required: [true, 'Stock is required'],
-    min: [0, 'Stock cannot be negative'],
-    default: 0
-  },
-  lowStockThreshold: {
-    type: Number,
-    default: 10
+    trim: true
   },
   sku: {
     type: String,
-    required: [true, 'SKU is required'],
     unique: true,
-    uppercase: true
+    required: [true, 'SKU is required']
   },
-  barcode: String,
+  stock: {
+    type: Number,
+    required: [true, 'Stock quantity is required'],
+    min: [0, 'Stock cannot be negative'],
+    default: 0
+  },
+  images: [{
+    url: { type: String, required: true },
+    alt: { type: String, default: '' },
+    isPrimary: { type: Boolean, default: false }
+  }],
+  status: {
+    type: String,
+    enum: ['active', 'inactive', 'draft', 'discontinued'],
+    default: 'active'
+  },
+  tags: [String],
   weight: {
-    value: Number,
-    unit: {
-      type: String,
-      enum: ['kg', 'g', 'lb', 'oz'],
-      default: 'kg'
-    }
+    type: Number,
+    min: [0, 'Weight cannot be negative']
   },
   dimensions: {
     length: Number,
     width: Number,
-    height: Number,
-    unit: {
-      type: String,
-      enum: ['cm', 'in', 'm'],
-      default: 'cm'
-    }
+    height: Number
   },
-  images: [{
-    url: {
-      type: String,
-      required: true
-    },
-    alt: String,
-    isMain: {
-      type: Boolean,
-      default: false
-    }
-  }],
-  variants: [variantSchema],
-  sizes: [{
-    type: String,
-    enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '28', '30', '32', '34', '36', '38', '40', '42']
-  }],
-  colors: [String],
-  tags: [String],
-  features: [String],
-  materials: [String],
-  careInstructions: [String],
-  rating: {
-    average: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 5
-    },
-    count: {
-      type: Number,
-      default: 0
-    }
-  },
-  reviews: [reviewSchema],
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-  isFeatured: {
+  isFeatures: {
     type: Boolean,
     default: false
   },
-  isDigital: {
-    type: Boolean,
-    default: false
-  },
-  requiresShipping: {
-    type: Boolean,
-    default: true
-  },
-  taxClass: {
-    type: String,
-    enum: ['standard', 'reduced', 'zero'],
-    default: 'standard'
-  },
-  metaTitle: String,
-  metaDescription: String,
-  metaKeywords: [String],
-  seoUrl: String,
-  soldCount: {
+  salePrice: {
     type: Number,
-    default: 0
+    min: [0, 'Sale price cannot be negative']
   },
-  viewCount: {
+  saleStartDate: Date,
+  saleEndDate: Date,
+  minOrderQuantity: {
     type: Number,
-    default: 0
+    default: 1,
+    min: [1, 'Minimum order quantity must be at least 1']
   },
-  wishlistCount: {
+  maxOrderQuantity: {
     type: Number,
-    default: 0
+    default: 100
   }
 }, {
   timestamps: true
 });
 
 // Indexes for better performance
-productSchema.index({ name: 'text', description: 'text', tags: 'text' });
-productSchema.index({ category: 1, isActive: 1 });
-productSchema.index({ price: 1 });
-productSchema.index({ 'rating.average': -1 });
-productSchema.index({ soldCount: -1 });
-productSchema.index({ createdAt: -1 });
-productSchema.index({ slug: 1 });
+productSchema.index({ category: 1 });
+productSchema.index({ status: 1 });
 productSchema.index({ sku: 1 });
-productSchema.index({ isActive: 1, isFeatured: 1 });
+productSchema.index({ name: 'text', description: 'text' });
 
-// Generate slug from name before saving
+// Virtual for current selling price
+productSchema.virtual('currentPrice').get(function() {
+  if (this.salePrice && this.saleStartDate && this.saleEndDate) {
+    const now = new Date();
+    if (now >= this.saleStartDate && now <= this.saleEndDate) {
+      return this.salePrice;
+    }
+  }
+  return this.price;
+});
+
+// Method to check if product is on sale
+productSchema.methods.isOnSale = function() {
+  if (!this.salePrice || !this.saleStartDate || !this.saleEndDate) {
+    return false;
+  }
+  const now = new Date();
+  return now >= this.saleStartDate && now <= this.saleEndDate;
+};
+
+// Pre-save middleware to generate SKU if not provided
 productSchema.pre('save', function(next) {
-  if (!this.isModified('name')) return next();
-  
-  this.slug = this.name
-    .toLowerCase()
-    .replace(/[^a-zA-Z0-9 ]/g, '')
-    .replace(/\s+/g, '-')
-    .trim();
-  
+  if (!this.sku) {
+    this.sku = `HASH-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+  }
   next();
 });
 
-// Calculate average rating when reviews are updated
-productSchema.methods.calculateAverageRating = function() {
-  if (this.reviews.length === 0) {
-    this.rating.average = 0;
-    this.rating.count = 0;
-  } else {
-    const sum = this.reviews.reduce((acc, review) => acc + review.rating, 0);
-    this.rating.average = Math.round((sum / this.reviews.length) * 10) / 10;
-    this.rating.count = this.reviews.length;
-  }
-};
-
-// Add review method
-productSchema.methods.addReview = function(reviewData) {
-  this.reviews.push(reviewData);
-  this.calculateAverageRating();
-  return this.save();
-};
-
-// Remove review method
-productSchema.methods.removeReview = function(reviewId) {
-  this.reviews.id(reviewId).remove();
-  this.calculateAverageRating();
-  return this.save();
-};
-
-// Check if product is in stock
-productSchema.methods.isInStock = function(quantity = 1) {
-  return this.stock >= quantity;
-};
-
-// Reduce stock
-productSchema.methods.reduceStock = function(quantity) {
-  if (this.stock < quantity) {
-    throw new Error('Insufficient stock');
-  }
-  this.stock -= quantity;
-  this.soldCount += quantity;
-  return this.save();
-};
-
-// Increase stock (for returns/cancellations)
-productSchema.methods.increaseStock = function(quantity) {
-  this.stock += quantity;
-  this.soldCount = Math.max(0, this.soldCount - quantity);
-  return this.save();
-};
-
-// Virtual for discount percentage
-productSchema.virtual('discountPercentage').get(function() {
-  if (this.comparePrice && this.comparePrice > this.price) {
-    return Math.round(((this.comparePrice - this.price) / this.comparePrice) * 100);
-  }
-  return 0;
-});
-
-// Virtual for main image
-productSchema.virtual('mainImage').get(function() {
-  const mainImg = this.images.find(img => img.isMain);
-  return mainImg ? mainImg.url : (this.images[0] ? this.images[0].url : '');
-});
-
-// Ensure virtuals are included in JSON
-productSchema.set('toJSON', { virtuals: true });
-productSchema.set('toObject', { virtuals: true });
-
-export default mongoose.model('Product', productSchema); 
+export default mongoose.model('Product', productSchema);

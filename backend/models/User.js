@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 const addressSchema = new mongoose.Schema({
   line1: { type: String, required: true },
@@ -67,7 +68,18 @@ const userSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
-  }
+  },
+  role: { type: String, enum: ['user'], default: 'user' },
+  isPhoneVerified: { type: Boolean, default: false },
+  verifiedAt: { type: Date },
+  lastLogin: { type: Date },
+  loginAttempts: { type: Number, required: true, default: 0, select: false },
+  lockUntil: { type: Date, select: false },
+  passwordResetToken: String,
+  passwordResetExpires: Date,
+  addresses: [Object],
+  wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+  status: { type: String, enum: ['active', 'inactive', 'suspended'], default: 'active' }
 }, {
   timestamps: true
 });
@@ -85,6 +97,11 @@ userSchema.pre('save', async function(next) {
   next();
 });
 
+// Virtual property to check if account is locked
+userSchema.virtual('isLocked').get(function() {
+  return !!(this.lockUntil && this.lockUntil > Date.now());
+});
+
 // Static method to generate OTP
 userSchema.statics.generateOTP = function() {
   const otpLength = process.env.OTP_LENGTH || 4;
@@ -98,6 +115,27 @@ userSchema.statics.generateOTP = function() {
 // Instance method for password comparison
 userSchema.methods.correctPassword = async function(candidatePassword, userPassword) {
   return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+// Instance method for handling failed login attempts
+userSchema.methods.incLoginAttempts = async function() {
+  const maxAttempts = parseInt(process.env.MAX_LOGIN_ATTEMPTS, 10) || 5;
+  const lockTime = parseInt(process.env.LOGIN_LOCK_TIME_MINUTES, 10) || 15;
+
+  // If lock has expired, reset attempts
+  if (this.lockUntil && this.lockUntil < Date.now()) {
+    this.loginAttempts = 1;
+    this.lockUntil = undefined;
+  } else {
+    this.loginAttempts += 1;
+  }
+
+  // Lock account if max attempts reached
+  if (this.loginAttempts >= maxAttempts) {
+    this.lockUntil = Date.now() + lockTime * 60 * 1000;
+  }
+
+  await this.save({ validateBeforeSave: false });
 };
 
 // Instance method for password reset token

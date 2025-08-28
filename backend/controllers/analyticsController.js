@@ -310,4 +310,100 @@ export const getProductAnalytics = catchAsync(async (req, res, next) => {
       categoryPerformance
     }
   });
-}); 
+});
+
+// Dashboard Stats
+export const getDashboardStats = catchAsync(async (req, res, next) => {
+  const today = new Date();
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const startOfWeek = new Date(today.setDate(today.getDate() - 7));
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  // Revenue stats
+  const [todayRevenue, weekRevenue, monthRevenue, totalRevenue] = await Promise.all([
+    Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfToday },
+          status: { $ne: 'cancelled' }
+        }
+      },
+      { $group: { _id: null, total: { $sum: '$total' } } }
+    ]),
+    Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfWeek },
+          status: { $ne: 'cancelled' }
+        }
+      },
+      { $group: { _id: null, total: { $sum: '$total' } } }
+    ]),
+    Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfMonth },
+          status: { $ne: 'cancelled' }
+        }
+      },
+      { $group: { _id: null, total: { $sum: '$total' } } }
+    ]),
+    Order.aggregate([
+      {
+        $match: { status: { $ne: 'cancelled' } }
+      },
+      { $group: { _id: null, total: { $sum: '$total' } } }
+    ])
+  ]);
+
+  // Order stats
+  const [totalOrders, pendingOrders, completedOrders] = await Promise.all([
+    Order.countDocuments(),
+    Order.countDocuments({ status: 'pending' }),
+    Order.countDocuments({ status: 'completed' })
+  ]);
+
+  // Customer stats
+  const [totalCustomers, verifiedCustomers, newCustomersToday] = await Promise.all([
+    User.countDocuments(),
+    User.countDocuments({ isPhoneVerified: true }),
+    User.countDocuments({ createdAt: { $gte: startOfToday } })
+  ]);
+
+  // Product stats
+  const [totalProducts, lowStockProducts, outOfStockProducts] = await Promise.all([
+    Product.countDocuments({ isActive: true }),
+    Product.countDocuments({
+      $expr: { $lte: ['$stock', '$lowStockThreshold'] },
+      isActive: true
+    }),
+    Product.countDocuments({ stock: 0, isActive: true })
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      revenue: {
+        today: todayRevenue[0]?.total || 0,
+        week: weekRevenue[0]?.total || 0,
+        month: monthRevenue[0]?.total || 0,
+        total: totalRevenue[0]?.total || 0
+      },
+      orders: {
+        total: totalOrders,
+        pending: pendingOrders,
+        completed: completedOrders
+      },
+      customers: {
+        total: totalCustomers,
+        verified: verifiedCustomers,
+        newToday: newCustomersToday
+      },
+      products: {
+        total: totalProducts,
+        lowStock: lowStockProducts,
+        outOfStock: outOfStockProducts
+      }
+    }
+  });
+});

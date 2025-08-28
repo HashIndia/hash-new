@@ -22,6 +22,16 @@ const useProductStore = create((set, get) => ({
   },
   isLoading: false,
   error: null,
+  isInitialized: false,
+
+  // Initialize store
+  initialize: async () => {
+    if (get().isInitialized) return;
+    
+    set({ isInitialized: true });
+    await get().loadProducts();
+    await get().loadCategories();
+  },
 
   // Product Actions
   loadProducts: async (params = {}) => {

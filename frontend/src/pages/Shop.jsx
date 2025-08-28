@@ -1,335 +1,250 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import useProductStore from '../stores/useProductStore';
-import ProductCard from '../components/ProductCard';
-import FilterBar from '../components/FilterBar';
 import { 
-  Search, 
-  Filter, 
-  Grid, 
-  List,
-  SlidersHorizontal,
-  X
-} from 'lucide-react';
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '../components/ui/select';
+import { Badge } from '../components/ui/badge';
+import { Grid, List, Search, SlidersHorizontal } from 'lucide-react';
+import { productsAPI } from '../services/api';
+import toast from 'react-hot-toast';
 
 export default function Shop() {
-  const { products, loading } = useProductStore();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [priceRange, setPriceRange] = useState('all');
-  const [sortBy, setSortBy] = useState('name');
+  const [sortBy, setSortBy] = useState('createdAt');
   const [viewMode, setViewMode] = useState('grid');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Filter and sort products
-  const filteredProducts = useMemo(() => {
-    let filtered = products.filter(product =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const params = {
+          page: pagination.page,
+          limit: 12,
+          search: searchTerm,
+          category: selectedCategory,
+          sort: sortBy.split('-')[0],
+          order: sortBy.split('-')[1] || 'desc',
+          minPrice: priceRange.split('-')[0] === 'under' ? 0 : priceRange.split('-')[0],
+          maxPrice: priceRange.split('-')[1],
+        };
+        if (priceRange === 'all') {
+          delete params.minPrice;
+          delete params.maxPrice;
+        }
+        if (params.category === 'all') delete params.category;
 
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(product => 
-        product.category?.toLowerCase() === selectedCategory.toLowerCase()
-      );
-    }
-
-    if (priceRange !== 'all') {
-      switch (priceRange) {
-        case 'under-1000':
-          filtered = filtered.filter(product => product.price < 1000);
-          break;
-        case '1000-2000':
-          filtered = filtered.filter(product => product.price >= 1000 && product.price < 2000);
-          break;
-        case '2000-5000':
-          filtered = filtered.filter(product => product.price >= 2000 && product.price < 5000);
-          break;
-        case 'above-5000':
-          filtered = filtered.filter(product => product.price >= 5000);
-          break;
+        const response = await productsAPI.getProducts(params);
+        setProducts(response.data.products);
+        setPagination({
+          page: response.page,
+          totalPages: response.totalPages,
+          total: response.total,
+        });
+      } catch (err) {
+        setError('Failed to fetch products.');
+        toast.error('Could not load products.');
+      } finally {
+        setLoading(false);
       }
-    }
+    };
 
-    // Sort products
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'price-low':
-          return a.price - b.price;
-        case 'price-high':
-          return b.price - a.price;
-        case 'name':
-          return a.name.localeCompare(b.name);
-        default:
-          return 0;
-      }
-    });
+    const debounceFetch = setTimeout(() => {
+      fetchProducts();
+    }, 300); // Debounce search input
 
-    return filtered;
-  }, [products, searchTerm, selectedCategory, priceRange, sortBy]);
+    return () => clearTimeout(debounceFetch);
+  }, [searchTerm, selectedCategory, priceRange, sortBy, pagination.page]);
+
+  // Filter and sort products - This is now handled by the backend
+  const filteredProducts = products;
 
   const categories = useMemo(() => {
-    const cats = [...new Set(products.map(p => p.category).filter(Boolean))];
-    return cats;
-  }, [products]);
+    // This should ideally come from an API endpoint
+    return ['T-Shirts', 'Jeans', 'Dresses', 'Accessories'];
+  }, []);
 
-  if (loading) {
+  if (loading && products.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="spinner mb-4"></div>
-          <p className="text-gray-600">Loading products...</p>
-        </div>
+        <div className="spinner-lg"></div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header Section */}
-      <section className="bg-white border-b border-gray-200">
+      {/* Search Section */}
+      <section className="bg-white border-b">
         <div className="container mx-auto px-6 py-8">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Shop Collection</h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Discover our curated selection of premium fashion pieces crafted for the modern wardrobe.
-            </p>
+          <div className="relative max-w-2xl mx-auto">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-12 pr-4 py-3 text-lg"
+            />
           </div>
+        </div>
+      </section>
 
-          {/* Search and Filters */}
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            {/* Search */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Search products..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-gray-50 border-gray-300 focus:border-blue-500 focus:bg-white"
-              />
+      {/* Filters and Controls */}
+      <section className="bg-white border-b">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+            {/* Mobile Filter Toggle */}
+            <div className="lg:hidden w-full">
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+                className="w-full justify-center"
+              >
+                <SlidersHorizontal className="w-4 h-4 mr-2" />
+                Filters
+              </Button>
             </div>
 
-            {/* Desktop Filters */}
-            <div className="hidden md:flex items-center gap-4">
+            {/* Filters */}
+            <div className={`flex flex-col lg:flex-row gap-4 w-full lg:w-auto ${showFilters ? 'block' : 'hidden lg:flex'}`}>
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-40 bg-gray-50 border-gray-300">
+                <SelectTrigger className="w-full lg:w-40">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
-                  {categories.map(category => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
+                  {categories.map(cat => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
               <Select value={priceRange} onValueChange={setPriceRange}>
-                <SelectTrigger className="w-40 bg-gray-50 border-gray-300">
+                <SelectTrigger className="w-full lg:w-40">
                   <SelectValue placeholder="Price Range" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Prices</SelectItem>
-                  <SelectItem value="under-1000">Under ₹1,000</SelectItem>
-                  <SelectItem value="1000-2000">₹1,000 - ₹2,000</SelectItem>
-                  <SelectItem value="2000-5000">₹2,000 - ₹5,000</SelectItem>
-                  <SelectItem value="above-5000">Above ₹5,000</SelectItem>
+                  <SelectItem value="under-500">Under ₹500</SelectItem>
+                  <SelectItem value="500-1000">₹500 - ₹1000</SelectItem>
+                  <SelectItem value="1000-2000">₹1000 - ₹2000</SelectItem>
+                  <SelectItem value="2000-above">₹2000 & Above</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* View Controls */}
+            <div className="flex items-center gap-4 w-full lg:w-auto justify-between">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                >
+                  <Grid className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
 
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-40 bg-gray-50 border-gray-300">
+                <SelectTrigger className="w-40">
                   <SelectValue placeholder="Sort By" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="name">Name</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
+                  <SelectItem value="createdAt">Newest</SelectItem>
+                  <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                  <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                  <SelectItem value="name-asc">Name: A-Z</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-
-            {/* View Toggle and Mobile Filter */}
-            <div className="flex items-center gap-3">
-              <div className="hidden md:flex items-center gap-2 bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-md transition-all ${
-                    viewMode === 'grid' 
-                      ? 'bg-white shadow-sm text-blue-600' 
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  <Grid className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-md transition-all ${
-                    viewMode === 'list' 
-                      ? 'bg-white shadow-sm text-blue-600' 
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  <List className="w-4 h-4" />
-                </button>
-              </div>
-
-              <Button
-                onClick={() => setShowFilters(!showFilters)}
-                className="md:hidden bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2"
-              >
-                <Filter className="w-4 h-4 mr-2" />
-                Filters
-              </Button>
-            </div>
           </div>
-
-          {/* Mobile Filters */}
-          {showFilters && (
-            <motion.div 
-              className="md:hidden mt-6 p-6 bg-gray-50 rounded-lg border border-gray-200"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold text-gray-900">Filters</h3>
-                <button
-                  onClick={() => setShowFilters(false)}
-                  className="p-1 hover:bg-gray-200 rounded"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="bg-white border-gray-300">
-                      <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Categories</SelectItem>
-                      {categories.map(category => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
-                  <Select value={priceRange} onValueChange={setPriceRange}>
-                    <SelectTrigger className="bg-white border-gray-300">
-                      <SelectValue placeholder="Price Range" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Prices</SelectItem>
-                      <SelectItem value="under-1000">Under ₹1,000</SelectItem>
-                      <SelectItem value="1000-2000">₹1,000 - ₹2,000</SelectItem>
-                      <SelectItem value="2000-5000">₹2,000 - ₹5,000</SelectItem>
-                      <SelectItem value="above-5000">Above ₹5,000</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="bg-white border-gray-300">
-                      <SelectValue placeholder="Sort By" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="name">Name</SelectItem>
-                      <SelectItem value="price-low">Price: Low to High</SelectItem>
-                      <SelectItem value="price-high">Price: High to Low</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </motion.div>
-          )}
         </div>
       </section>
 
-      {/* Products Section */}
+      {/* Products Grid */}
       <section className="py-12">
         <div className="container mx-auto px-6">
           {/* Results Summary */}
           <div className="flex justify-between items-center mb-8">
             <div className="text-gray-600">
-              Showing {filteredProducts.length} of {products.length} products
+              Showing {filteredProducts.length} of {pagination.total} products
               {searchTerm && (
                 <span className="ml-2">
                   for "<span className="font-medium text-gray-900">{searchTerm}</span>"
                 </span>
               )}
             </div>
-            
-            {(searchTerm || selectedCategory !== 'all' || priceRange !== 'all') && (
-              <Button
-                onClick={() => {
-                  setSearchTerm('');
-                  setSelectedCategory('all');
-                  setPriceRange('all');
-                }}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm px-4 py-2"
-              >
-                Clear Filters
-              </Button>
-            )}
           </div>
 
-          {/* Products Grid */}
-          {filteredProducts.length > 0 ? (
-            <div className={`grid gap-6 ${
-              viewMode === 'grid' 
-                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-                : 'grid-cols-1'
-            }`}>
-              {filteredProducts.map((product, index) => (
-                <motion.div
-                  key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                >
-                  <ProductCard product={product} viewMode={viewMode} />
-                </motion.div>
-              ))}
+          {error && (
+            <div className="text-center py-12">
+              <p className="text-red-600">{error}</p>
+            </div>
+          )}
+
+          {filteredProducts.length === 0 && !loading ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600">No products found matching your criteria.</p>
             </div>
           ) : (
-            <div className="text-center py-16">
-              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Search className="w-8 h-8 text-gray-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
-              <p className="text-gray-600 mb-6">
-                Try adjusting your search criteria or browse our full collection.
-              </p>
-              <Button
-                onClick={() => {
-                  setSearchTerm('');
-                  setSelectedCategory('all');
-                  setPriceRange('all');
-                }}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3"
-              >
-                Browse All Products
-              </Button>
+            <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
+              {filteredProducts.map((product, index) => (
+                <motion.div
+                  key={product._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Link to={`/product/${product._id}`}>
+                    <Card className="group hover:shadow-lg transition-shadow duration-300 cursor-pointer">
+                      <CardContent className="p-0">
+                        <div className="aspect-square overflow-hidden rounded-t-lg">
+                          <img
+                            src={product.images?.[0] || '/placeholder-product.jpg'}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
+                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
+                          <div className="flex justify-between items-center">
+                            <span className="text-xl font-bold text-indigo-600">₹{product.price}</span>
+                            <Badge variant="secondary">{product.category}</Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </motion.div>
+              ))}
             </div>
           )}
         </div>
       </section>
     </div>
   );
-} 
+}

@@ -2,8 +2,11 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import useCartStore from '../stores/useCartStore';
+import useUserStore from '../stores/useUserStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { authAPI } from '../services/api';
+import toast from 'react-hot-toast';
 import { 
   Star, 
   Heart, 
@@ -18,10 +21,18 @@ import {
 } from 'lucide-react';
 
 export default function ProductCard({ product, viewMode = 'grid' }) {
-  const addToCart = useCartStore(state => state.addItem);
+  const addToCart = useCartStore(state => state.addToCart);
+  const { wishlist, setWishlist, isAuthenticated } = useUserStore();
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
+
+  // Check if product is in wishlist
+  useEffect(() => {
+    if (wishlist && product) {
+      setIsWishlisted(wishlist.some(item => item._id === product._id));
+    }
+  }, [wishlist, product]);
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
@@ -32,7 +43,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    addToCart(product);
+    addToCart(product, 1);
     setIsAddingToCart(false);
     setJustAdded(true);
     
@@ -40,15 +51,51 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
     setTimeout(() => setJustAdded(false), 2000);
   };
 
-  const handleWishlist = (e) => {
+  const handleWishlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
+
+    if (!isAuthenticated) {
+      toast.error('Please login to add items to wishlist');
+      return;
+    }
+
+    try {
+      if (isWishlisted) {
+        await authAPI.removeFromWishlist(product._id);
+        setWishlist(wishlist.filter(item => item._id !== product._id));
+        toast.success('Removed from wishlist');
+      } else {
+        await authAPI.addToWishlist(product._id);
+        setWishlist([...wishlist, product]);
+        toast.success('Added to wishlist');
+      }
+      setIsWishlisted(!isWishlisted);
+    } catch (error) {
+      console.error('Wishlist error:', error);
+      toast.error('Failed to update wishlist');
+    }
   };
 
-  const discountPercentage = Math.round(((product.price * 1.3 - product.price) / (product.price * 1.3)) * 100);
-  const isNewProduct = true; // In real app, this would come from product data
-  const isBestSeller = Math.random() > 0.7; // Mock bestseller logic
+  // Calculate discount and pricing
+  const currentPrice = product.salePrice && product.saleStartDate && product.saleEndDate ? 
+    (new Date() >= new Date(product.saleStartDate) && new Date() <= new Date(product.saleEndDate) ? product.salePrice : product.price) : 
+    product.price;
+  
+  const discountPercentage = product.salePrice && currentPrice < product.price ? 
+    Math.round(((product.price - currentPrice) / product.price) * 100) : 0;
+  
+  const isNewProduct = product.isFeatures || (new Date() - new Date(product.createdAt)) < (7 * 24 * 60 * 60 * 1000); // 7 days
+  const isBestSeller = product.isFeatures;
+
+  // Get primary image or fallback
+  const primaryImage = product.images?.find(img => img.isPrimary)?.url || 
+                      product.images?.[0]?.url || 
+                      "https://placehold.co/400x500/64748b/fff?text=Product";
+
+  // Mock data for demo purposes (replace with real data when available)
+  const mockRating = 4.9;
+  const mockReviews = 256;
 
   if (viewMode === 'list') {
     return (
@@ -62,7 +109,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
           <div className="flex">
             <div className="relative w-48 h-48 flex-shrink-0 overflow-hidden">
               <motion.img
-                src={product.images[0] || "https://placehold.co/400x500/64748b/fff?text=Product"}
+                src={primaryImage}
                 alt={product.name}
                 className="w-full h-full object-cover"
                 whileHover={{ scale: 1.1 }}
@@ -94,7 +141,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
             <CardContent className="flex-1 p-6">
               <div className="flex justify-between items-start h-full">
                 <div className="flex-1">
-                  <Link to={`/product/${product.id}`}>
+                  <Link to={`/product/${product._id}`}>
                     <motion.h3 
                       className="font-bold text-xl text-gray-900 mb-3 hover:text-blue-600 transition-colors line-clamp-1"
                       whileHover={{ scale: 1.02 }}
@@ -104,12 +151,12 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
                   </Link>
                   
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="text-3xl font-bold text-gray-900">₹{product.price}</div>
+                    <div className="text-3xl font-bold text-gray-900">₹{currentPrice}</div>
                     {discountPercentage > 0 && (
                       <>
-                        <div className="text-lg text-gray-500 line-through">₹{Math.round(product.price * 1.3)}</div>
+                        <div className="text-lg text-gray-500 line-through">₹{product.price}</div>
                         <span className="badge badge-success text-xs">
-                          Save ₹{Math.round(product.price * 0.3)}
+                          Save ₹{product.price - currentPrice}
                         </span>
                       </>
                     )}
@@ -121,21 +168,24 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
                         <Star key={i} className="w-4 h-4 fill-current" />
                       ))}
                     </div>
-                    <span className="text-sm text-gray-600 font-medium">(4.9)</span>
-                    <span className="text-xs text-gray-500">• 256 reviews</span>
+                    <span className="text-sm text-gray-600 font-medium">({mockRating})</span>
+                    <span className="text-xs text-gray-500">• {mockReviews} reviews</span>
                   </div>
                   
                   <p className="text-gray-600 mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
                   
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="text-sm text-gray-600 font-medium">Available sizes:</span>
-                    {product.sizes.slice(0, 4).map((size) => (
-                      <span key={size} className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-lg font-medium hover:bg-gray-200 transition-colors">
-                        {size}
-                      </span>
-                    ))}
-                    {product.sizes.length > 4 && (
-                      <span className="text-xs text-gray-500 font-medium">+{product.sizes.length - 4} more</span>
+                    <span className="text-sm text-gray-600 font-medium">Category:</span>
+                    <span className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-lg font-medium">
+                      {product.category}
+                    </span>
+                    {product.brand && (
+                      <>
+                        <span className="text-sm text-gray-600 font-medium">Brand:</span>
+                        <span className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-lg font-medium">
+                          {product.brand}
+                        </span>
+                      </>
                     )}
                   </div>
 
@@ -146,7 +196,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
                     </div>
                     <div className="flex items-center gap-1">
                       <TrendingUp className="w-4 h-4 text-blue-600" />
-                      <span>Trending</span>
+                      <span>Stock: {product.stock}</span>
                     </div>
                   </div>
                 </div>
@@ -166,7 +216,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
                       <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
                     </motion.button>
                     <Link 
-                      to={`/product/${product.id}`}
+                      to={`/product/${product._id}`}
                       className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-all shadow-md group"
                     >
                       <Eye className="w-5 h-5 text-gray-600 group-hover:text-blue-600" />
@@ -240,9 +290,9 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
     >
       <Card className="group overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white border-0 rounded-2xl">
         <div className="relative overflow-hidden">
-          <Link to={`/product/${product.id}`}>
+          <Link to={`/product/${product._id}`}>
             <motion.img
-              src={product.images[0] || "https://placehold.co/400x500/64748b/fff?text=Product"}
+              src={primaryImage}
               alt={product.name}
               className="w-full h-80 object-cover"
               whileHover={{ scale: 1.1 }}
@@ -267,7 +317,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
               <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
             </motion.button>
             <Link 
-              to={`/product/${product.id}`}
+              to={`/product/${product._id}`}
               className="w-12 h-12 bg-white rounded-xl shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors group/btn"
             >
               <Eye className="w-5 h-5 text-gray-600 group-hover/btn:text-blue-600" />
@@ -312,7 +362,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
         </div>
         
         <CardContent className="p-8">
-          <Link to={`/product/${product.id}`}>
+          <Link to={`/product/${product._id}`}>
             <motion.h3 
               className="font-bold text-xl text-gray-900 mb-3 line-clamp-1 group-hover:text-blue-600 transition-colors"
               whileHover={{ scale: 1.02 }}
@@ -322,12 +372,12 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
           </Link>
           
           <div className="flex items-center gap-3 mb-4">
-            <div className="text-3xl font-bold text-gray-900">₹{product.price}</div>
+            <div className="text-3xl font-bold text-gray-900">₹{currentPrice}</div>
             {discountPercentage > 0 && (
               <>
-                <div className="text-lg text-gray-500 line-through">₹{Math.round(product.price * 1.3)}</div>
+                <div className="text-lg text-gray-500 line-through">₹{product.price}</div>
                 <span className="badge badge-success text-xs">
-                  Save ₹{Math.round(product.price * 0.3)}
+                  Save ₹{product.price - currentPrice}
                 </span>
               </>
             )}
@@ -339,26 +389,26 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
                 <Star key={i} className="w-4 h-4 fill-current" />
               ))}
             </div>
-            <span className="text-sm text-gray-600 font-medium">(4.9)</span>
-            <span className="text-xs text-gray-500">• 256 reviews</span>
+            <span className="text-sm text-gray-600 font-medium">({mockRating})</span>
+            <span className="text-xs text-gray-500">• {mockReviews} reviews</span>
           </div>
           
           <p className="text-gray-600 mb-6 line-clamp-2 leading-relaxed">{product.description}</p>
           
           <div className="flex items-center justify-between mb-6">
             <div className="flex gap-2">
-              {product.sizes.slice(0, 3).map((size) => (
-                <span key={size} className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-lg font-medium hover:bg-gray-200 transition-colors">
-                  {size}
+              <span className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-lg font-medium">
+                {product.category}
+              </span>
+              {product.brand && (
+                <span className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-lg font-medium">
+                  {product.brand}
                 </span>
-              ))}
-              {product.sizes.length > 3 && (
-                <span className="text-xs text-gray-500 font-medium">+{product.sizes.length - 3}</span>
               )}
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Truck className="w-4 h-4 text-green-600" />
-              <span>Free delivery</span>
+              <span>Stock: {product.stock}</span>
             </div>
           </div>
 

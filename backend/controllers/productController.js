@@ -1,73 +1,55 @@
+import { validationResult } from 'express-validator';
+import Product from '../models/Product.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
-import Product from '../models/Product.js';
-import User from '../models/User.js';
 
-// Get all products with filtering, sorting, and pagination
+// Get all products (public)
 export const getAllProducts = catchAsync(async (req, res, next) => {
-  // Build query object
-  const queryObj = { isActive: true };
+  const {
+    page = 1,
+    limit = 12,
+    category,
+    subcategory,
+    brand,
+    minPrice,
+    maxPrice,
+    search,
+    sort = '-createdAt',
+    status = 'active'
+  } = req.query;
+
+  // Build filter object
+  const filter = { status };
+
+  if (category) filter.category = category;
+  if (subcategory) filter.subcategory = subcategory;
+  if (brand) filter.brand = new RegExp(brand, 'i');
   
-  // Handle category filter
-  if (req.query.category && req.query.category !== 'all') {
-    queryObj.category = req.query.category;
-  }
-  
-  // Handle price filters
-  if (req.query.minPrice || req.query.maxPrice) {
-    queryObj.price = {};
-    if (req.query.minPrice) queryObj.price.$gte = Number(req.query.minPrice);
-    if (req.query.maxPrice) queryObj.price.$lte = Number(req.query.maxPrice);
-  }
-  
-  // Handle search
-  if (req.query.search) {
-    queryObj.$or = [
-      { name: { $regex: req.query.search, $options: 'i' } },
-      { description: { $regex: req.query.search, $options: 'i' } },
-      { tags: { $in: [new RegExp(req.query.search, 'i')] } }
-    ];
+  if (minPrice || maxPrice) {
+    filter.price = {};
+    if (minPrice) filter.price.$gte = parseFloat(minPrice);
+    if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
   }
 
-  // Handle stock filters for admin
-  if (req.query.stock) {
-    if (req.query.stock === 'low') {
-      queryObj.$expr = { $lte: ['$stock', '$lowStockThreshold'] };
-    } else if (req.query.stock === 'out') {
-      queryObj.stock = 0;
-    }
+  if (search) {
+    filter.$text = { $search: search };
   }
 
-  // Pagination
-  const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 12;
+  // Execute query with pagination
   const skip = (page - 1) * limit;
-
-  // Sorting
-  let sortObj = {};
-  if (req.query.sort) {
-    const sortField = req.query.sort;
-    const sortOrder = req.query.order === 'desc' ? -1 : 1;
-    sortObj[sortField] = sortOrder;
-  } else {
-    sortObj.createdAt = -1; // Default sort by newest
-  }
-
-  // Execute query
-  const products = await Product.find(queryObj)
-    .sort(sortObj)
+  const products = await Product.find(filter)
+    .sort(sort)
     .skip(skip)
-    .limit(limit)
-    .select('name price images rating category slug stock isActive description tags');
+    .limit(parseInt(limit))
+    .select('-__v');
 
-  // Get total count for pagination
-  const total = await Product.countDocuments(queryObj);
+  const total = await Product.countDocuments(filter);
 
   res.status(200).json({
     status: 'success',
     results: products.length,
     total,
-    page,
+    page: parseInt(page),
     totalPages: Math.ceil(total / limit),
     data: {
       products
@@ -75,12 +57,9 @@ export const getAllProducts = catchAsync(async (req, res, next) => {
   });
 });
 
-// Get single product
+// Get single product (public)
 export const getProduct = catchAsync(async (req, res, next) => {
-  const product = await Product.findOne({
-    $or: [{ _id: req.params.id }, { slug: req.params.id }],
-    isActive: true
-  }).populate('reviews.user', 'name');
+  const product = await Product.findById(req.params.id).select('-__v');
 
   if (!product) {
     return next(new AppError('Product not found', 404));
@@ -94,37 +73,178 @@ export const getProduct = catchAsync(async (req, res, next) => {
   });
 });
 
-// Create new product (Admin only)
-export const createProduct = catchAsync(async (req, res, next) => {
-  const productData = { ...req.body };
-  
-  // Handle image uploads
-  if (req.files && req.files.length > 0) {
-    productData.images = req.files.map(file => file.path);
-  }
+// Get featured products (public)
+export const getFeaturedProducts = catchAsync(async (req, res, next) => {
+  const { limit = 8 } = req.query;
 
-  const product = await Product.create(productData);
+  const products = await Product.find({ 
+    status: 'active', 
+    isFeatures: true 
+  })
+    .sort('-createdAt')
+    .limit(parseInt(limit))
+    .select('-__v');
 
-  res.status(201).json({
+  res.status(200).json({
     status: 'success',
+    results: products.length,
     data: {
-      product
+      products
     }
   });
 });
 
-// Update product (Admin only)
-export const updateProduct = catchAsync(async (req, res, next) => {
-  const updateData = { ...req.body };
+// Get products by category (public)
+export const getProductsByCategory = catchAsync(async (req, res, next) => {
+  const { category } = req.params;
+  const { page = 1, limit = 12, sort = '-createdAt' } = req.query;
+
+  const filter = { category, status: 'active' };
+  const skip = (page - 1) * limit;
+
+  const products = await Product.find(filter)
+    .sort(sort)
+    .skip(skip)
+    .limit(parseInt(limit))
+    .select('-__v');
+
+  const total = await Product.countDocuments(filter);
+
+  res.status(200).json({
+    status: 'success',
+    results: products.length,
+    total,
+    page: parseInt(page),
+    totalPages: Math.ceil(total / limit),
+    data: {
+      products
+    }
+  });
+});
+
+// Admin Functions
+
+// Get all products for admin
+export const getAllProductsAdmin = catchAsync(async (req, res, next) => {
+  const {
+    page = 1,
+    limit = 20,
+    category,
+    status,
+    search,
+    sort = '-createdAt'
+  } = req.query;
+
+  // Build filter object
+  const filter = {};
+  if (category) filter.category = category;
+  if (status) filter.status = status;
+  if (search) {
+    filter.$or = [
+      { name: new RegExp(search, 'i') },
+      { description: new RegExp(search, 'i') },
+      { sku: new RegExp(search, 'i') }
+    ];
+  }
+
+  // Execute query with pagination
+  const skip = (page - 1) * limit;
+  const products = await Product.find(filter)
+    .sort(sort)
+    .skip(skip)
+    .limit(parseInt(limit))
+    .select('-__v');
+
+  const total = await Product.countDocuments(filter);
+
+  res.status(200).json({
+    status: 'success',
+    results: products.length,
+    total,
+    page: parseInt(page),
+    totalPages: Math.ceil(total / limit),
+    data: {
+      products
+    }
+  });
+});
+
+// Create product (admin)
+export const createProduct = catchAsync(async (req, res, next) => {
+  console.log('=== CREATE PRODUCT DEBUG ===');
+  console.log('Headers:', req.headers);
+  console.log('Content-Type:', req.headers['content-type']);
+  console.log('Raw body:', req.body);
+  console.log('Body keys:', Object.keys(req.body || {}));
+  console.log('Body values:', Object.values(req.body || {}));
+  console.log('Request method:', req.method);
+  console.log('Request URL:', req.url);
   
-  // Handle new image uploads
-  if (req.files && req.files.length > 0) {
-    updateData.images = req.files.map(file => file.path);
+  // Check if body is empty
+  if (!req.body || Object.keys(req.body).length === 0) {
+    console.log('ERROR: Request body is empty or undefined');
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Request body is empty. Please check if you are sending JSON data with correct Content-Type header.',
+      receivedData: req.body
+    });
+  }
+  
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log('Validation errors:', errors.array());
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Validation failed',
+      errors: errors.array(),
+      receivedData: req.body
+    });
+  }
+
+  // Convert and clean the data
+  const productData = {
+    name: req.body.name?.trim(),
+    description: req.body.description?.trim(),
+    price: parseFloat(req.body.price),
+    category: req.body.category?.trim(),
+    subcategory: req.body.subcategory?.trim(),
+    brand: req.body.brand?.trim(),
+    sku: req.body.sku?.trim(),
+    stock: parseInt(req.body.stock) || 0,
+    status: req.body.status || 'active',
+    images: Array.isArray(req.body.images) ? req.body.images : [],
+    tags: Array.isArray(req.body.tags) ? req.body.tags : [],
+    isFeatures: Boolean(req.body.isFeatures) || false
+  };
+
+  console.log('Processed product data:', productData);
+
+  try {
+    const product = await Product.create(productData);
+    console.log('Product created successfully:', product._id);
+
+    res.status(201).json({
+      status: 'success',
+      data: {
+        product
+      }
+    });
+  } catch (error) {
+    console.error('Error creating product:', error);
+    return next(error);
+  }
+});
+
+// Update product (admin)
+export const updateProduct = catchAsync(async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new AppError('Validation failed', 400, errors.array()));
   }
 
   const product = await Product.findByIdAndUpdate(
     req.params.id,
-    updateData,
+    req.body,
     {
       new: true,
       runValidators: true
@@ -143,13 +263,9 @@ export const updateProduct = catchAsync(async (req, res, next) => {
   });
 });
 
-// Delete product (Admin only)
+// Delete product (admin)
 export const deleteProduct = catchAsync(async (req, res, next) => {
-  const product = await Product.findByIdAndUpdate(
-    req.params.id,
-    { isActive: false },
-    { new: true }
-  );
+  const product = await Product.findByIdAndDelete(req.params.id);
 
   if (!product) {
     return next(new AppError('Product not found', 404));
@@ -161,103 +277,17 @@ export const deleteProduct = catchAsync(async (req, res, next) => {
   });
 });
 
-// Add product review
-export const addReview = catchAsync(async (req, res, next) => {
-  const { rating, comment } = req.body;
-  const productId = req.params.id;
-  const userId = req.user._id;
+// Update product stock (admin)
+export const updateProductStock = catchAsync(async (req, res, next) => {
+  const { stock } = req.body;
 
-  const product = await Product.findById(productId);
-  if (!product) {
-    return next(new AppError('Product not found', 404));
+  if (typeof stock !== 'number' || stock < 0) {
+    return next(new AppError('Stock must be a non-negative number', 400));
   }
 
-  // Check if user has already reviewed this product
-  const existingReview = product.reviews.find(
-    review => review.user.toString() === userId.toString()
-  );
-
-  if (existingReview) {
-    return next(new AppError('You have already reviewed this product', 400));
-  }
-
-  // Add review
-  const review = {
-    user: userId,
-    rating: Number(rating),
-    comment,
-    createdAt: new Date()
-  };
-
-  product.reviews.push(review);
-
-  // Calculate new average rating
-  const totalRating = product.reviews.reduce((sum, review) => sum + review.rating, 0);
-  product.rating = totalRating / product.reviews.length;
-
-  await product.save();
-
-  // Populate the user field for the response
-  await product.populate('reviews.user', 'name');
-
-  res.status(201).json({
-    status: 'success',
-    data: {
-      review: product.reviews[product.reviews.length - 1]
-    }
-  });
-});
-
-// Get product categories
-export const getCategories = catchAsync(async (req, res, next) => {
-  const categories = await Product.distinct('category', { isActive: true });
-
-  res.status(200).json({
-    status: 'success',
-    results: categories.length,
-    data: {
-      categories
-    }
-  });
-});
-
-// Search products
-export const searchProducts = catchAsync(async (req, res, next) => {
-  const { q: query, limit = 10 } = req.query;
-  
-  if (!query) {
-    return next(new AppError('Search query is required', 400));
-  }
-
-  const products = await Product.find({
-    $or: [
-      { name: { $regex: query, $options: 'i' } },
-      { description: { $regex: query, $options: 'i' } },
-      { tags: { $in: [new RegExp(query, 'i')] } }
-    ],
-    isActive: true
-  }).limit(Number(limit));
-
-  res.status(200).json({
-    status: 'success',
-    results: products.length,
-    data: {
-      products
-    }
-  });
-});
-
-// Update product stock
-export const updateStock = catchAsync(async (req, res, next) => {
-  const { stock, lowStockThreshold } = req.body;
-  
   const product = await Product.findByIdAndUpdate(
     req.params.id,
-    { 
-      stock,
-      lowStockThreshold: lowStockThreshold || 10,
-      updatedAt: new Date()
-    },
+    { stock },
     { new: true, runValidators: true }
   );
 
@@ -273,64 +303,39 @@ export const updateStock = catchAsync(async (req, res, next) => {
   });
 });
 
-// Bulk update stock
-export const bulkUpdateStock = catchAsync(async (req, res, next) => {
-  const { updates } = req.body;
-  
-  if (!updates || !Array.isArray(updates)) {
-    return next(new AppError('Updates array is required', 400));
+// Bulk update products (admin)
+export const bulkUpdateProducts = catchAsync(async (req, res, next) => {
+  const { productIds, updateData } = req.body;
+
+  if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+    return next(new AppError('Product IDs array is required', 400));
   }
 
-  const bulkOps = updates.map(update => ({
-    updateOne: {
-      filter: { _id: update.productId },
-      update: { 
-        stock: update.stock,
-        lowStockThreshold: update.lowStockThreshold || 10,
-        updatedAt: new Date()
-      }
-    }
-  }));
-
-  const result = await Product.bulkWrite(bulkOps);
+  const result = await Product.updateMany(
+    { _id: { $in: productIds } },
+    updateData,
+    { runValidators: true }
+  );
 
   res.status(200).json({
     status: 'success',
+    message: `Updated ${result.modifiedCount} products`,
     data: {
-      modifiedCount: result.modifiedCount,
-      matchedCount: result.matchedCount
+      matchedCount: result.matchedCount,
+      modifiedCount: result.modifiedCount
     }
   });
 });
 
-// Get low stock products
-export const getLowStockProducts = catchAsync(async (req, res, next) => {
-  const products = await Product.find({
-    $expr: { $lte: ['$stock', '$lowStockThreshold'] },
-    isActive: true
-  }).select('name stock lowStockThreshold category price');
-
+// Get all categories (public)
+export const getCategories = catchAsync(async (req, res, next) => {
+  const categories = await Product.distinct('category', { status: 'active' });
+  
   res.status(200).json({
     status: 'success',
-    results: products.length,
+    results: categories.length,
     data: {
-      products
+      categories
     }
   });
 });
-
-// Get out of stock products
-export const getOutOfStockProducts = catchAsync(async (req, res, next) => {
-  const products = await Product.find({
-    stock: 0,
-    isActive: true
-  }).select('name stock category price');
-
-  res.status(200).json({
-    status: 'success',
-    results: products.length,
-    data: {
-      products
-    }
-  });
-}); 

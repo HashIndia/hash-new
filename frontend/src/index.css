@@ -68,6 +68,11 @@
   }
 }
 
+/* Toast styles */
+.toast-container {
+  font-family: 'DM Sans', sans-serif;
+}
+
 /* Custom scrollbar - enhanced version */
 ::-webkit-scrollbar {
   width: 6px;

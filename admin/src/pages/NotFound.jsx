@@ -68,7 +68,7 @@ const NotFound = () => {
               Go Back
             </Button>
             
-            <Link to="/admin">
+            <Link to="/">
               <Button className="min-w-[160px] bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
                 <Home className="w-4 h-4 mr-2" />
                 Back to Dashboard
@@ -86,37 +86,37 @@ const NotFound = () => {
             <p className="text-sm text-gray-500 mb-4">Maybe you were looking for:</p>
             <div className="flex flex-wrap justify-center gap-4 text-sm">
               <Link 
-                to="/admin" 
+                to="/" 
                 className="text-blue-600 hover:text-blue-800 hover:underline"
               >
                 Dashboard
               </Link>
               <Link 
-                to="/admin/inventory" 
+                to="/inventory" 
                 className="text-blue-600 hover:text-blue-800 hover:underline"
               >
                 Inventory
               </Link>
               <Link 
-                to="/admin/orders" 
+                to="/orders" 
                 className="text-blue-600 hover:text-blue-800 hover:underline"
               >
                 Orders
               </Link>
               <Link 
-                to="/admin/customers" 
+                to="/customers" 
                 className="text-blue-600 hover:text-blue-800 hover:underline"
               >
                 Customers
               </Link>
               <Link 
-                to="/admin/broadcast" 
+                to="/broadcast" 
                 className="text-blue-600 hover:text-blue-800 hover:underline"
               >
                 Broadcast
               </Link>
               <Link 
-                to="/admin/analytics" 
+                to="/analytics" 
                 className="text-blue-600 hover:text-blue-800 hover:underline"
               >
                 Analytics
@@ -129,4 +129,4 @@ const NotFound = () => {
   );
 };
 
-export default NotFound; 
+export default NotFound;

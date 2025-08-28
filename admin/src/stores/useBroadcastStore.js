@@ -1,11 +1,92 @@
 import { create } from 'zustand';
 import { campaignsAPI, customersAPI, handleAPIError } from '../services/api.js';
 
+// Mock campaigns data
+const mockCampaigns = [
+  {
+    id: 'camp-1',
+    name: 'Summer Sale 2024',
+    type: 'email',
+    subject: 'Don\'t Miss Our Summer Sale - Up to 50% Off!',
+    content: 'Get ready for summer with our amazing collection. Shop now and save big on all your favorite items.',
+    status: 'completed',
+    recipients: 'all_customers',
+    createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+    sentCount: 1250,
+    deliveredCount: 1198,
+    openedCount: 456,
+    clickedCount: 89
+  },
+  {
+    id: 'camp-2',
+    name: 'New Collection Alert',
+    type: 'sms',
+    content: 'Check out our new arrivals! Fresh styles just dropped. Visit our store now.',
+    status: 'completed',
+    recipients: 'vip_customers',
+    createdAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+    sentCount: 89,
+    deliveredCount: 87,
+    openedCount: 34,
+    clickedCount: 12
+  },
+  {
+    id: 'camp-3',
+    name: 'Cart Abandonment Follow-up',
+    type: 'email',
+    subject: 'You left something behind...',
+    content: 'Complete your purchase and get free shipping on your order.',
+    status: 'draft',
+    recipients: 'custom_list',
+    createdAt: new Date().toISOString(),
+    sentCount: 0,
+    deliveredCount: 0,
+    openedCount: 0,
+    clickedCount: 0
+  }
+];
+
+// Mock templates data
+const mockTemplates = [
+  {
+    id: 'tmpl-1',
+    name: 'Welcome Email',
+    type: 'email',
+    subject: 'Welcome to Our Store!',
+    content: 'Thank you for joining us! Here\'s a special 10% off coupon for your first purchase.'
+  },
+  {
+    id: 'tmpl-2',
+    name: 'Order Confirmation',
+    type: 'email',
+    subject: 'Your Order is Confirmed',
+    content: 'We\'ve received your order and it\'s being processed. You\'ll receive tracking information soon.'
+  },
+  {
+    id: 'tmpl-3',
+    name: 'Flash Sale SMS',
+    type: 'sms',
+    content: 'FLASH SALE! 24 hours only - 30% off everything. Use code FLASH30. Shop now!'
+  },
+  {
+    id: 'tmpl-4',
+    name: 'Birthday Wishes',
+    type: 'whatsapp',
+    content: 'Happy Birthday! 🎉 Celebrate with a special 25% discount on your next purchase.'
+  }
+];
+
 const useBroadcastStore = create((set, get) => ({
   // State
   campaigns: [],
-  templates: [],
-  selectedCampaign: null,
+  templates: mockTemplates,
+  currentCampaign: {
+    name: '',
+    type: 'email',
+    subject: '',
+    content: '',
+    recipients: 'all_customers'
+  },
   filters: {
     type: 'all',
     status: 'all',
@@ -17,13 +98,13 @@ const useBroadcastStore = create((set, get) => ({
     total: 0,
     totalPages: 0
   },
+  isLoading: false,
+  error: null,
   recipients: {
     all: [],
     verified: [],
     custom: []
   },
-  isLoading: false,
-  error: null,
 
   // Campaign Management Actions
   loadCampaigns: async (params = {}) => {
@@ -37,7 +118,7 @@ const useBroadcastStore = create((set, get) => ({
         ...params
       };
 
-      const response = await campaignsAPI.getAllCampaigns(queryParams);
+      const response = await campaignsAPI.getCampaigns(queryParams);
       
       set({
         campaigns: response.data.campaigns,
@@ -51,6 +132,7 @@ const useBroadcastStore = create((set, get) => ({
       });
     } catch (error) {
       const errorMessage = handleAPIError(error);
+      console.error('Failed to load campaigns:', error);
       set({ isLoading: false, error: errorMessage });
     }
   },
@@ -359,6 +441,94 @@ const useBroadcastStore = create((set, get) => ({
   // Clear actions
   clearSelectedCampaign: () => set({ selectedCampaign: null }),
   clearError: () => set({ error: null }),
+
+  // New actions for current campaign
+  setCampaignField: (field, value) => {
+    set(state => ({
+      currentCampaign: { ...state.currentCampaign, [field]: value }
+    }));
+  },
+  
+  resetCurrentCampaign: () => {
+    set({
+      currentCampaign: {
+        name: '',
+        type: 'email',
+        subject: '',
+        content: '',
+        recipients: 'all_customers'
+      }
+    });
+  },
+  
+  loadTemplate: (templateId) => {
+    const state = get();
+    const template = state.templates.find(t => t.id === templateId);
+    if (template) {
+      set({
+        currentCampaign: {
+          name: template.name,
+          type: template.type,
+          subject: template.subject || '',
+          content: template.content,
+          recipients: 'all_customers'
+        }
+      });
+    }
+  },
+  
+  saveCampaign: async (campaign) => {
+    const newCampaign = {
+      ...campaign,
+      id: `camp-${Date.now()}`,
+      status: 'draft',
+      createdAt: new Date().toISOString(),
+      sentCount: 0,
+      deliveredCount: 0,
+      openedCount: 0,
+      clickedCount: 0
+    };
+    
+    set(state => ({
+      campaigns: [...state.campaigns, newCampaign]
+    }));
+    
+    return { success: true };
+  },
+  
+  deleteCampaign: (campaignId) => {
+    set(state => ({
+      campaigns: state.campaigns.filter(c => c.id !== campaignId)
+    }));
+  },
+  
+  duplicateCampaign: (campaignId) => {
+    const state = get();
+    const campaign = state.campaigns.find(c => c.id === campaignId);
+    if (campaign) {
+      const duplicated = {
+        ...campaign,
+        id: `camp-${Date.now()}`,
+        name: `${campaign.name} (Copy)`,
+        status: 'draft',
+        createdAt: new Date().toISOString(),
+        sentCount: 0,
+        deliveredCount: 0,
+        openedCount: 0,
+        clickedCount: 0
+      };
+      
+      set(state => ({
+        campaigns: [...state.campaigns, duplicated]
+      }));
+    }
+  },
+
+  // Initialize store by loading campaigns
+  initialize: async () => {
+    const { loadCampaigns } = get();
+    await loadCampaigns();
+  }
 }));
 
-export default useBroadcastStore; 
+export default useBroadcastStore;

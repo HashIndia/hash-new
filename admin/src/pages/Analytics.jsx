@@ -1,4 +1,4 @@
-import { useState, useMemo, memo, useCallback } from 'react';
+import { useState, useMemo, memo, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   TrendingUp, 
@@ -38,9 +38,10 @@ import {
 import useOrderStore from '../stores/useOrderStore';
 import useCustomerStore from '../stores/useCustomerStore';
 import useInventoryStore from '../stores/useInventoryStore';
+import useAnalyticsStore from '../stores/useAnalyticsStore';
 
 // Move static data outside component to prevent re-creation
-const revenueData = [
+const revenueDataFallback = [
   { date: '2024-01-01', revenue: 4500, orders: 23 },
   { date: '2024-01-02', revenue: 3200, orders: 18 },
   { date: '2024-01-03', revenue: 5100, orders: 28 },
@@ -50,7 +51,7 @@ const revenueData = [
   { date: '2024-01-07', revenue: 7200, orders: 42 }
 ];
 
-const topProductsData = [
+const topProductsDataFallback = [
   { name: 'Cotton T-Shirt', sales: 145, revenue: 4350 },
   { name: 'Denim Jeans', sales: 98, revenue: 5880 },
   { name: 'Summer Dress', sales: 67, revenue: 5360 },
@@ -58,7 +59,7 @@ const topProductsData = [
   { name: 'Sneakers', sales: 34, revenue: 3400 }
 ];
 
-const customerSegmentData = [
+const customerSegmentDataFallback = [
   { name: 'New Customers', value: 35, color: '#3b82f6' },
   { name: 'Returning', value: 45, color: '#8b5cf6' },
   { name: 'VIP', value: 20, color: '#10b981' }
@@ -80,9 +81,9 @@ const recentActivityData = [
 ];
 
 // Memoized chart components to prevent re-renders
-const RevenueChart = memo(() => (
+const RevenueChart = memo(({ data }) => (
   <ResponsiveContainer width="100%" height={300}>
-    <AreaChart data={revenueData}>
+    <AreaChart data={data}>
       <defs>
         <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
           <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
@@ -113,11 +114,11 @@ const RevenueChart = memo(() => (
 
 RevenueChart.displayName = 'RevenueChart';
 
-const CustomerSegmentChart = memo(() => (
+const CustomerSegmentChart = memo(({ data }) => (
   <ResponsiveContainer width="100%" height={300}>
     <PieChart>
       <Pie
-        data={customerSegmentData}
+        data={data}
         cx="50%"
         cy="50%"
         outerRadius={100}
@@ -125,7 +126,7 @@ const CustomerSegmentChart = memo(() => (
         dataKey="value"
         label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
       >
-        {customerSegmentData.map((entry, index) => (
+        {data?.map((entry, index) => (
           <Cell key={`cell-${index}`} fill={entry.color} />
         ))}
       </Pie>
@@ -136,9 +137,9 @@ const CustomerSegmentChart = memo(() => (
 
 CustomerSegmentChart.displayName = 'CustomerSegmentChart';
 
-const TopProductsChart = memo(() => (
+const TopProductsChart = memo(({ data }) => (
   <ResponsiveContainer width="100%" height={300}>
-    <BarChart data={topProductsData} layout="horizontal">
+    <BarChart data={data} layout="horizontal">
       <CartesianGrid strokeDasharray="3 3" />
       <XAxis type="number" />
       <YAxis dataKey="name" type="category" width={100} />
@@ -153,13 +154,79 @@ TopProductsChart.displayName = 'TopProductsChart';
 const Analytics = () => {
   const [dateRange, setDateRange] = useState('7d');
   
-  // Use stable selectors to prevent infinite re-renders
+  const {
+    dashboardStats,
+    revenueAnalytics,
+    customerAnalytics,
+    productAnalytics,
+    isLoading,
+    error,
+    initialize,
+    loadRevenueAnalytics,
+    loadCustomerAnalytics,
+    loadProductAnalytics
+  } = useAnalyticsStore();
+
+  // Initialize analytics data on component mount
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  // Reload data when date range changes
+  useEffect(() => {
+    if (dateRange) {
+      const params = { period: dateRange };
+      Promise.all([
+        loadRevenueAnalytics(params),
+        loadCustomerAnalytics(params),
+        loadProductAnalytics(params)
+      ]);
+    }
+  }, [dateRange, loadRevenueAnalytics, loadCustomerAnalytics, loadProductAnalytics]);
+  
+  // Use stable selectors to prevent infinite re-renders - fallback to previous implementation for now
   const orders = useOrderStore(state => state.orders);
   const customers = useCustomerStore(state => state.customers);
   const products = useInventoryStore(state => state.products);
 
+  // Use real data from analytics API when available, otherwise fallback to computed values
+  const revenueData = revenueAnalytics?.dailyData?.map(item => ({
+    date: `${item._id.year}-${String(item._id.month).padStart(2, '0')}-${String(item._id.day).padStart(2, '0')}`,
+    revenue: item.revenue,
+    orders: item.orders
+  })) || revenueDataFallback;
+  
+  const topProductsData = productAnalytics?.topProducts?.map(product => ({
+    name: product.name,
+    sales: product.totalSold,
+    revenue: product.revenue
+  })) || topProductsDataFallback;
+  
+  const customerSegmentData = customerAnalytics?.customerSegments?.map(segment => ({
+    name: segment._id === 'new' ? 'New Customers' : 
+         segment._id === 'regular' ? 'Regular Customers' : 
+         segment._id === 'loyal' ? 'Loyal Customers' : segment._id,
+    value: segment.count,
+    color: segment._id === 'new' ? '#3b82f6' : 
+           segment._id === 'regular' ? '#8b5cf6' : 
+           segment._id === 'loyal' ? '#10b981' : '#6b7280'
+  })) || customerSegmentDataFallback;
+
   // Memoize computed values to prevent recalculation on every render
   const orderStats = useMemo(() => {
+    // Use dashboard stats if available, otherwise compute from orders
+    if (dashboardStats) {
+      return {
+        total: dashboardStats.orders.total,
+        pending: dashboardStats.orders.pending,
+        completed: dashboardStats.orders.completed,
+        totalRevenue: dashboardStats.revenue.total,
+        avgOrderValue: dashboardStats.orders.total > 0 ? 
+          dashboardStats.revenue.total / dashboardStats.orders.total : 0
+      };
+    }
+    
+    // Fallback to computed values
     const total = orders.length;
     const pending = orders.filter(o => o.status === 'pending').length;
     const shipped = orders.filter(o => o.status === 'shipped').length;
@@ -247,38 +314,57 @@ const Analytics = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {kpis.map((kpi, index) => (
-          <motion.div
-            key={kpi.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1, duration: 0.5 }}
-          >
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">{kpi.title}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{kpi.value}</p>
-                  <div className={`flex items-center mt-2 text-sm ${
-                    kpi.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {kpi.changeType === 'increase' ? (
-                      <TrendingUp className="w-4 h-4 mr-1" />
-                    ) : (
-                      <TrendingDown className="w-4 h-4 mr-1" />
-                    )}
-                    {kpi.change}
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="p-6">
+              <div className="animate-pulse">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-300 rounded w-24 mb-2"></div>
+                    <div className="h-8 bg-gray-300 rounded w-16 mb-2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-20"></div>
                   </div>
-                </div>
-                <div className={`${kpi.color} p-3 rounded-lg`}>
-                  <kpi.icon className="w-6 h-6 text-white" />
+                  <div className="bg-gray-300 w-12 h-12 rounded-lg"></div>
                 </div>
               </div>
             </Card>
-          </motion.div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {kpis.map((kpi, index) => (
+            <motion.div
+              key={kpi.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1, duration: 0.5 }}
+            >
+              <Card className="p-6 hover:shadow-lg transition-shadow">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">{kpi.title}</p>
+                    <p className="text-2xl font-bold text-gray-900 mt-1">{kpi.value}</p>
+                    <div className={`flex items-center mt-2 text-sm ${
+                      kpi.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {kpi.changeType === 'increase' ? (
+                        <TrendingUp className="w-4 h-4 mr-1" />
+                      ) : (
+                        <TrendingDown className="w-4 h-4 mr-1" />
+                      )}
+                      {kpi.change}
+                    </div>
+                  </div>
+                  <div className={`${kpi.color} p-3 rounded-lg`}>
+                    <kpi.icon className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -297,7 +383,7 @@ const Analytics = () => {
                 View Details
               </Button>
             </div>
-            <RevenueChart />
+            <RevenueChart data={revenueData} />
           </Card>
         </motion.div>
 
@@ -316,7 +402,7 @@ const Analytics = () => {
                 Manage Segments
               </Button>
             </div>
-            <CustomerSegmentChart />
+            <CustomerSegmentChart data={customerSegmentData} />
           </Card>
         </motion.div>
       </div>
@@ -335,7 +421,7 @@ const Analytics = () => {
               <h3 className="text-lg font-semibold text-gray-900">Top Performing Products</h3>
               <Button variant="outline" size="sm">View All</Button>
             </div>
-            <TopProductsChart />
+            <TopProductsChart data={topProductsData} />
           </Card>
         </motion.div>
 

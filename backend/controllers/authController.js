@@ -5,47 +5,10 @@ import User from '../models/User.js';
 import RefreshToken from '../models/RefreshToken.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
-import * as emailService from '../services/emailService.js';
-import { 
-  generateAccessToken, 
-  generateRefreshToken, 
-  verifyRefreshToken, 
-  revokeRefreshToken,
-  revokeAllRefreshTokens,
-  setAuthCookies,
-  clearAuthCookies,
-  extractTokensFromCookies
-} from '../utils/tokenUtils.js';
+import emailService from '../services/emailService.js';
+import { createSendTokens, clearAuthCookies } from '../utils/tokenUtils.js';
 
-// Create and send tokens via cookies
-const createSendTokens = async (user, statusCode, res, req) => {
-  const accessToken = generateAccessToken({ id: user._id, role: user.role }, 'user');
-  const refreshToken = await generateRefreshToken(
-    user._id, 
-    'user', 
-    req.ip, 
-    req.get('User-Agent')
-  );
-
-  // Set secure HTTP-only cookies
-  setAuthCookies(res, accessToken, refreshToken, 'user');
-
-  // Remove sensitive data from output
-  user.password = undefined;
-  user.otp = undefined;
-  user.otpExpires = undefined;
-  user.passwordResetToken = undefined;
-  user.passwordResetExpires = undefined;
-
-  res.status(statusCode).json({
-    status: 'success',
-    data: {
-      user,
-    },
-  });
-};
-
-// Register new user - Step 1: Initiate registration and send OTP
+// Register a new user
 export const register = catchAsync(async (req, res, next) => {
   // Check validation errors
   const errors = validationResult(req);
@@ -55,30 +18,20 @@ export const register = catchAsync(async (req, res, next) => {
 
   const { name, email, phone, password } = req.body;
 
-  // Check if user already exists and is verified
-  const existingUser = await User.findOne({
-    $or: [{ email }, { phone }],
-    isPhoneVerified: true
-  });
-
+  // Check if user already exists
+  const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
   if (existingUser) {
-    if (existingUser.email === email) {
-      return next(new AppError('An account with this email already exists.', 400));
-    }
-    if (existingUser.phone === phone) {
-      return next(new AppError('An account with this phone number already exists.', 400));
-    }
+    return next(new AppError('User with this email or phone already exists', 400));
   }
 
   // Generate OTP
   const otp = User.generateOTP();
-  console.log(`[DEV] Registration OTP for ${email}: ${otp}`); // <-- Log OTP for dev
+  console.log(`[DEV] Registration OTP for ${email}: ${otp}`);
 
   // Send OTP email
-  try {
-    await emailService.sendOTPEmail({ name, email }, otp);
-  } catch (error) {
-    console.error('Failed to send OTP email:', error);
+  const emailResult = await emailService.sendOTPEmail({ name, email }, otp);
+  if (!emailResult.success) {
+    console.error('❌ authController: Failed to send critical OTP email. Reason:', emailResult.error.message);
     return next(new AppError('Failed to send OTP. Please try again.', 500));
   }
 
@@ -86,21 +39,68 @@ export const register = catchAsync(async (req, res, next) => {
   const registrationToken = jwt.sign(
     { name, email, phone, password, otp },
     process.env.JWT_SECRET,
-    { expiresIn: `${process.env.OTP_EXPIRY_MINUTES}m` }
+    { expiresIn: '10m' }
   );
 
   res.status(200).json({
     status: 'success',
-    message: `An OTP has been sent to ${email}. Please use it to verify your account.`,
-    data: {
-      registrationToken
-    }
+    message: 'OTP sent to your email',
+    data: { registrationToken }
   });
+});
+
+// Verify OTP and complete registration
+export const verifyOTP = catchAsync(async (req, res, next) => {
+  const { registrationToken, otp } = req.body;
+
+  if (!registrationToken || !otp) {
+    return next(new AppError('Registration token and OTP are required', 400));
+  }
+
+  // Verify the registration token
+  let decoded;
+  try {
+    decoded = jwt.verify(registrationToken, process.env.JWT_SECRET);
+  } catch (error) {
+    return next(new AppError('Invalid or expired registration token', 400));
+  }
+
+  // Check if OTP matches
+  if (decoded.otp !== otp) {
+    return next(new AppError('Invalid OTP', 400));
+  }
+
+  const { name, email, phone, password } = decoded;
+
+  // Create the user with explicit status
+  const newUser = await User.create({
+    name,
+    email,
+    phone,
+    password,
+    isPhoneVerified: true,
+    verifiedAt: new Date(),
+    status: 'active' // Explicitly set status to active
+  });
+
+  console.log('[verifyOTP] Created user with ID:', newUser._id, 'Status:', newUser.status);
+
+  // Send welcome email but do not block the request if it fails
+  const welcomeEmailResult = await emailService.sendWelcomeEmail(newUser);
+  if (!welcomeEmailResult.success) {
+    console.error('⚠️  Failed to send welcome email after verification, but user was created successfully. Reason:', welcomeEmailResult.error?.message);
+  }
+
+  console.log('[verifyOTP] About to call createSendTokens');
+  
+  // Log the new user in
+  await createSendTokens(newUser, 201, res, req);
+  
+  console.log('[verifyOTP] createSendTokens completed');
 });
 
 // Login user
 export const login = catchAsync(async (req, res, next) => {
-  // Check validation errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return next(new AppError('Validation failed', 400, errors.array()));
@@ -108,190 +108,75 @@ export const login = catchAsync(async (req, res, next) => {
 
   const { email, password } = req.body;
 
-  // Check if email and password exist
   if (!email || !password) {
     return next(new AppError('Please provide email and password!', 400));
   }
 
-  // Check if user exists && password is correct
-  let user = await User.findOne({ 
-    $or: [
-      { email: email },
-      { phone: email } // Allow login with phone number
-    ]
-  }).select('+password +loginAttempts +lockUntil');
+  console.log('[login] Attempting login for:', email);
+
+  const user = await User.findOne({ email }).select('+password +loginAttempts +lockUntil');
 
   if (!user || !(await user.correctPassword(password, user.password))) {
-    // Handle failed login attempts
-    if (user) {
-      await user.incLoginAttempts();
-    }
+    console.log('[login] Invalid credentials for:', email);
+    if (user) await user.incLoginAttempts();
     return next(new AppError('Incorrect email or password', 401));
   }
 
-  // Check if account is locked
   if (user.isLocked) {
-    return next(new AppError('Account is temporarily locked due to too many failed login attempts. Please try again later.', 423));
+    return next(new AppError('Account locked due to too many failed login attempts.', 403));
   }
 
   // Reset login attempts on successful login
-  if (user.loginAttempts && user.loginAttempts > 0) {
-    await user.updateOne({
-      $unset: { loginAttempts: 1, lockUntil: 1 }
-    });
-  }
-
-  // Update last login
-  user.lastLogin = new Date();
+  user.loginAttempts = 0;
+  user.lastLogin = Date.now();
   await user.save({ validateBeforeSave: false });
+
+  console.log('[login] Login successful for:', email);
 
   // Create and send tokens
   await createSendTokens(user, 200, res, req);
 });
 
-// Verify OTP - Step 2: Verify OTP and create user
-export const verifyOTP = catchAsync(async (req, res, next) => {
-  // Check validation errors
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return next(new AppError('Validation failed', 400, errors.array()));
-  }
-
-  const { registrationToken, otp } = req.body;
-
-  if (!registrationToken || !otp) {
-    return next(new AppError('Registration token and OTP are required.', 400));
-  }
-
-  // Verify the temporary token
-  let decoded;
-  try {
-    decoded = jwt.verify(registrationToken, process.env.JWT_SECRET);
-  } catch (err) {
-    return next(new AppError('Invalid or expired registration token. Please register again.', 400));
-  }
-
-  // Check if OTP matches
-  if (decoded.otp !== otp) {
-    return next(new AppError('Invalid OTP.', 400));
-  }
-
-  // OTP is correct, create the user
-  const { name, email, phone, password } = decoded;
-
-  const newUser = await User.create({
-    name,
-    email,
-    phone,
-    password,
-    isPhoneVerified: true, // Mark as verified since OTP is correct
-    verifiedAt: new Date()
-  });
-
-  // Send welcome email
-  try {
-    await emailService.sendWelcomeEmail(newUser);
-  } catch (error) {
-    console.error('Failed to send welcome email after verification:', error);
-  }
-
-  // Log the new user in
-  await createSendTokens(newUser, 201, res, req);
-});
-
-// Resend OTP
-export const resendOTP = catchAsync(async (req, res, next) => {
-  const { registrationToken } = req.body;
-
-  if (!registrationToken) {
-    return next(new AppError('Registration token is required to resend OTP.', 400));
-  }
-
-  // Verify the temporary token to get user details
-  let decoded;
-  try {
-    decoded = jwt.verify(registrationToken, process.env.JWT_SECRET, {
-      ignoreExpiration: true // We allow resending OTP for expired tokens
-    });
-  } catch (err) {
-    return next(new AppError('Invalid registration token.', 400));
-  }
-
-  const { name, email, phone, password } = decoded;
-
-  // Generate and send new OTP
-  const newOtp = User.generateOTP();
-  console.log(`[DEV] Resend OTP for ${email}: ${newOtp}`); // <-- Log OTP for dev
-
-  try {
-    await emailService.sendOTPEmail({ name, email }, newOtp);
-  } catch (error) {
-    return next(new AppError('Failed to send OTP. Please try again.', 500));
-  }
-
-  // Create a new registration token with the new OTP
-  const newRegistrationToken = jwt.sign(
-    { name, email, phone, password, otp: newOtp },
-    process.env.JWT_SECRET,
-    { expiresIn: `${process.env.OTP_EXPIRY_MINUTES}m` }
-  );
-
-  res.status(200).json({
-    status: 'success',
-    message: 'A new OTP has been sent to your email.',
-    data: {
-      registrationToken: newRegistrationToken
-    }
-  });
-});
-
-// Refresh access token
+// Refresh token
 export const refreshToken = catchAsync(async (req, res, next) => {
-  const { refreshToken } = extractTokensFromCookies(req);
-
-  if (!refreshToken) {
-    return next(new AppError('Refresh token not provided', 401));
+  const token = req.cookies.userRefreshToken;
+  
+  console.log('[refreshToken] Refresh token request, token present:', !!token);
+  
+  if (!token) {
+    return next(new AppError('You are not logged in.', 401));
   }
 
-  try {
-    // Verify refresh token
-    const tokenDoc = await verifyRefreshToken(refreshToken, 'user');
-    const user = tokenDoc.user;
+  const refreshTokenDoc = await RefreshToken.findOne({ token }).populate('user');
 
-    // Generate new access token
-    const newAccessToken = generateAccessToken({ id: user._id, role: user.role }, 'user');
-
-    // Update access token cookie (keep refresh token as is)
-    setAuthCookies(res, newAccessToken, refreshToken, 'user');
-
-    res.status(200).json({
-      status: 'success',
-      message: 'Token refreshed successfully'
-    });
-  } catch (error) {
-    // Clear cookies if refresh token is invalid
+  if (!refreshTokenDoc || !refreshTokenDoc.user) {
+    console.log('[refreshToken] Invalid refresh token');
     clearAuthCookies(res, 'user');
-    return next(new AppError('Invalid refresh token', 401));
+    return next(new AppError('Invalid session. Please log in again.', 401));
   }
+
+  if (refreshTokenDoc.expires < new Date()) {
+    console.log('[refreshToken] Refresh token expired');
+    await refreshTokenDoc.deleteOne();
+    clearAuthCookies(res, 'user');
+    return next(new AppError('Session expired. Please log in again.', 401));
+  }
+
+  console.log('[refreshToken] Refresh successful for:', refreshTokenDoc.user.email);
+  await createSendTokens(refreshTokenDoc.user, 200, res, req);
 });
 
 // Logout
 export const logout = catchAsync(async (req, res, next) => {
-  const { refreshToken } = extractTokensFromCookies(req);
-
-  // Revoke refresh token if it exists
-  if (refreshToken) {
-    try {
-      await revokeRefreshToken(refreshToken, req.ip, req.get('User-Agent'));
-    } catch (error) {
-      console.error('Failed to revoke refresh token:', error);
-    }
+  const token = req.cookies.userRefreshToken;
+  
+  if (token) {
+    await RefreshToken.findOneAndDelete({ token });
   }
-
-  // Clear auth cookies
+  
   clearAuthCookies(res, 'user');
-
-  res.status(200).json({
+  
+  res.status(200).json({ 
     status: 'success',
     message: 'Logged out successfully'
   });
@@ -299,17 +184,69 @@ export const logout = catchAsync(async (req, res, next) => {
 
 // Logout from all devices
 export const logoutAll = catchAsync(async (req, res, next) => {
-  const userId = req.user._id;
-
-  // Revoke all refresh tokens for this user
-  await revokeAllRefreshTokens(userId, 'user');
-
-  // Clear auth cookies
+  console.log('[logoutAll] Processing logout from all devices');
+  
+  try {
+    await RefreshToken.deleteMany({ user: req.user._id });
+    console.log('[logoutAll] All refresh tokens deleted');
+  } catch (error) {
+    console.log('[logoutAll] Error deleting refresh tokens:', error.message);
+  }
+  
   clearAuthCookies(res, 'user');
+  
+  res.status(200).json({ 
+    status: 'success', 
+    message: 'Logged out from all devices.' 
+  });
+});
+
+// Resend OTP
+export const resendOTP = catchAsync(async (req, res, next) => {
+  const { registrationToken } = req.body;
+
+  if (!registrationToken) {
+    return next(new AppError('Registration token is required', 400));
+  }
+
+  // Verify the existing registration token
+  let decoded;
+  try {
+    decoded = jwt.verify(registrationToken, process.env.JWT_SECRET);
+  } catch (error) {
+    return next(new AppError('Invalid or expired registration token', 400));
+  }
+
+  const { name, email, phone, password } = decoded;
+
+  // Check if user already exists
+  const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
+  if (existingUser) {
+    return next(new AppError('User with this email or phone already exists', 400));
+  }
+
+  // Generate new OTP
+  const newOtp = User.generateOTP();
+  console.log(`[DEV] Resend OTP for ${email}: ${newOtp}`);
+
+  // Send OTP email
+  const emailResult = await emailService.sendOTPEmail({ name, email }, newOtp);
+  if (!emailResult.success) {
+    console.error('❌ authController: Failed to send OTP email. Reason:', emailResult.error.message);
+    return next(new AppError('Failed to send OTP. Please try again.', 500));
+  }
+
+  // Create a new registration token with the new OTP
+  const newRegistrationToken = jwt.sign(
+    { name, email, phone, password, otp: newOtp },
+    process.env.JWT_SECRET,
+    { expiresIn: '10m' }
+  );
 
   res.status(200).json({
     status: 'success',
-    message: 'Logged out from all devices successfully'
+    message: 'New OTP sent to your email',
+    data: { registrationToken: newRegistrationToken }
   });
 });
 
@@ -397,91 +334,63 @@ export const updatePassword = catchAsync(async (req, res, next) => {
 
 // Get current user
 export const getMe = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user._id)
-    .populate('addresses')
-    .populate({
-      path: 'orders',
-      options: { sort: { createdAt: -1 }, limit: 5 }
-    });
-
+  console.log('[getMe] Getting current user:', req.user?.email);
+  
   res.status(200).json({
     status: 'success',
-    data: {
-      user
-    }
+    data: { user: req.user }
   });
 });
 
-// Update current user data
+// Update current user
 export const updateMe = catchAsync(async (req, res, next) => {
-  // Create error if user POSTs password data
-  if (req.body.password || req.body.passwordConfirm) {
-    return next(
-      new AppError(
-        'This route is not for password updates. Please use /updateMyPassword.',
-        400
-      )
-    );
-  }
-
-  // Filter out unwanted fields that are not allowed to be updated
-  const filteredBody = {};
-  const allowedFields = ['name', 'email', 'phone', 'dateOfBirth', 'gender'];
+  const { name, phone } = req.body;
+  const user = await User.findByIdAndUpdate(
+    req.user.id,
+    { name, phone },
+    { new: true, runValidators: true }
+  );
   
-  Object.keys(req.body).forEach(el => {
-    if (allowedFields.includes(el)) {
-      filteredBody[el] = req.body[el];
-    }
-  });
-
-  // Update user document
-  const updatedUser = await User.findByIdAndUpdate(req.user._id, filteredBody, {
-    new: true,
-    runValidators: true
-  });
-
   res.status(200).json({
     status: 'success',
-    data: {
-      user: updatedUser
-    }
+    data: { user }
   });
 });
 
-// Address management
+// Get user addresses
 export const getAddresses = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user._id).populate('addresses');
+  console.log('[getAddresses] Getting addresses for user:', req.user.email);
   
+  const user = await User.findById(req.user.id);
   res.status(200).json({
     status: 'success',
-    data: {
-      addresses: user.addresses
-    }
+    data: { addresses: user.addresses || [] }
   });
 });
 
+// Add new address
 export const addAddress = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user._id);
+  console.log('[addAddress] Adding address for user:', req.user.email);
+  console.log('[addAddress] Address data:', req.body);
   
-  const newAddress = {
-    ...req.body,
-    id: new Date().getTime().toString()
-  };
+  const user = await User.findById(req.user.id);
+  const newAddress = { ...req.body, _id: new Date().getTime().toString() };
   
+  if (!user.addresses) user.addresses = [];
   user.addresses.push(newAddress);
+  
   await user.save();
   
   res.status(201).json({
     status: 'success',
-    data: {
-      address: newAddress
-    }
+    data: { address: newAddress }
   });
 });
 
+// Update address
 export const updateAddress = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user._id);
-  const addressIndex = user.addresses.findIndex(addr => addr.id === req.params.addressId);
+  const user = await User.findById(req.user.id);
+  const addressIndex = user.addresses.findIndex(addr => addr._id === req.params.addressId);
   
   if (addressIndex === -1) {
     return next(new AppError('Address not found', 404));
@@ -492,15 +401,14 @@ export const updateAddress = catchAsync(async (req, res, next) => {
   
   res.status(200).json({
     status: 'success',
-    data: {
-      address: user.addresses[addressIndex]
-    }
+    data: { address: user.addresses[addressIndex] }
   });
 });
 
+// Delete address
 export const deleteAddress = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user._id);
-  user.addresses = user.addresses.filter(addr => addr.id !== req.params.addressId);
+  const user = await User.findById(req.user.id);
+  user.addresses = user.addresses.filter(addr => addr._id !== req.params.addressId);
   await user.save();
   
   res.status(204).json({
@@ -509,24 +417,20 @@ export const deleteAddress = catchAsync(async (req, res, next) => {
   });
 });
 
-// Wishlist management
+// Get wishlist
 export const getWishlist = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user._id).populate('wishlist');
-  
+  const user = await User.findById(req.user.id).populate('wishlist');
   res.status(200).json({
     status: 'success',
-    data: {
-      wishlist: user.wishlist
-    }
+    data: { wishlist: user.wishlist || [] }
   });
 });
 
+// Add to wishlist
 export const addToWishlist = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user._id);
-  const productId = req.params.productId;
-  
-  if (!user.wishlist.includes(productId)) {
-    user.wishlist.push(productId);
+  const user = await User.findById(req.user.id);
+  if (!user.wishlist.includes(req.params.productId)) {
+    user.wishlist.push(req.params.productId);
     await user.save();
   }
   
@@ -536,13 +440,41 @@ export const addToWishlist = catchAsync(async (req, res, next) => {
   });
 });
 
+// Remove from wishlist
 export const removeFromWishlist = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user._id);
+  const user = await User.findById(req.user.id);
   user.wishlist = user.wishlist.filter(id => id.toString() !== req.params.productId);
   await user.save();
   
   res.status(200).json({
     status: 'success',
     message: 'Product removed from wishlist'
+  });
+});
+
+// Get user orders
+export const getUserOrders = catchAsync(async (req, res, next) => {
+  console.log('[getUserOrders] Getting orders for user:', req.user.email);
+  
+  // For now, return empty array until you implement Order model
+  const orders = [];
+  const total = 0;
+  
+  res.status(200).json({
+    status: 'success',
+    results: orders.length,
+    total,
+    page: 1,
+    totalPages: 1,
+    data: { orders }
+  });
+});
+
+// Create order (can be added later when needed)
+export const createOrder = catchAsync(async (req, res, next) => {
+  // Placeholder for now
+  res.status(501).json({
+    status: 'error',
+    message: 'Order creation not implemented yet'
   });
 });

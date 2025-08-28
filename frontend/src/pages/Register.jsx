@@ -1,9 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import OTPModal from "../components/OTPModal";
 import useUserStore from "../stores/useUserStore";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { authAPI } from "../services/api";
+import toast from "react-hot-toast";
+import { AlertCircle } from "lucide-react";
 
 export default function Register() {
   const { setUser } = useUserStore();
@@ -13,6 +17,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
+  const navigate = useNavigate();
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -77,11 +82,32 @@ export default function Register() {
     setIsLoading(true);
     setErrors({});
     
-    // Simulate API call
-    setTimeout(() => {
+    console.log('Frontend: Registration form submitted with data:', form);
+    try {
+      console.log('Frontend: Attempting to call authAPI.register...');
+      const response = await authAPI.register(form);
+      console.log('Frontend: API call successful, response:', response);
+      
+      toast.success(response.message || 'OTP sent to your email!');
+      // Store the token and navigate to the OTP verification page
+      navigate('/verify-otp', { state: { registrationToken: response.data.registrationToken } });
+
+    } catch (error) {
+      console.error('Frontend: API call failed. Error:', error);
+      if (error.status === 400 && error.data?.errors) {
+        // Handle validation errors from the backend
+        const newErrors = {};
+        error.data.errors.forEach(err => {
+          newErrors[err.path] = err.msg;
+        });
+        setErrors(newErrors);
+        toast.error('Please fix the errors in the form.');
+      } else {
+        toast.error(error.message || 'Registration failed. Please try again.');
+      }
+    } finally {
       setIsLoading(false);
-      setShowOTP(true);
-    }, 1000);
+    }
   }
 
   function handleVerifyOTP(otp) {
@@ -113,6 +139,9 @@ export default function Register() {
             <CardTitle className="text-2xl font-semibold text-center text-slate-800">
               Sign Up
             </CardTitle>
+            <CardDescription className="text-center text-sm text-slate-500">
+              Enter your details to get started.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -131,7 +160,7 @@ export default function Register() {
                 />
                 {errors.name && (
                   <p className="text-sm text-red-600 flex items-center gap-1">
-                    <span>⚠️</span> {errors.name}
+                    <AlertCircle className="w-4 h-4" /> {errors.name}
                   </p>
                 )}
               </div>
@@ -151,7 +180,7 @@ export default function Register() {
                 />
                 {errors.email && (
                   <p className="text-sm text-red-600 flex items-center gap-1">
-                    <span>⚠️</span> {errors.email}
+                    <AlertCircle className="w-4 h-4" /> {errors.email}
                   </p>
                 )}
               </div>
@@ -171,7 +200,7 @@ export default function Register() {
                 />
                 {errors.phone && (
                   <p className="text-sm text-red-600 flex items-center gap-1">
-                    <span>⚠️</span> {errors.phone}
+                    <AlertCircle className="w-4 h-4" /> {errors.phone}
                   </p>
                 )}
               </div>
@@ -213,7 +242,7 @@ export default function Register() {
                 )}
                 {errors.password && (
                   <p className="text-sm text-red-600 flex items-center gap-1">
-                    <span>⚠️</span> {errors.password}
+                    <AlertCircle className="w-4 h-4" /> {errors.password}
                   </p>
                 )}
               </div>
@@ -233,7 +262,7 @@ export default function Register() {
                 />
                 {errors.confirmPassword && (
                   <p className="text-sm text-red-600 flex items-center gap-1">
-                    <span>⚠️</span> {errors.confirmPassword}
+                    <AlertCircle className="w-4 h-4" /> {errors.confirmPassword}
                   </p>
                 )}
               </div>
@@ -302,4 +331,4 @@ export default function Register() {
       />
     </div>
   );
-} 
+}

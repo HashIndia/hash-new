@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
@@ -22,29 +22,57 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
-import OTPModal from '../components/OTPModal';
-import useOrderStore from '../stores/useOrderStore';
+import { ordersAPI } from '../services/api';
 import { format } from 'date-fns';
+import toast from 'react-hot-toast';
 
 const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [loading, setLoading] = useState(true);
   
-  const {
-    searchTerm,
-    statusFilter,
-    dateRange,
-    setSearchTerm,
-    setStatusFilter,
-    setDateRange,
-    getFilteredOrders,
-    updateOrderStatus,
-    generateOTP,
-    verifyOTP,
-    addOrderNote
-  } = useOrderStore();
+  // Real state from API
+  const [orders, setOrders] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [dateRange, setDateRange] = useState('all');
 
-  const orders = getFilteredOrders();
+  // Fetch orders from API
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        const params = {
+          search: searchTerm,
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+          dateRange: dateRange !== 'all' ? dateRange : undefined
+        };
+        
+        const response = await ordersAPI.getOrders(params);
+        setOrders(response?.data?.data?.orders || []);
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+        toast.error('Failed to fetch orders');
+        setOrders([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [searchTerm, statusFilter, dateRange]);
+
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      await ordersAPI.updateOrderStatus(orderId, newStatus);
+      setOrders(prev => prev.map(order => 
+        order._id === orderId ? { ...order, status: newStatus } : order
+      ));
+      toast.success('Order status updated successfully');
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      toast.error('Failed to update order status');
+    }
+  };
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -66,27 +94,19 @@ const Orders = () => {
     }
   };
 
-  const handleStatusChange = (orderId, newStatus) => {
-    updateOrderStatus(orderId, newStatus);
-  };
-
-  const handleOTPAction = (order) => {
-    setSelectedOrder(order);
-    setShowOTPModal(true);
-  };
-
-  const handleGenerateOTP = async (orderId) => {
-    const otp = generateOTP(orderId);
-    // In real app, you would send this OTP via SMS/email
-    console.log(`OTP ${otp} generated for order ${orderId}`);
-  };
-
-  const handleVerifyOTP = async (orderId, enteredOTP) => {
-    return verifyOTP(orderId, enteredOTP);
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading orders...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -147,159 +167,119 @@ const Orders = () => {
 
       {/* Orders List */}
       <div className="space-y-4">
-        <AnimatePresence>
-          {orders.map((order, index) => (
-            <motion.div
-              key={order.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ delay: index * 0.05, duration: 0.3 }}
-            >
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className={`p-2 rounded-lg ${getStatusColor(order.status).replace('text-', 'bg-').replace('-800', '-100')}`}>
-                      {getStatusIcon(order.status)}
+        {orders.length === 0 ? (
+          <div className="text-center py-12">
+            <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
+            <p className="text-gray-600">Try adjusting your search criteria.</p>
+          </div>
+        ) : (
+          <AnimatePresence>
+            {orders.map((order, index) => (
+              <motion.div
+                key={order._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ delay: index * 0.05, duration: 0.3 }}
+              >
+                <Card className="p-6 hover:shadow-lg transition-shadow">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className={`p-2 rounded-lg ${getStatusColor(order.status).replace('text-', 'bg-').replace('-800', '-100')}`}>
+                        {getStatusIcon(order.status)}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{order.orderNumber || order._id}</h3>
+                        <p className="text-sm text-gray-600">
+                          {format(new Date(order.createdAt), 'MMM dd, yyyy • HH:mm')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(order.status)}`}>
+                        {order.status}
+                      </span>
+                      <span className="text-lg font-bold text-gray-900">
+                        ₹{order.totalAmount?.toFixed(2) || '0.00'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-1">Customer</h4>
+                      <p className="text-sm text-gray-600">{order.user?.name || 'N/A'}</p>
+                      <p className="text-sm text-gray-600">{order.user?.email || 'N/A'}</p>
+                      <p className="text-sm text-gray-600">{order.user?.phone || 'N/A'}</p>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{order.id}</h3>
-                      <p className="text-sm text-gray-600">
-                        {format(new Date(order.orderDate), 'MMM dd, yyyy • HH:mm')}
+                      <h4 className="font-medium text-gray-900 mb-1">Items</h4>
+                      {order.items?.slice(0, 2).map((item, idx) => (
+                        <p key={idx} className="text-sm text-gray-600">
+                          {item.quantity}x {item.name}
+                        </p>
+                      ))}
+                      {order.items?.length > 2 && (
+                        <p className="text-sm text-gray-500">+{order.items.length - 2} more items</p>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-1">Delivery</h4>
+                      <p className="text-sm text-gray-600 mb-1">
+                        {order.shippingAddress?.street || 'N/A'}
                       </p>
+                      {order.trackingNumber && (
+                        <p className="text-sm text-blue-600">
+                          Tracking: {order.trackingNumber}
+                        </p>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(order.status)}`}>
-                      {order.status}
-                    </span>
-                    <span className="text-lg font-bold text-gray-900">
-                      ${order.total.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-1">Customer</h4>
-                    <p className="text-sm text-gray-600">{order.customerName}</p>
-                    <p className="text-sm text-gray-600">{order.customerEmail}</p>
-                    <p className="text-sm text-gray-600">{order.customerPhone}</p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-1">Items</h4>
-                    {order.items.slice(0, 2).map((item, idx) => (
-                      <p key={idx} className="text-sm text-gray-600">
-                        {item.quantity}x {item.name}
-                      </p>
-                    ))}
-                    {order.items.length > 2 && (
-                      <p className="text-sm text-gray-500">+{order.items.length - 2} more items</p>
-                    )}
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-1">Delivery</h4>
-                    <p className="text-sm text-gray-600 mb-1">
-                      {order.customerAddress}
-                    </p>
-                    {order.trackingNumber && (
-                      <p className="text-sm text-blue-600">
-                        Tracking: {order.trackingNumber}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                  <div className="flex space-x-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setSelectedOrder(order)}
-                    >
-                      <Eye className="w-3 h-3 mr-1" />
-                      View Details
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setSelectedOrder(order)}
-                    >
-                      <Edit className="w-3 h-3 mr-1" />
-                      Edit
-                    </Button>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    {order.status === 'pending' && (
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                    <div className="flex space-x-2">
                       <Button
                         size="sm"
-                        onClick={() => handleStatusChange(order.id, 'shipped')}
-                        className="bg-blue-600 hover:bg-blue-700"
+                        variant="outline"
+                        onClick={() => setSelectedOrder(order)}
                       >
-                        <Truck className="w-3 h-3 mr-1" />
-                        Mark as Shipped
+                        <Eye className="w-3 h-3 mr-1" />
+                        View Details
                       </Button>
-                    )}
-                    {order.status === 'shipped' && (
-                      <Button
-                        size="sm"
-                        onClick={() => handleOTPAction(order)}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        {order.otpVerified ? (
-                          <>
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Delivered
-                          </>
-                        ) : (
-                          <>
-                            <Send className="w-3 h-3 mr-1" />
-                            OTP Delivery
-                          </>
-                        )}
-                      </Button>
-                    )}
-                    {order.status === 'delivered' && order.otpVerified && (
-                      <div className="flex items-center text-green-600 text-sm">
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Verified Delivery
-                      </div>
-                    )}
-                  </div>
-                </div>
+                    </div>
 
-                {order.notes && (
-                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-700">
-                      <strong>Note:</strong> {order.notes}
-                    </p>
+                    <div className="flex items-center space-x-2">
+                      {order.status === 'pending' && (
+                        <Button
+                          size="sm"
+                          onClick={() => handleStatusChange(order._id, 'shipped')}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          <Truck className="w-3 h-3 mr-1" />
+                          Mark as Shipped
+                        </Button>
+                      )}
+                      {order.status === 'shipped' && (
+                        <Button
+                          size="sm"
+                          onClick={() => handleStatusChange(order._id, 'delivered')}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Mark as Delivered
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                )}
-              </Card>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+                </Card>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        )}
       </div>
-
-      {orders.length === 0 && (
-        <div className="text-center py-12">
-          <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
-          <p className="text-gray-600">Try adjusting your search criteria.</p>
-        </div>
-      )}
-
-      {/* OTP Modal */}
-      <OTPModal
-        isOpen={showOTPModal}
-        onClose={() => setShowOTPModal(false)}
-        order={selectedOrder}
-        onGenerateOTP={handleGenerateOTP}
-        onVerifyOTP={handleVerifyOTP}
-      />
     </div>
   );
 };
 
-export default Orders; 
+export default Orders;

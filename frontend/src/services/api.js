@@ -1,18 +1,18 @@
 import axios from 'axios';
+import useUserStore from '../stores/useUserStore';
 
-// Create axios instance with base configuration
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
-  timeout: 10000,
-  withCredentials: true, // Include cookies in requests
+  withCredentials: true, // Essential for cookies
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Flag to prevent multiple refresh attempts
 let isRefreshing = false;
 let failedQueue = [];
+let refreshAttempts = 0;
+const MAX_REFRESH_ATTEMPTS = 1; // Reduced to 1 to prevent loops
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach(prom => {
@@ -22,173 +22,132 @@ const processQueue = (error, token = null) => {
       prom.resolve(token);
     }
   });
-  
   failedQueue = [];
 };
 
-// Response interceptor for error handling and token refresh
-api.interceptors.response.use(
-  (response) => {
-    return response.data;
+// Add request interceptor to log cookies
+api.interceptors.request.use(
+  (config) => {
+    // Only log important requests to reduce console spam
+    if (config.url?.includes('/login') || config.url?.includes('/register')) {
+      console.log('[API Request]', config.method?.toUpperCase(), config.url);
+      console.log('[API Request] withCredentials:', config.withCredentials);
+      console.log('[API Request] Current cookies:', document.cookie);
+    }
+    return config;
   },
+  (error) => Promise.reject(error)
+);
+
+// Simple response interceptor
+api.interceptors.response.use(
+  (response) => response.data,
   async (error) => {
     const originalRequest = error.config;
-    const message = error.response?.data?.message || error.message || 'An error occurred';
-    
-    // Handle 401 errors - try to refresh token
-    if (error.response?.status === 401 && !originalRequest._retry) {
+
+    // Reset refresh attempts on successful requests
+    if (error.response?.status !== 401) {
+      refreshAttempts = 0;
+    }
+
+    // Only try to refresh on 401 errors that aren't already retries
+    if (error.response?.status === 401 && !originalRequest._retry && refreshAttempts < MAX_REFRESH_ATTEMPTS) {
+      
+      // Never try to refresh these endpoints
+      const noRefreshEndpoints = ['/auth/refresh-token', '/auth/login', '/auth/register', '/auth/verify-otp'];
+      const shouldSkipRefresh = noRefreshEndpoints.some(endpoint => originalRequest.url?.includes(endpoint));
+      
+      if (shouldSkipRefresh) {
+        console.log('[API] Auth endpoint failed, not attempting refresh');
+        refreshAttempts = 0;
+        useUserStore.getState().logout();
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
+        return Promise.reject(error.response?.data || error);
+      }
+
       if (isRefreshing) {
-        // If refresh is already in progress, queue this request
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        }).then(() => {
-          return api(originalRequest);
-        }).catch(err => {
-          return Promise.reject(err);
-        });
+        }).then(() => api(originalRequest));
       }
 
       originalRequest._retry = true;
       isRefreshing = true;
+      refreshAttempts++;
 
       try {
-        // Try to refresh the token
+        console.log(`[API] Attempting token refresh (attempt ${refreshAttempts}/${MAX_REFRESH_ATTEMPTS})...`);
         await api.post('/auth/refresh-token');
+        console.log('[API] Token refresh successful');
+        refreshAttempts = 0;
         processQueue(null);
-        isRefreshing = false;
-        
-        // Retry the original request
         return api(originalRequest);
       } catch (refreshError) {
+        console.log('[API] Token refresh failed:', refreshError);
+        refreshAttempts = 0;
         processQueue(refreshError, null);
-        isRefreshing = false;
-        
-        // Refresh failed - redirect to login
-        window.location.href = '/login';
+        useUserStore.getState().logout();
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
-    
-    // For other errors, create a standardized error object
-    const standardError = {
-      message,
-      status: error.response?.status,
-      data: error.response?.data,
-    };
-    
-    return Promise.reject(standardError);
+
+    // If we've hit the refresh limit, logout immediately
+    if (refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
+      console.log('[API] Max refresh attempts exceeded, logging out');
+      refreshAttempts = 0;
+      useUserStore.getState().logout();
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
+    }
+
+    return Promise.reject(error.response?.data || error);
   }
 );
 
-// Auth API
+// API endpoints
 export const authAPI = {
-  // User Authentication
   register: (userData) => api.post('/auth/register', userData),
   login: (credentials) => api.post('/auth/login', credentials),
   logout: () => api.post('/auth/logout'),
-  logoutAll: () => api.post('/auth/logout-all'),
-  refreshToken: () => api.post('/auth/refresh-token'),
-  verifyOTP: (otpData) => api.post('/auth/verify-otp', otpData),
-  resendOTP: (phone) => api.post('/auth/resend-otp', { phone }),
-  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
-  resetPassword: (token, passwordData) => api.patch(`/auth/reset-password/${token}`, passwordData),
-  updatePassword: (passwordData) => api.patch('/auth/update-password', passwordData),
   getCurrentUser: () => api.get('/auth/me'),
-  updateProfile: (userData) => api.patch('/auth/update-me', userData),
-
-  // Address Management
+  verifyOTP: (otpData) => api.post('/auth/verify-otp', otpData),
+  resendOTP: (registrationToken) => api.post('/auth/resend-otp', { registrationToken }),
   getAddresses: () => api.get('/auth/addresses'),
   addAddress: (addressData) => api.post('/auth/addresses', addressData),
   updateAddress: (addressId, addressData) => api.patch(`/auth/addresses/${addressId}`, addressData),
   deleteAddress: (addressId) => api.delete(`/auth/addresses/${addressId}`),
-
-  // Wishlist Management
   getWishlist: () => api.get('/auth/wishlist'),
   addToWishlist: (productId) => api.post(`/auth/wishlist/${productId}`),
   removeFromWishlist: (productId) => api.delete(`/auth/wishlist/${productId}`),
 };
 
-// Products API
 export const productsAPI = {
-  getProducts: (params = {}) => {
-    const queryString = new URLSearchParams(params).toString();
-    return api.get(`/products?${queryString}`);
-  },
+  getProducts: (params) => api.get('/products', { params }),
   getProduct: (id) => api.get(`/products/${id}`),
-  searchProducts: (query) => api.get(`/products/search?q=${encodeURIComponent(query)}`),
+  searchProducts: (query) => api.get('/products/search', { params: { q: query } }),
   getCategories: () => api.get('/products/categories'),
-  addReview: (productId, reviewData) => api.post(`/products/${productId}/reviews`, reviewData),
 };
 
-// Orders API
 export const ordersAPI = {
+  getUserOrders: (params = {}) => api.get('/auth/orders', { params }), // Changed to use auth route
   createOrder: (orderData) => api.post('/orders', orderData),
-  getUserOrders: (params = {}) => {
-    const queryString = new URLSearchParams(params).toString();
-    return api.get(`/orders/my-orders?${queryString}`);
-  },
   getOrder: (orderId) => api.get(`/orders/${orderId}`),
-  cancelOrder: (orderId) => api.patch(`/orders/${orderId}/cancel`),
-  verifyDeliveryOTP: (orderId, otp) => api.post(`/orders/${orderId}/verify-delivery`, { otp }),
 };
 
-// Cart API (if needed for server-side cart management)
-export const cartAPI = {
-  getCart: () => api.get('/cart'),
-  addToCart: (productId, quantity) => api.post('/cart', { productId, quantity }),
-  updateCartItem: (itemId, quantity) => api.patch(`/cart/${itemId}`, { quantity }),
-  removeFromCart: (itemId) => api.delete(`/cart/${itemId}`),
-  clearCart: () => api.delete('/cart'),
-};
-
-// Payment API
-export const paymentAPI = {
-  createPaymentIntent: (orderData) => api.post('/payments/create-intent', orderData),
-  verifyPayment: (paymentData) => api.post('/payments/verify', paymentData),
-};
-
-// Error handling utility
-export const handleAPIError = (error) => {
+export const handleAPIError = (error, defaultMessage = 'An unexpected error occurred.') => {
   console.error('API Error:', error);
-  
-  // You can customize error handling based on your needs
-  if (error.status >= 500) {
-    return 'Server error. Please try again later.';
-  } else if (error.status === 404) {
-    return 'Resource not found.';
-  } else if (error.status === 403) {
-    return 'You are not authorized to perform this action.';
-  } else if (error.status === 400) {
-    return error.message || 'Invalid request.';
+  if (error?.message) {
+    return error.message;
   }
-  
-  return error.message || 'An unexpected error occurred.';
+  return defaultMessage;
 };
 
-// Loading state management
-export const createLoadingState = () => {
-  let isLoading = false;
-  let loadingPromise = null;
-  
-  return {
-    isLoading: () => isLoading,
-    wrap: async (apiCall) => {
-      if (isLoading) {
-        return loadingPromise;
-      }
-      
-      isLoading = true;
-      loadingPromise = apiCall();
-      
-      try {
-        const result = await loadingPromise;
-        return result;
-      } finally {
-        isLoading = false;
-        loadingPromise = null;
-      }
-    },
-  };
-};
-
-export default api; 
+export default api;

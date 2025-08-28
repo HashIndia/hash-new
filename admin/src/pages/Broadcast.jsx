@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Send, 
@@ -36,19 +36,39 @@ const Broadcast = () => {
     campaigns,
     templates,
     currentCampaign,
+    isLoading,
+    error,
     setCampaignField,
     resetCurrentCampaign,
     loadTemplate,
     saveCampaign,
     deleteCampaign,
     duplicateCampaign,
-    getCampaignStats
+    initialize
   } = useBroadcastStore();
 
+  // Initialize campaigns on component mount
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  // Get customer stats using the same pattern as other components
   const { getCustomerStats } = useCustomerStore();
-  
-  const campaignStats = getCampaignStats();
   const customerStats = getCustomerStats();
+
+  // Memoize campaign stats to prevent infinite loops
+  const campaignStats = useMemo(() => {
+    const totalCampaigns = campaigns.length;
+    const totalSent = campaigns.reduce((sum, campaign) => sum + (campaign.sentCount || 0), 0);
+    const totalOpened = campaigns.reduce((sum, campaign) => sum + (campaign.openedCount || 0), 0);
+    const avgOpenRate = totalSent > 0 ? (totalOpened / totalSent) * 100 : 0;
+    
+    return {
+      totalCampaigns,
+      totalSent,
+      avgOpenRate
+    };
+  }, [campaigns]);
 
   const getTypeIcon = (type) => {
     switch (type) {
@@ -356,4 +376,4 @@ const Broadcast = () => {
   );
 };
 
-export default Broadcast; 
+export default Broadcast;

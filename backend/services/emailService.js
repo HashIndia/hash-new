@@ -9,30 +9,52 @@ class EmailService {
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
-      secure: false, // true for 465, false for other ports
+      secure: false, 
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS
       }
     });
+
+    // Verify connection configuration on startup
+    this.verifyConnection();
+  }
+
+  async verifyConnection() {
+    try {
+      await this.transporter.verify();
+      console.log('✅ Email Service: Connection verified successfully.');
+    } catch (error) {
+      console.error('❌ Email Service: Connection verification failed. Please check your SMTP credentials and settings in .env', error);
+    }
   }
 
   // Send email
   async sendEmail(options) {
     try {
       const mailOptions = {
-        from: `Hash Store <${process.env.SENDER_EMAIL}>`,
+        from: `Hash Clothing <${process.env.SENDER_EMAIL}>`,
         to: options.to,
         subject: options.subject,
         text: options.text,
         html: options.html
       };
 
+      console.log('📧 [Email Service] Preparing to send email with options:', {
+        from: mailOptions.from,
+        to: mailOptions.to,
+        subject: mailOptions.subject,
+      });
+
       const result = await this.transporter.sendMail(mailOptions);
+      
+      console.log('✅ [Email Service] Email sent successfully. Nodemailer response:', result);
       return { success: true, messageId: result.messageId };
     } catch (error) {
-      console.error('Email sending failed:', error);
-      throw new AppError('Failed to send email', 500);
+      console.error('❌ [Email Service] Email sending failed inside sendEmail function:', error);
+      // We will log the error but not throw an AppError, allowing the calling function to decide how to proceed.
+      // This makes the service more resilient for non-critical emails.
+      return { success: false, error: error };
     }
   }
 

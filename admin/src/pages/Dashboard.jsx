@@ -1,4 +1,5 @@
-import { useMemo, memo, useCallback } from 'react';
+import { useState, useEffect, useMemo, memo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   ShoppingCart, 
@@ -12,9 +13,7 @@ import {
 } from 'lucide-react';
 import { Card } from '../components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import useOrderStore from '../stores/useOrderStore';
-import useInventoryStore from '../stores/useInventoryStore';
-import useCustomerStore from '../stores/useCustomerStore';
+import { adminAuthAPI, productsAPI, ordersAPI, customersAPI } from '../services/api';
 
 // Move static data outside component to prevent re-creation
 const salesData = [
@@ -31,12 +30,6 @@ const categoryData = [
   { name: 'Jeans', value: 25, color: '#8b5cf6' },
   { name: 'Dresses', value: 20, color: '#10b981' },
   { name: 'Accessories', value: 20, color: '#f59e0b' }
-];
-
-const recentOrdersData = [
-  { id: 'ORD001', customer: 'John Doe', amount: '$140.36', status: 'pending' },
-  { id: 'ORD002', customer: 'Jane Smith', amount: '$97.18', status: 'shipped' },
-  { id: 'ORD003', customer: 'Bob Johnson', amount: '$107.96', status: 'delivered' }
 ];
 
 // Memoized chart components to prevent re-renders
@@ -83,11 +76,22 @@ const CategoryChart = memo(() => (
 
 CategoryChart.displayName = 'CategoryChart';
 
-const Dashboard = () => {
-  // Use stable selectors to prevent infinite re-renders
-  const orders = useOrderStore(state => state.orders);
-  const customers = useCustomerStore(state => state.customers);
-  const products = useInventoryStore(state => state.products);
+export default function Dashboard() {
+  // ALL HOOKS MUST BE CALLED AT THE TOP - BEFORE ANY CONDITIONS OR EARLY RETURNS
+  const [admin, setAdmin] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  // Real data from API instead of dummy stores
+  const [orders, setOrders] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [dashboardStats, setDashboardStats] = useState({
+    totalRevenue: 0,
+    totalOrders: 0,
+    totalCustomers: 0,
+    lowStockProducts: 0
+  });
 
   // Memoize computed values to prevent recalculation on every render
   const orderStats = useMemo(() => {
@@ -96,7 +100,7 @@ const Dashboard = () => {
     const shipped = orders.filter(o => o.status === 'shipped').length;
     const delivered = orders.filter(o => o.status === 'delivered').length;
     const cancelled = orders.filter(o => o.status === 'cancelled').length;
-    const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+    const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
     const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
     
     return {
@@ -114,24 +118,18 @@ const Dashboard = () => {
     const total = customers.length;
     const active = customers.filter(c => c.status === 'active').length;
     const inactive = customers.filter(c => c.status === 'inactive').length;
-    const vip = customers.filter(c => c.tags.includes('VIP')).length;
-    const totalRevenue = customers.reduce((sum, c) => sum + c.totalSpent, 0);
-    const avgOrderValue = customers.length > 0 
-      ? customers.reduce((sum, c) => sum + (c.totalSpent / Math.max(c.totalOrders, 1)), 0) / customers.length 
-      : 0;
+    const vip = customers.filter(c => c.tags?.includes('VIP')).length;
     
     return {
       total,
       active,
       inactive,
-      vip,
-      avgOrderValue,
-      totalRevenue
+      vip
     };
   }, [customers]);
 
   const lowStockProducts = useMemo(() => {
-    return products.filter(product => product.stock < 20);
+    return products.filter(product => (product.stock || 0) < 20);
   }, [products]);
 
   // Use useMemo for derived data to prevent re-computation
@@ -179,153 +177,177 @@ const Dashboard = () => {
     }
   }, []);
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your store.</p>
-        </div>
-        <div className="text-right">
-          <p className="text-sm text-gray-500">Last updated</p>
-          <p className="text-sm font-medium text-gray-900">{new Date().toLocaleString()}</p>
+  // Fetch dashboard data from API
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      console.log('[Dashboard] Fetching data...');
+      // Fetch all data in parallel with error handling
+      const [ordersResult, customersResult, productsResult] = await Promise.all([
+        ordersAPI.getOrders({ limit: 100 }).catch(() => ({ data: { orders: [] } })),
+        customersAPI.getCustomers({ limit: 100 }).catch(() => ({ data: { customers: [] } })),
+        productsAPI.getProducts({ limit: 100 }).catch(() => ({ data: { products: [] } })),
+      ]);
+
+      // Handle orders - safe extraction
+      if (ordersResult) {
+        const ordersData = ordersResult.data?.orders || [];
+        setOrders(Array.isArray(ordersData) ? ordersData : []);
+      } else {
+        setOrders([]);
+      }
+
+      // Handle customers - safe extraction
+      if (customersResult) {
+        const customersData = customersResult.data?.customers || [];
+        setCustomers(Array.isArray(customersData) ? customersData : []);
+      } else {
+        setCustomers([]);
+      }
+
+      // Handle products - safe extraction
+      if (productsResult) {
+        const productsData = productsResult.data?.products || [];
+        setProducts(Array.isArray(productsData) ? productsData : []);
+      } else {
+        setProducts([]);
+      }
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      // Set empty arrays as fallback
+      setOrders([]);
+      setCustomers([]);
+      setProducts([]);
+    }
+  }, []);
+
+  // ALL HOOKS CALLED ABOVE - NOW SAFE FOR EFFECTS AND CONDITIONAL LOGIC
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await adminAuthAPI.getCurrentAdmin();
+        setAdmin(response.data.user);
+        console.log('[Admin Dashboard] Admin authenticated:', response.data.user.email);
+        
+        // Fetch dashboard data after authentication
+        await fetchDashboardData();
+      } catch (error) {
+        console.log('[Admin Dashboard] Not authenticated, redirecting to login');
+        navigate('/admin/login');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, [navigate, fetchDashboardData]);
+
+  const handleLogout = async () => {
+    try {
+      await adminAuthAPI.logout();
+    } catch (error) {
+      console.log('Logout error (ignored):', error);
+    } finally {
+      localStorage.removeItem('admin-auth');
+      navigate('/admin/login');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading dashboard...</p>
         </div>
       </div>
+    );
+  }
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <motion.div
-            key={stat.name}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1, duration: 0.5 }}
-          >
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-center">
-                <div className={`${stat.color} p-3 rounded-lg`}>
-                  <stat.icon className="w-6 h-6 text-white" />
-                </div>
-                <div className="ml-4 flex-1">
-                  <p className="text-sm font-medium text-gray-600">{stat.name}</p>
+  if (!admin) {
+    return null; // Will redirect to login
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <nav className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <h1 className="text-xl font-semibold text-gray-900">Admin Dashboard</h1>
+            <div className="flex items-center space-x-4">
+              <span className="text-gray-700">Welcome, {admin.email}</span>
+              <button
+                onClick={handleLogout}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="px-4 py-6 sm:px-0">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={stat.name}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+              >
+                <Card className="p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-center justify-between">
-                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                    <div className={`flex items-center text-sm ${
-                      stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {stat.changeType === 'increase' ? (
-                        <ArrowUpRight className="w-4 h-4" />
-                      ) : (
-                        <ArrowDownRight className="w-4 h-4" />
-                      )}
-                      {stat.change}
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">{stat.name}</p>
+                      <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                      <div className={`flex items-center mt-2 text-sm ${
+                        stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {stat.changeType === 'increase' ? (
+                          <TrendingUp className="w-4 h-4 mr-1" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 mr-1" />
+                        )}
+                        {stat.change}
+                      </div>
+                    </div>
+                    <div className={`${stat.color} p-3 rounded-lg`}>
+                      <stat.icon className="w-6 h-6 text-white" />
                     </div>
                   </div>
-                </div>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Quick Summary */}
+          <div className="bg-white p-8 rounded-lg shadow">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Dashboard Overview</h2>
+            <p className="text-gray-600 mb-6">Real-time data from your store</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <h3 className="text-lg font-medium text-gray-900">Total Users</h3>
+                <p className="text-3xl font-bold text-blue-600">{customerStats.total}</p>
+                <p className="text-sm text-gray-600">Active: {customerStats.active}</p>
               </div>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Sales Chart */}
-        <motion.div
-          key="sales-chart"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-        >
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Sales Overview</h3>
-            <SalesChart />
-          </Card>
-        </motion.div>
-
-        {/* Category Distribution */}
-        <motion.div
-          key="category-chart"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
-        >
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Sales by Category</h3>
-            <CategoryChart />
-          </Card>
-        </motion.div>
-      </div>
-
-      {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Orders */}
-        <motion.div
-          key="recent-orders"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-          className="lg:col-span-2"
-        >
-          <Card className="p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Recent Orders</h3>
-              <a href="/admin/orders" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                View all
-              </a>
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <h3 className="text-lg font-medium text-gray-900">Total Orders</h3>
+                <p className="text-3xl font-bold text-green-600">{orderStats.total}</p>
+                <p className="text-sm text-gray-600">Pending: {orderStats.pending}</p>
+              </div>
+              <div className="text-center p-4 bg-purple-50 rounded-lg">
+                <h3 className="text-lg font-medium text-gray-900">Total Products</h3>
+                <p className="text-3xl font-bold text-purple-600">{products.length}</p>
+                <p className="text-sm text-gray-600">Low Stock: {lowStockProducts.length}</p>
+              </div>
             </div>
-            <div className="space-y-4">
-              {recentOrdersData.map((order) => (
-                <div key={order.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="font-medium text-gray-900">{order.id}</p>
-                    <p className="text-sm text-gray-600">{order.customer}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-gray-900">{order.amount}</p>
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.status)}`}>
-                      {order.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* Low Stock Alert */}
-        <motion.div
-          key="low-stock"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.5 }}
-        >
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Low Stock Alert</h3>
-            <div className="space-y-3">
-              {lowStockProducts.slice(0, 5).map((product) => (
-                <div key={product.id} className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{product.name}</p>
-                    <p className="text-xs text-gray-500">{product.sku}</p>
-                  </div>
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                    product.stock < 10 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {product.stock} left
-                  </span>
-                </div>
-              ))}
-              {lowStockProducts.length === 0 && (
-                <p className="text-sm text-gray-500 text-center py-4">All products are well stocked</p>
-              )}
-            </div>
-          </Card>
-        </motion.div>
-      </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 };
-
-export default Dashboard; 

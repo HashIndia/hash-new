@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import crypto from 'crypto';
 
 const refreshTokenSchema = new mongoose.Schema({
   token: {
@@ -9,87 +8,44 @@ const refreshTokenSchema = new mongoose.Schema({
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    ref: 'User'
   },
   admin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Admin'
   },
-  type: {
-    type: String,
-    enum: ['user', 'admin'],
-    required: true
+  userAgent: {
+    type: String
   },
-  expiresAt: {
+  ip: {
+    type: String
+  },
+  expires: {
     type: Date,
-    required: true,
-    default: function() {
-      return new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-    }
+    required: true
   },
   createdAt: {
     type: Date,
     default: Date.now
   },
-  lastUsed: {
-    type: Date,
-    default: Date.now
+  revoked: {
+    type: Date
   },
-  ipAddress: String,
-  userAgent: String,
-  isRevoked: {
-    type: Boolean,
-    default: false
+  revokedByIp: {
+    type: String
   }
 });
 
-// Index for automatic cleanup of expired tokens
-refreshTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-
-// Static method to generate refresh token
-refreshTokenSchema.statics.generateToken = function() {
-  return crypto.randomBytes(64).toString('hex');
-};
-
-// Instance method to check if token is expired
-refreshTokenSchema.methods.isExpired = function() {
-  return Date.now() >= this.expiresAt.getTime();
-};
-
-// Instance method to check if token is active
-refreshTokenSchema.methods.isActive = function() {
-  return !this.isRevoked && !this.isExpired();
-};
-
-// Instance method to revoke token
-refreshTokenSchema.methods.revoke = function(ipAddress, userAgent) {
-  this.isRevoked = true;
-  this.revokedAt = new Date();
-  this.revokedByIp = ipAddress;
-  this.revokedByUserAgent = userAgent;
-};
-
-// Static method to revoke all tokens for a user
-refreshTokenSchema.statics.revokeAllUserTokens = async function(userId, type = 'user') {
-  const filter = type === 'user' ? { user: userId, type: 'user' } : { admin: userId, type: 'admin' };
-  await this.updateMany(filter, { 
-    isRevoked: true, 
-    revokedAt: new Date() 
-  });
-};
-
-// Static method to cleanup expired and revoked tokens
-refreshTokenSchema.statics.cleanup = async function() {
-  const expiredDate = new Date();
-  await this.deleteMany({
-    $or: [
-      { expiresAt: { $lt: expiredDate } },
-      { isRevoked: true, revokedAt: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) } } // Delete revoked tokens after 24 hours
-    ]
-  });
-};
+// More robust validation with better error messages
+refreshTokenSchema.pre('validate', function(next) {
+  console.log('[RefreshToken] Validating token with user:', this.user, 'admin:', this.admin);
+  
+  if (!this.user && !this.admin) {
+    console.error('[RefreshToken] Validation failed - no user or admin associated');
+    return next(new Error('A refresh token must be associated with a user or an admin.'));
+  }
+  next();
+});
 
 const RefreshToken = mongoose.model('RefreshToken', refreshTokenSchema);
-
-export default RefreshToken; 
+export default RefreshToken;

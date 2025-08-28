@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Input } from "../components/ui/input";
 import useProductStore from "../stores/useProductStore";
 import { motion, AnimatePresence } from "framer-motion";
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { 
   TrendingUp, 
   ShoppingCart, 
@@ -25,8 +27,12 @@ import {
 } from "lucide-react";
 
 export default function Home() {
-  const { products } = useProductStore();
+  const { products, initialize, isLoading } = useProductStore();
   const featured = products.slice(0, 6);
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
 
   const stats = [
     {
@@ -482,7 +488,7 @@ export default function Home() {
           >
             {featured.map((product, index) => (
               <motion.div
-                key={product.id}
+                key={product._id}
                 variants={itemVariants}
                 whileHover={{ y: -8, scale: 1.02 }}
                 transition={{ duration: 0.3 }}
@@ -551,7 +557,7 @@ export default function Home() {
                     </div>
 
                     <Button asChild className="w-full btn-gradient py-3 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all">
-                      <a href={`/product/${product.id}`}>View Details</a>
+                      <Link to={`/product/${product._id}`}>View Details</Link>
                     </Button>
                   </CardContent>
                 </Card>
@@ -566,10 +572,10 @@ export default function Home() {
             viewport={{ once: true }}
           >
             <Button asChild className="btn-gradient px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all hover-lift">
-              <a href="/shop" className="flex items-center gap-2">
+              <Link to="/shop" className="flex items-center gap-2">
                 View All Products
                 <ArrowRight className="w-5 h-5" />
-              </a>
+              </Link>
             </Button>
           </motion.div>
         </div>

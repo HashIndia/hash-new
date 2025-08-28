@@ -4,100 +4,100 @@ import { Input } from "../components/ui/input";
 import AddressForm from "../components/AddressForm";
 import useCartStore from "../stores/useCartStore";
 import useUserStore from "../stores/useUserStore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { authAPI, ordersAPI } from "../services/api";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function Checkout() {
   const { items, clearCart } = useCartStore();
-  const { addresses, setAddresses } = useUserStore();
-  const [selectedAddress, setSelectedAddress] = useState(0);
+  const { user, addresses, setAddresses } = useUserStore();
+  const [selectedAddress, setSelectedAddress] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [showAddressForm, setShowAddressForm] = useState(false);
-  const [orderPlaced, setOrderPlaced] = useState(false);
-  const [paymentDetails, setPaymentDetails] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    nameOnCard: '',
-    upiId: ''
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (addresses.length > 0) {
+      setSelectedAddress(addresses[0].id);
+    }
+  }, [addresses]);
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
   const shipping = subtotal > 999 ? 0 : 99;
   const tax = Math.round(subtotal * 0.18);
   const total = subtotal + shipping + tax;
 
-  const handleAddAddress = (address) => {
-    setAddresses([...addresses, address]);
-    setShowAddressForm(false);
-    setSelectedAddress(addresses.length);
+  const handleAddAddress = async (addressData) => {
+    setIsLoading(true);
+    try {
+      const response = await authAPI.addAddress(addressData);
+      const newAddress = response.data.address;
+      setAddresses([...addresses, newAddress]);
+      setSelectedAddress(newAddress._id);
+      setShowAddressForm(false);
+      toast.success("Address added successfully!");
+    } catch (error) {
+      toast.error("Failed to add address. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (items.length === 0) {
-      alert('Your cart is empty!');
+      toast.error('Your cart is empty!');
       return;
     }
-    if (addresses.length === 0) {
-      alert('Please add a delivery address!');
+    if (!selectedAddress) {
+      toast.error('Please select or add a delivery address!');
       return;
     }
-    setOrderPlaced(true);
-    clearCart();
-    setTimeout(() => {
-      window.location.href = '/orders';
-    }, 3000);
+
+    setIsLoading(true);
+    const orderData = {
+      items: items.map(item => ({
+        productId: item.id,
+        quantity: item.qty,
+        price: item.price,
+        name: item.name,
+        image: item.images?.[0],
+        size: item.selectedSize,
+        color: item.selectedColor,
+      })),
+      shippingAddress: addresses.find(addr => addr.id === selectedAddress),
+      paymentMethod,
+      subtotal,
+      shipping,
+      tax,
+      total,
+    };
+
+    try {
+      const response = await ordersAPI.createOrder(orderData);
+      toast.success("Order placed successfully!");
+      clearCart();
+      navigate(`/orders/${response.data.order._id}`);
+    } catch (error) {
+      toast.error(error.message || "Failed to place order. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handlePaymentDetailsChange = (field, value) => {
     setPaymentDetails(prev => ({ ...prev, [field]: value }));
   };
 
-  if (orderPlaced) {
+  if (isLoading && !showAddressForm) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        >
-          <Card className="max-w-md w-full mx-6 border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
-            <CardContent className="text-center py-12">
-              <motion.div 
-                className="text-6xl mb-4"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, duration: 0.5, type: "spring" }}
-              >
-                🎉
-              </motion.div>
-              <motion.h2 
-                className="text-2xl font-bold text-green-600 mb-2"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                Order Placed Successfully!
-              </motion.h2>
-              <motion.p 
-                className="text-slate-600 mb-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-              >
-                Thank you for your purchase. You'll receive a confirmation email shortly.
-              </motion.p>
-              <motion.div 
-                className="text-sm text-slate-500"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-              >
-                Redirecting to orders...
-              </motion.div>
-            </CardContent>
-          </Card>
-        </motion.div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="spinner-lg mb-4"></div>
+          <p className="text-gray-600">Processing your order...</p>
+        </div>
       </div>
     );
   }
@@ -142,7 +142,7 @@ export default function Checkout() {
                   <div className="space-y-3 mb-4">
                     {addresses.map((address, idx) => (
                       <motion.label 
-                        key={idx} 
+                        key={address.id || idx} 
                         className="flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors duration-200"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
@@ -150,8 +150,8 @@ export default function Checkout() {
                         <input
                           type="radio"
                           name="address"
-                          checked={selectedAddress === idx}
-                          onChange={() => setSelectedAddress(idx)}
+                          checked={selectedAddress === address.id}
+                          onChange={() => setSelectedAddress(address.id)}
                           className="mt-1"
                         />
                         <div className="flex-1">
@@ -171,7 +171,7 @@ export default function Checkout() {
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <AddressForm onSave={handleAddAddress} />
+                      <AddressForm onSubmit={handleAddAddress} onCancel={() => setShowAddressForm(false)} isLoading={isLoading} />
                     </motion.div>
                   ) : (
                     <motion.div
@@ -391,9 +391,10 @@ export default function Checkout() {
                   >
                     <Button
                       onClick={handlePlaceOrder}
-                      className="w-full py-4 text-lg font-semibold bg-slate-800 hover:bg-slate-900 shadow-lg hover:shadow-xl transition-all duration-300"
+                      disabled={isLoading}
+                      className="w-full py-4 text-lg font-semibold bg-slate-800 hover:bg-slate-900 shadow-lg hover:shadow-xl transition-all duration-300 disabled:bg-slate-400"
                     >
-                      Place Order - ₹{total}
+                      {isLoading ? 'Placing Order...' : `Place Order - ₹${total}`}
                     </Button>
                   </motion.div>
                 </div>
@@ -404,4 +405,4 @@ export default function Checkout() {
       </motion.div>
     </div>
   );
-} 
+}
