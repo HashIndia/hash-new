@@ -55,9 +55,8 @@ export default function Orders() {
       pdf.setFont('helvetica', 'bold');
       pdf.text('INVOICE', margin, 35);
 
-      // Hash Logo - Using actual logo images side by side
+      // Hash Logo - Using actual logo images side by side with natural proportions
       const logoY = 15;
-      const logoHeight = 20;
       
       try {
         // Load hash-logo.jpg
@@ -78,14 +77,32 @@ export default function Orders() {
           reader.readAsDataURL(hashTextBlob);
         });
         
-        // Add logo images side by side
-        const logoWidth = 15;
-        const textLogoWidth = 25;
-        const totalLogoWidth = logoWidth + textLogoWidth + 2; // 2mm gap
+        // Create temporary images to get natural dimensions
+        const tempLogo = new Image();
+        const tempText = new Image();
+        
+        await new Promise((resolve) => {
+          tempLogo.onload = resolve;
+          tempLogo.src = hashLogoDataUrl;
+        });
+        
+        await new Promise((resolve) => {
+          tempText.onload = resolve;
+          tempText.src = hashTextDataUrl;
+        });
+        
+        // Calculate natural proportions - target height of 20mm
+        const targetHeight = 20;
+        const logoNaturalWidth = (tempLogo.width / tempLogo.height) * targetHeight;
+        const textNaturalWidth = (tempText.width / tempText.height) * targetHeight;
+        
+        // Position logos side by side with natural proportions
+        const gap = 3; // 3mm gap between logos
+        const totalLogoWidth = logoNaturalWidth + textNaturalWidth + gap;
         const logoStartX = pageWidth - margin - totalLogoWidth;
         
-        pdf.addImage(hashLogoDataUrl, 'JPEG', logoStartX, logoY, logoWidth, logoHeight);
-        pdf.addImage(hashTextDataUrl, 'JPEG', logoStartX + logoWidth + 2, logoY, textLogoWidth, logoHeight);
+        pdf.addImage(hashLogoDataUrl, 'JPEG', logoStartX, logoY, logoNaturalWidth, targetHeight);
+        pdf.addImage(hashTextDataUrl, 'JPEG', logoStartX + logoNaturalWidth + gap, logoY, textNaturalWidth, targetHeight);
         
       } catch (error) {
         console.error('Error loading logo images:', error);
@@ -229,29 +246,48 @@ export default function Orders() {
         tableY += 15;
       });
 
-      // Summary section
-      const summaryY = tableY + 20;
-      const summaryX = margin + 120;
+      // Summary section with proper alignment and modern styling
+      const summaryY = tableY + 30;
+      const summaryStartX = margin + 100; // Start position for labels
+      const summaryValueX = pageWidth - margin - 40; // Right aligned position for values
+      
+      // Draw summary box background
+      pdf.setFillColor(248, 249, 250); // Light gray background
+      pdf.rect(summaryStartX - 5, summaryY - 10, 85, 50, 'F');
+      
+      // Summary box border
+      pdf.setDrawColor(0, 0, 0);
+      pdf.setLineWidth(0.5);
+      pdf.rect(summaryStartX - 5, summaryY - 10, 85, 50);
       
       // Subtotal
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(10);
-      pdf.text('SUBTOTAL', summaryX, summaryY);
-      pdf.text(`₹${subtotalAmount.toFixed(0)}`, summaryX + 50, summaryY);
+      pdf.setFontSize(11);
+      pdf.setTextColor(...blackColor);
+      pdf.text('SUBTOTAL', summaryStartX, summaryY);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`₹ ${subtotalAmount.toFixed(0)}`, summaryValueX, summaryY, { align: 'right' });
       
       // Tax
+      pdf.setFont('helvetica', 'normal');
       const taxRate = 0.1; // 10%
       const taxAmount = subtotalAmount * taxRate;
-      pdf.text('Tax', summaryX, summaryY + 10);
-      pdf.text('10%', summaryX + 30, summaryY + 10);
-      pdf.text(`₹${taxAmount.toFixed(0)}`, summaryX + 50, summaryY + 10);
+      pdf.text('Tax (10%)', summaryStartX, summaryY + 12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`₹ ${taxAmount.toFixed(0)}`, summaryValueX, summaryY + 12, { align: 'right' });
       
-      // Total
+      // Divider line
+      pdf.setLineWidth(1);
+      pdf.line(summaryStartX, summaryY + 20, summaryStartX + 75, summaryY + 20);
+      
+      // Total with enhanced styling
       const totalAmount = subtotalAmount + taxAmount;
       pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(12);
-      pdf.text('TOTAL', summaryX, summaryY + 25);
-      pdf.text(`₹${totalAmount.toFixed(0)}`, summaryX + 50, summaryY + 25);
+      pdf.setFontSize(14);
+      pdf.setTextColor(...blackColor);
+      pdf.text('TOTAL', summaryStartX, summaryY + 32);
+      pdf.setFontSize(16);
+      pdf.text(`₹ ${totalAmount.toFixed(0)}`, summaryValueX, summaryY + 32, { align: 'right' });
 
       // Footer
       const footerY = pageHeight - 40;
