@@ -25,28 +25,41 @@ export default function Privacy() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-indigo-50/10">
+    <div className="min-h-screen bg-white">
+      {/* Header Section with Hash Branding */}
+      <div className="bg-black text-white py-16">
+        <motion.div 
+          className="container mx-auto px-6 max-w-4xl text-center"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div variants={itemVariants}>
+            <h1 className="text-5xl md:text-6xl font-light tracking-[0.2em] mb-4">HASH</h1>
+            <p className="text-gray-300 text-sm tracking-[0.15em] uppercase mb-8">Premium E-commerce</p>
+            <h2 className="text-3xl md:text-4xl font-light mb-4">Privacy Policy</h2>
+            <p className="text-gray-400">Last updated: January 2024</p>
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Content Section */}
       <motion.div 
-        className="container mx-auto py-12 px-6 max-w-4xl"
+        className="container mx-auto py-16 px-6 max-w-4xl"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <motion.div className="text-center mb-12" variants={itemVariants}>
-          <h1 className="text-4xl font-bold text-slate-900 mb-4">Privacy Policy</h1>
-          <p className="text-slate-600">Last updated: January 2024</p>
-        </motion.div>
-
         <motion.div variants={itemVariants}>
-          <Card className="shadow-lg bg-card/80 backdrop-blur-sm border border-border">
-            <CardContent className="p-8">
-              <div className="prose prose-slate max-w-none">
-                <motion.section className="mb-8" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-slate-900 mb-4">1. Information We Collect</h2>
-                  <p className="text-slate-600 mb-4">
+          <Card className="border border-gray-200 shadow-sm bg-white">
+            <CardContent className="p-8 md:p-12">
+              <div className="prose prose-gray max-w-none">
+                <motion.section className="mb-12" variants={itemVariants}>
+                  <h2 className="text-2xl font-semibold text-black mb-6 pb-2 border-b border-gray-200">1. Information We Collect</h2>
+                  <p className="text-gray-700 mb-4 leading-relaxed">
                     We collect information you provide directly to us, such as when you create an account, make a purchase, or contact us for support.
                   </p>
-                  <ul className="list-disc pl-6 text-slate-600 space-y-2">
+                  <ul className="list-disc pl-6 text-gray-700 space-y-2">
                     <li>Personal information (name, email address, phone number)</li>
                     <li>Billing and shipping addresses</li>
                     <li>Payment information (processed securely by our payment partners)</li>
@@ -55,12 +68,12 @@ export default function Privacy() {
                   </ul>
                 </motion.section>
 
-                <motion.section className="mb-8" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-slate-900 mb-4">2. How We Use Your Information</h2>
-                  <p className="text-slate-600 mb-4">
+                <motion.section className="mb-12" variants={itemVariants}>
+                  <h2 className="text-2xl font-semibold text-black mb-6 pb-2 border-b border-gray-200">2. How We Use Your Information</h2>
+                  <p className="text-gray-700 mb-4 leading-relaxed">
                     We use the information we collect to provide, maintain, and improve our services:
                   </p>
-                  <ul className="list-disc pl-6 text-slate-600 space-y-2">
+                  <ul className="list-disc pl-6 text-gray-700 space-y-2">
                     <li>Process and fulfill your orders</li>
                     <li>Send you order confirmations and shipping updates</li>
                     <li>Provide customer support</li>
@@ -70,12 +83,12 @@ export default function Privacy() {
                   </ul>
                 </motion.section>
 
-                <motion.section className="mb-8" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-slate-900 mb-4">3. Information Sharing</h2>
-                  <p className="text-slate-600 mb-4">
+                <motion.section className="mb-12" variants={itemVariants}>
+                  <h2 className="text-2xl font-semibold text-black mb-6 pb-2 border-b border-gray-200">3. Information Sharing</h2>
+                  <p className="text-gray-700 mb-4 leading-relaxed">
                     We do not sell, trade, or otherwise transfer your personal information to third parties except as described below:
                   </p>
-                  <ul className="list-disc pl-6 text-slate-600 space-y-2">
+                  <ul className="list-disc pl-6 text-gray-700 space-y-2">
                     <li>Service providers who assist us in operating our website and conducting business</li>
                     <li>Payment processors for secure transaction processing</li>
                     <li>Shipping companies to deliver your orders</li>
@@ -83,12 +96,12 @@ export default function Privacy() {
                   </ul>
                 </motion.section>
 
-                <motion.section className="mb-8" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-slate-900 mb-4">4. Data Security</h2>
-                  <p className="text-slate-600 mb-4">
+                <motion.section className="mb-12" variants={itemVariants}>
+                  <h2 className="text-2xl font-semibold text-black mb-6 pb-2 border-b border-gray-200">4. Data Security</h2>
+                  <p className="text-gray-700 mb-4 leading-relaxed">
                     We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. This includes:
                   </p>
-                  <ul className="list-disc pl-6 text-slate-600 space-y-2">
+                  <ul className="list-disc pl-6 text-gray-700 space-y-2">
                     <li>SSL encryption for data transmission</li>
                     <li>Secure servers and databases</li>
                     <li>Regular security audits and updates</li>
@@ -96,12 +109,12 @@ export default function Privacy() {
                   </ul>
                 </motion.section>
 
-                <motion.section className="mb-8" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-slate-900 mb-4">5. Your Rights</h2>
-                  <p className="text-slate-600 mb-4">
+                <motion.section className="mb-12" variants={itemVariants}>
+                  <h2 className="text-2xl font-semibold text-black mb-6 pb-2 border-b border-gray-200">5. Your Rights</h2>
+                  <p className="text-gray-700 mb-4 leading-relaxed">
                     You have the following rights regarding your personal information:
                   </p>
-                  <ul className="list-disc pl-6 text-slate-600 space-y-2">
+                  <ul className="list-disc pl-6 text-gray-700 space-y-2">
                     <li>Access and review your personal information</li>
                     <li>Correct inaccurate or incomplete information</li>
                     <li>Delete your account and personal information</li>
@@ -110,35 +123,47 @@ export default function Privacy() {
                   </ul>
                 </motion.section>
 
-                <motion.section className="mb-8" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-slate-900 mb-4">6. Cookies and Tracking</h2>
-                  <p className="text-slate-600 mb-4">
+                <motion.section className="mb-12" variants={itemVariants}>
+                  <h2 className="text-2xl font-semibold text-black mb-6 pb-2 border-b border-gray-200">6. Cookies and Tracking</h2>
+                  <p className="text-gray-700 mb-4 leading-relaxed">
                     We use cookies and similar technologies to enhance your browsing experience, analyze site traffic, and personalize content. You can control cookie settings through your browser preferences.
                   </p>
                 </motion.section>
 
-                <motion.section className="mb-8" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-slate-900 mb-4">7. Children's Privacy</h2>
-                  <p className="text-slate-600 mb-4">
+                <motion.section className="mb-12" variants={itemVariants}>
+                  <h2 className="text-2xl font-semibold text-black mb-6 pb-2 border-b border-gray-200">7. Children's Privacy</h2>
+                  <p className="text-gray-700 mb-4 leading-relaxed">
                     Our services are not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13.
                   </p>
                 </motion.section>
 
                 <motion.section className="mb-8" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-slate-900 mb-4">8. Contact Us</h2>
-                  <p className="text-slate-600 mb-4">
+                  <h2 className="text-2xl font-semibold text-black mb-6 pb-2 border-b border-gray-200">8. Contact Us</h2>
+                  <p className="text-gray-700 mb-6 leading-relaxed">
                     If you have any questions about this Privacy Policy or our data practices, please contact us:
                   </p>
-                  <div className="bg-slate-50 p-4 rounded-lg">
-                    <p className="text-slate-700 font-medium">Hash Clothing</p>
-                    <p className="text-slate-600">Email: privacy@hashclothing.com</p>
-                    <p className="text-slate-600">Phone: +91 9876543210</p>
-                    <p className="text-slate-600">Address: 123 Fashion Street, Mumbai, India</p>
+                  <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg">
+                    <h3 className="text-lg font-semibold text-black mb-4 tracking-wide">HASH</h3>
+                    <div className="space-y-2">
+                      <p className="text-gray-700">Email: privacy@hash.com</p>
+                      <p className="text-gray-700">Phone: +91 9876543210</p>
+                      <p className="text-gray-700">Address: 123 Fashion Street, Mumbai, India</p>
+                    </div>
                   </div>
                 </motion.section>
               </div>
             </CardContent>
           </Card>
+        </motion.div>
+
+        {/* Footer Section */}
+        <motion.div 
+          className="mt-16 text-center py-8 border-t border-gray-200"
+          variants={itemVariants}
+        >
+          <p className="text-gray-500 text-sm">
+            © 2024 Hash - Premium E-commerce Platform. All rights reserved.
+          </p>
         </motion.div>
       </motion.div>
     </div>
