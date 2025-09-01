@@ -268,20 +268,20 @@ export default function Orders() {
       pdf.setFont('helvetica', 'bold');
       pdf.text(`₹ ${subtotalAmount.toFixed(0)}`, summaryValueX, summaryY, { align: 'right' });
       
-      // Tax
+      // Gateway Charges
       pdf.setFont('helvetica', 'normal');
-      const taxRate = 0.1; // 10%
-      const taxAmount = subtotalAmount * taxRate;
-      pdf.text('Tax (10%)', summaryStartX, summaryY + 12);
+      const gatewayRate = 0.02; // 2%
+      const gatewayCharges = subtotalAmount * gatewayRate;
+      pdf.text('Gateway Charges (2%)', summaryStartX, summaryY + 12);
       pdf.setFont('helvetica', 'bold');
-      pdf.text(`₹ ${taxAmount.toFixed(0)}`, summaryValueX, summaryY + 12, { align: 'right' });
+      pdf.text(`₹ ${gatewayCharges.toFixed(0)}`, summaryValueX, summaryY + 12, { align: 'right' });
       
       // Divider line
       pdf.setLineWidth(1);
       pdf.line(summaryStartX, summaryY + 20, summaryStartX + 75, summaryY + 20);
       
       // Total with enhanced styling
-      const totalAmount = subtotalAmount + taxAmount;
+      const totalAmount = subtotalAmount + gatewayCharges;
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(14);
       pdf.setTextColor(...blackColor);
