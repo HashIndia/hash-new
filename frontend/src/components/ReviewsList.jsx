@@ -103,14 +103,14 @@ const ReviewsList = ({ productId, onReviewsLoaded }) => {
   return (
     <div className="space-y-6">
       {/* Sort Options */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h3 className="text-lg font-semibold text-foreground">
           Customer Reviews ({reviews.length})
         </h3>
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm"
+          className="px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm w-full sm:w-auto"
         >
           <option value="-createdAt">Newest First</option>
           <option value="createdAt">Oldest First</option>
@@ -122,41 +122,43 @@ const ReviewsList = ({ productId, onReviewsLoaded }) => {
       {/* Reviews List */}
       <div className="space-y-4">
         {reviews.map((review) => (
-          <Card key={review._id} className="p-6">
-            <div className="flex items-start space-x-4">
+          <Card key={review._id} className="p-4 sm:p-6">
+            <div className="flex items-start space-x-3 sm:space-x-4">
               {/* User Avatar */}
-              <div className="w-10 h-10 bg-hash-purple/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <User className="w-5 h-5 text-hash-purple" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-hash-purple/10 rounded-full flex items-center justify-center flex-shrink-0">
+                <User className="w-4 h-4 sm:w-5 sm:h-5 text-hash-purple" />
               </div>
 
               {/* Review Content */}
               <div className="flex-1 min-w-0">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <h4 className="font-medium text-foreground">
-                      {review.user?.name || 'Anonymous'}
-                    </h4>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <StarRating rating={review.rating} />
-                      <span className="text-sm text-muted-foreground">
-                        {review.rating}/5
-                      </span>
-                      {review.isVerifiedPurchase && (
-                        <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full border border-green-500/30">
-                          Verified Purchase
+                <div className="space-y-2 sm:space-y-0">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                    <div className="flex-1">
+                      <h4 className="font-medium text-foreground text-sm sm:text-base">
+                        {review.user?.name || 'Anonymous'}
+                      </h4>
+                      <div className="flex flex-wrap items-center gap-2 mt-1">
+                        <StarRating rating={review.rating} />
+                        <span className="text-xs sm:text-sm text-muted-foreground">
+                          {review.rating}/5
                         </span>
-                      )}
+                        {review.isVerifiedPurchase && (
+                          <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full border border-green-500/30">
+                            Verified Purchase
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    {formatDate(review.createdAt)}
+                    <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
+                      <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                      {formatDate(review.createdAt)}
+                    </div>
                   </div>
                 </div>
 
                 {/* Review Title */}
-                <h5 className="font-medium text-foreground mb-2">
+                <h5 className="font-medium text-foreground mb-2 text-sm sm:text-base mt-3 sm:mt-2">
                   {review.title}
                 </h5>
 
@@ -167,13 +169,13 @@ const ReviewsList = ({ productId, onReviewsLoaded }) => {
 
                 {/* Review Images */}
                 {review.images && review.images.length > 0 && (
-                  <div className="flex space-x-2 mb-3">
+                  <div className="flex flex-wrap gap-2 mb-3">
                     {review.images.map((image, index) => (
                       <img
                         key={index}
                         src={image.url}
                         alt={image.alt || 'Review image'}
-                        className="w-16 h-16 object-cover rounded-lg border border-border"
+                        className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg border border-border"
                       />
                     ))}
                   </div>
@@ -181,8 +183,8 @@ const ReviewsList = ({ productId, onReviewsLoaded }) => {
 
                 {/* Helpful Button */}
                 <div className="flex items-center space-x-4">
-                  <button className="flex items-center space-x-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    <ThumbsUp className="w-4 h-4" />
+                  <button className="flex items-center space-x-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    <ThumbsUp className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span>Helpful</span>
                     {review.helpfulCount > 0 && (
                       <span>({review.helpfulCount})</span>
@@ -197,22 +199,23 @@ const ReviewsList = ({ productId, onReviewsLoaded }) => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center space-x-2">
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
           <Button
             variant="outline"
             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
+            className="w-full sm:w-auto"
           >
             Previous
           </Button>
           
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1 overflow-x-auto max-w-full">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <Button
                 key={page}
                 variant={currentPage === page ? "default" : "outline"}
                 onClick={() => setCurrentPage(page)}
-                className="w-10 h-10"
+                className="w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm flex-shrink-0"
               >
                 {page}
               </Button>
@@ -223,6 +226,7 @@ const ReviewsList = ({ productId, onReviewsLoaded }) => {
             variant="outline"
             onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
+            className="w-full sm:w-auto"
           >
             Next
           </Button>

@@ -560,14 +560,14 @@ export default function ProductDetails() {
         </div>
 
         {/* Reviews Section */}
-        <div className="mt-16">
+        <div className="mt-8 sm:mt-12 lg:mt-16">
           <Card className="shadow-lg bg-card/80 backdrop-blur-sm border border-border">
-            <CardHeader>
-              <CardTitle className="text-2xl text-foreground font-space">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-xl sm:text-2xl text-foreground font-space">
                 Customer Reviews
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6">
               <ReviewsList 
                 productId={id} 
                 onReviewsLoaded={setTotalReviews}
