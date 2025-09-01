@@ -31,45 +31,8 @@ const processQueue = (error, token = null) => {
 adminApi.interceptors.response.use(
   (response) => response.data,
   async (error) => {
-    const originalRequest = error.config;
-    
-    // Only attempt refresh for 401 errors, not already retried, and we have cookies
-    if (error.response?.status === 401 && 
-        !originalRequest._retry && 
-        document.cookie.includes('adminRefreshToken')) {
-      
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        }).then(() => {
-          return adminApi(originalRequest);
-        }).catch(err => {
-          return Promise.reject(err);
-        });
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        await adminApi.post('/admin/auth/refresh');
-        processQueue(null);
-        return adminApi(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError);
-        localStorage.removeItem('admin-auth');
-        
-        if (!window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
-        }
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
-    }
-    
-    // For 401 without refresh token, just redirect to login
-    if (error.response?.status === 401 && !document.cookie.includes('adminRefreshToken')) {
+    // For now, just redirect on 401 - disable refresh logic temporarily
+    if (error.response?.status === 401) {
       localStorage.removeItem('admin-auth');
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';

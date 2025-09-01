@@ -17,6 +17,14 @@ router.get('/debug', (req, res) => {
     corsOrigins: process.env.NODE_ENV === 'production' 
       ? [process.env.FRONTEND_URL, process.env.ADMIN_URL]
       : 'all',
+    environmentCheck: {
+      hasJwtSecret: !!process.env.JWT_SECRET,
+      hasJwtRefreshSecret: !!process.env.JWT_REFRESH_SECRET,
+      hasAdminJwtSecret: !!process.env.ADMIN_JWT_SECRET,
+      hasMongoUri: !!process.env.MONGODB_URI,
+      hasFrontendUrl: !!process.env.FRONTEND_URL,
+      hasAdminUrl: !!process.env.ADMIN_URL,
+    },
     timestamp: new Date().toISOString()
   });
 });

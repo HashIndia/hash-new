@@ -59,29 +59,74 @@ router.post('/login', [
     }
 
     // Generate tokens using centralized function
-    const { accessToken, refreshToken } = generateTokens({
-      id: admin._id,
-      email: admin.email,
-      role: admin.role
-    }, 'admin');
+    try {
+      const { accessToken, refreshToken } = generateTokens({
+        id: admin._id,
+        email: admin.email,
+        role: admin.role
+      }, 'admin');
 
-    // Set cookies using centralized function
-    setAuthCookies(res, accessToken, refreshToken, 'admin');
-    
-    console.log('[Admin Login] Login successful for:', email);
+      // Set cookies using centralized function
+      setAuthCookies(res, accessToken, refreshToken, 'admin');
+      
+      console.log('[Admin Login] Login successful for:', email);
 
-    res.json({
-      status: 'success',
-      token: accessToken,
-      data: {
-        user: {
+      res.json({
+        status: 'success',
+        token: accessToken,
+        data: {
+          user: {
+            id: admin._id,
+            email: admin.email,
+            name: admin.name,
+            role: admin.role
+          }
+        }
+      });
+    } catch (tokenError) {
+      console.error('[Admin Login] Token generation error:', tokenError.message);
+      
+      // Fallback: Create simple access token without refresh
+      try {
+        const secret = process.env.ADMIN_JWT_SECRET || process.env.JWT_SECRET;
+        const payload = {
           id: admin._id,
           email: admin.email,
-          name: admin.name,
           role: admin.role
-        }
+        };
+        
+        const token = jwt.sign(payload, secret, { expiresIn: '8h' });
+        
+        // Set simple cookie
+        res.cookie('adminAccessToken', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+          maxAge: 8 * 60 * 60 * 1000 // 8 hours
+        });
+        
+        console.log('[Admin Login] Using fallback token generation');
+        
+        res.json({
+          status: 'success',
+          token: token,
+          data: {
+            user: {
+              id: admin._id,
+              email: admin.email,
+              name: admin.name,
+              role: admin.role
+            }
+          }
+        });
+      } catch (fallbackError) {
+        console.error('[Admin Login] Fallback token error:', fallbackError.message);
+        return res.status(500).json({ 
+          status: 'error',
+          message: 'Authentication system error. Please check server configuration.' 
+        });
       }
-    });
+    }
   } catch (err) {
     console.error('Admin login error:', err.message);
     res.status(500).json({ 
@@ -144,8 +189,9 @@ router.post('/refresh', async (req, res) => {
       });
     }
 
-    // Verify refresh token
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    // Verify refresh token using fallback secret
+    const refreshSecret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
+    const decoded = jwt.verify(refreshToken, refreshSecret);
     
     // Find admin
     const admin = await Admin.findById(decoded.id);

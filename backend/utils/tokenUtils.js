@@ -53,12 +53,12 @@ export const generateRefreshToken = async (user, userType, ip, userAgent) => {
 export const generateTokens = (payload, userType = 'user') => {
   const accessToken = generateAccessToken(payload.id, userType);
   
-  // For refresh token, we use a simple JWT with longer expiration
-  const refreshSecret = process.env.JWT_REFRESH_SECRET;
+  // For refresh token, use JWT_REFRESH_SECRET or fallback to JWT_SECRET
+  const refreshSecret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
   const refreshExpiresIn = userType === 'admin' ? '30d' : '7d';
   
   if (!refreshSecret) {
-    throw new Error('JWT_REFRESH_SECRET environment variable is not set');
+    throw new Error('JWT_SECRET or JWT_REFRESH_SECRET environment variable must be set');
   }
   
   const refreshToken = jwt.sign(payload, refreshSecret, { expiresIn: refreshExpiresIn });
