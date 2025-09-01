@@ -61,14 +61,27 @@ const orderSchema = new mongoose.Schema({
   },
   paymentStatus: {
     type: String,
-    enum: ['pending', 'initiated', 'paid', 'failed', 'refunded'],
+    enum: ['pending', 'initiated', 'paid', 'failed', 'refunded', 'partially_refunded'],
     default: 'pending'
   },
   paymentSessionId: {
-    type: String
+    type: String // Legacy field for other payment gateways
+  },
+  razorpayOrderId: {
+    type: String // Razorpay order ID
   },
   paymentId: {
-    type: String
+    type: String // Razorpay payment ID
+  },
+  refundId: {
+    type: String // Razorpay refund ID
+  },
+  refundStatus: {
+    type: String,
+    enum: ['pending', 'processed', 'failed']
+  },
+  refundAmount: {
+    type: Number
   },
   status: {
     type: String,
