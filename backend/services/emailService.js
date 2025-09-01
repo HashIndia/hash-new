@@ -101,12 +101,12 @@ class EmailService {
       <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: white;">
         <div style="background: #000000; padding: 40px 20px; text-align: center; border-bottom: 4px solid #f8f9fa;">
           <div style="display: inline-block; position: relative; margin-bottom: 15px;">
-            <!-- Hash Logo Circle -->
-            <div style="width: 60px; height: 60px; border: 3px solid white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-              <span style="color: white; font-size: 24px; font-weight: bold;">H</span>
+            <!-- Hash Logo Images Side by Side -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;">
+              <img src="${process.env.FRONTEND_URL}/hash-logo.jpg" alt="Hash Logo" style="height: 50px; width: auto; object-fit: contain;" />
+              <img src="${process.env.FRONTEND_URL}/hash-logo-text.jpg" alt="Hash Text" style="height: 50px; width: auto; object-fit: contain;" />
             </div>
           </div>
-          <h1 style="color: white; margin: 0; font-size: 36px; font-weight: 300; letter-spacing: 8px;">HASH</h1>
           <p style="color: #f8f9fa; margin: 8px 0 0 0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">Premium E-commerce</p>
         </div>
         <div style="padding: 40px 30px; background: white;">
@@ -160,12 +160,12 @@ class EmailService {
       <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: white;">
         <div style="background: #000000; padding: 40px 20px; text-align: center; border-bottom: 4px solid #f8f9fa;">
           <div style="display: inline-block; position: relative; margin-bottom: 15px;">
-            <!-- Hash Logo Circle -->
-            <div style="width: 60px; height: 60px; border: 3px solid white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-              <span style="color: white; font-size: 24px; font-weight: bold;">H</span>
+            <!-- Hash Logo Images Side by Side -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;">
+              <img src="${process.env.FRONTEND_URL}/hash-logo.jpg" alt="Hash Logo" style="height: 50px; width: auto; object-fit: contain;" />
+              <img src="${process.env.FRONTEND_URL}/hash-logo-text.jpg" alt="Hash Text" style="height: 50px; width: auto; object-fit: contain;" />
             </div>
           </div>
-          <h1 style="color: white; margin: 0; font-size: 36px; font-weight: 300; letter-spacing: 8px;">HASH</h1>
           <p style="color: #f8f9fa; margin: 8px 0 0 0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">Premium E-commerce</p>
           <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
             <h2 style="color: white; margin: 0; font-size: 24px; font-weight: 400;">Order Confirmed!</h2>
@@ -244,12 +244,12 @@ class EmailService {
       <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: white;">
         <div style="background: #000000; padding: 40px 20px; text-align: center; border-bottom: 4px solid #f8f9fa;">
           <div style="display: inline-block; position: relative; margin-bottom: 15px;">
-            <!-- Hash Logo Circle -->
-            <div style="width: 60px; height: 60px; border: 3px solid white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-              <span style="color: white; font-size: 24px; font-weight: bold;">H</span>
+            <!-- Hash Logo Images Side by Side -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;">
+              <img src="${process.env.FRONTEND_URL}/hash-logo.jpg" alt="Hash Logo" style="height: 50px; width: auto; object-fit: contain;" />
+              <img src="${process.env.FRONTEND_URL}/hash-logo-text.jpg" alt="Hash Text" style="height: 50px; width: auto; object-fit: contain;" />
             </div>
           </div>
-          <h1 style="color: white; margin: 0; font-size: 36px; font-weight: 300; letter-spacing: 8px;">HASH</h1>
           <p style="color: #f8f9fa; margin: 8px 0 0 0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">Premium E-commerce</p>
           <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
             <h2 style="color: white; margin: 0; font-size: 24px; font-weight: 400;">Order Shipped!</h2>
@@ -341,12 +341,12 @@ class EmailService {
       <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: white;">
         <div style="background: #000000; padding: 40px 20px; text-align: center; border-bottom: 4px solid #f8f9fa;">
           <div style="display: inline-block; position: relative; margin-bottom: 15px;">
-            <!-- Hash Logo Circle -->
-            <div style="width: 60px; height: 60px; border: 3px solid white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-              <span style="color: white; font-size: 24px; font-weight: bold;">H</span>
+            <!-- Hash Logo Images Side by Side -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;">
+              <img src="${process.env.FRONTEND_URL}/hash-logo.jpg" alt="Hash Logo" style="height: 50px; width: auto; object-fit: contain;" />
+              <img src="${process.env.FRONTEND_URL}/hash-logo-text.jpg" alt="Hash Text" style="height: 50px; width: auto; object-fit: contain;" />
             </div>
           </div>
-          <h1 style="color: white; margin: 0; font-size: 36px; font-weight: 300; letter-spacing: 8px;">HASH</h1>
           <p style="color: #f8f9fa; margin: 8px 0 0 0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">Premium E-commerce</p>
           <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
             <h2 style="color: white; margin: 0; font-size: 24px; font-weight: 400;">Out for Delivery</h2>

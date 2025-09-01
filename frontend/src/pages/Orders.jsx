@@ -55,25 +55,45 @@ export default function Orders() {
       pdf.setFont('helvetica', 'bold');
       pdf.text('INVOICE', margin, 35);
 
-      // Hash Logo - Circular design with "H" inside
-      const logoX = pageWidth - margin - 50;
-      const logoY = 20;
-      const logoRadius = 20;
+      // Hash Logo - Using actual logo images side by side
+      const logoY = 15;
+      const logoHeight = 20;
       
-      // Draw circle for logo
-      pdf.setDrawColor(...blackColor);
-      pdf.setLineWidth(2);
-      pdf.circle(logoX, logoY, logoRadius, 'S');
-      
-      // Hash text in circle
-      pdf.setFontSize(16);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('H', logoX - 3, logoY + 3);
-      
-      // Hash brand text
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text('HASH', logoX - 8, logoY + 18);
+      try {
+        // Load hash-logo.jpg
+        const hashLogoResponse = await fetch('/hash-logo.jpg');
+        const hashLogoBlob = await hashLogoResponse.blob();
+        const hashLogoDataUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.readAsDataURL(hashLogoBlob);
+        });
+        
+        // Load hash-logo-text.jpg
+        const hashTextResponse = await fetch('/hash-logo-text.jpg');
+        const hashTextBlob = await hashTextResponse.blob();
+        const hashTextDataUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.readAsDataURL(hashTextBlob);
+        });
+        
+        // Add logo images side by side
+        const logoWidth = 15;
+        const textLogoWidth = 25;
+        const totalLogoWidth = logoWidth + textLogoWidth + 2; // 2mm gap
+        const logoStartX = pageWidth - margin - totalLogoWidth;
+        
+        pdf.addImage(hashLogoDataUrl, 'JPEG', logoStartX, logoY, logoWidth, logoHeight);
+        pdf.addImage(hashTextDataUrl, 'JPEG', logoStartX + logoWidth + 2, logoY, textLogoWidth, logoHeight);
+        
+      } catch (error) {
+        console.error('Error loading logo images:', error);
+        // Fallback to text-based logo
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('HASH', pageWidth - margin - 30, logoY + 15);
+      }
 
       // Invoice details section - right aligned
       let rightSideY = 60;
