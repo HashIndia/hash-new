@@ -10,7 +10,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { authAPI, ordersAPI, paymentsAPI } from "../services/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { load } from "cashfree-pg-sdk-javascript";
 
 export default function Checkout() {
   const { items, clearCart, getCartTotal, getShippingCost, getTax, getGrandTotal } = useCartStore();
@@ -37,6 +36,16 @@ export default function Checkout() {
     
     loadAddresses();
   }, [user, setAddresses]);
+
+  // Preload Razorpay script
+  useEffect(() => {
+    if (!window.Razorpay) {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
 
   useEffect(() => {
     if (addresses.length > 0) {
@@ -120,8 +129,8 @@ export default function Checkout() {
           }
         });
       } else {
-        // For online payment, integrate Cashfree
-        await initiatePayment(order._id, total);
+        // For online payment, integrate Razorpay
+        await initiateRazorpayPayment(order._id, total);
       }
     } catch (error) {
       toast.error(error.message || "Failed to place order. Please try again.");
@@ -130,39 +139,102 @@ export default function Checkout() {
     }
   };
 
-  const initiatePayment = async (orderId, amount) => {
+  const initiateRazorpayPayment = async (orderId, amount) => {
     try {
-      // Create payment order
+      // Check if Razorpay is loaded
+      if (!window.Razorpay) {
+        // Dynamically load Razorpay script
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = () => processRazorpayPayment(orderId, amount);
+        script.onerror = () => {
+          toast.error('Failed to load payment gateway. Please try again.');
+        };
+        document.body.appendChild(script);
+        return;
+      }
+      
+      await processRazorpayPayment(orderId, amount);
+    } catch (error) {
+      console.error('Payment initialization failed:', error);
+      toast.error('Failed to initialize payment. Please try again.');
+    }
+  };
+
+  const processRazorpayPayment = async (orderId, amount) => {
+    try {
+      // Create Razorpay order
       const paymentResponse = await paymentsAPI.createPaymentOrder({
         orderId,
         amount
       });
 
-      const { paymentSessionId } = paymentResponse.data;
+      const { razorpayOrderId, key } = paymentResponse.data;
 
-      // Initialize Cashfree SDK
-      const cashfree = await load({
-        mode: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox'
-      });
+      const options = {
+        key: key, // Razorpay key from backend
+        amount: amount * 100, // Amount in paisa
+        currency: 'INR',
+        name: 'HASH',
+        description: 'Order Payment',
+        order_id: razorpayOrderId,
+        handler: async function (response) {
+          try {
+            // Verify payment on backend
+            const verifyResponse = await paymentsAPI.verifyPayment({
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature
+            });
 
-      // Checkout options
-      const checkoutOptions = {
-        paymentSessionId: paymentSessionId,
-        returnUrl: `${window.location.origin}/order-success?order_id=${orderId}`,
+            if (verifyResponse.data.verified) {
+              toast.success("Payment successful!");
+              
+              // Create notification for order confirmation
+              createOrderNotification(
+                orderId, 
+                'confirmed', 
+                amount
+              );
+              
+              clearCart();
+              navigate('/order-success', { 
+                state: { 
+                  orderId: orderId,
+                  paymentId: response.razorpay_payment_id,
+                  paymentMethod: 'online',
+                  status: 'confirmed'
+                }
+              });
+            } else {
+              toast.error('Payment verification failed. Please contact support.');
+            }
+          } catch (error) {
+            console.error('Payment verification failed:', error);
+            toast.error('Payment verification failed. Please contact support.');
+          }
+        },
+        prefill: {
+          name: user?.name || '',
+          email: user?.email || '',
+          contact: user?.phone || ''
+        },
+        theme: {
+          color: '#8B5CF6' // Hash purple color
+        },
+        modal: {
+          ondismiss: function() {
+            toast.error('Payment cancelled');
+          }
+        }
       };
 
-      // Open Cashfree checkout
-      cashfree.checkout(checkoutOptions).then((result) => {
-        if (result.error) {
-          toast.error('Payment failed. Please try again.');
-        } else if (result.redirect) {
-          // Handle success - the returnUrl will handle the redirect
-        }
-      });
+      const rzp = new window.Razorpay(options);
+      rzp.open();
 
     } catch (error) {
-      console.error('Payment initialization failed:', error);
-      toast.error('Failed to initialize payment. Please try again.');
+      console.error('Razorpay payment processing failed:', error);
+      toast.error('Failed to process payment. Please try again.');
     }
   };
 

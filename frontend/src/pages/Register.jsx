@@ -122,35 +122,39 @@ export default function Register() {
   const passwordStrength = getPasswordStrength(form.password);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-card to-background flex items-center justify-center p-6 relative">
+    <div className="min-h-screen bg-gradient-to-br from-background via-card to-background flex items-center justify-center p-4 md:p-6 relative">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_80%_20%,hsl(var(--hash-blue))_0%,transparent_50%),radial-gradient(circle_at_40%_40%,hsl(var(--hash-pink))_0%,transparent_50%)] opacity-5"></div>
       
       <div className="w-full max-w-md relative z-10">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 md:mb-8">
           {/* Logo */}
-          <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-hash-purple via-hash-blue to-hash-pink rounded-2xl flex items-center justify-center shadow-lg">
-            <span className="text-2xl font-bold text-white font-space">#</span>
+          <div className="mx-auto mb-3 md:mb-4 w-14 h-14 md:w-16 md:h-16 rounded-2xl overflow-hidden shadow-lg">
+            <img 
+              src="/hash-logo.jpg" 
+              alt="Hash Logo" 
+              className="w-full h-full object-cover"
+            />
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2 font-space">Join HASH</h1>
-          <p className="text-muted-foreground">Start your style journey with us</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2 font-space">Join HASH</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Start your style journey with us</p>
         </div>
 
         <Card className="bg-card/80 backdrop-blur-xl border border-border shadow-2xl shadow-hash-purple/10">
-          <CardHeader className="space-y-1 pb-6">
-            <CardTitle className="text-2xl font-semibold text-center text-foreground font-space">
+          <CardHeader className="space-y-1 pb-4 md:pb-6">
+            <CardTitle className="text-xl md:text-2xl font-semibold text-center text-foreground font-space">
               Create Account
             </CardTitle>
-            <CardDescription className="text-center text-sm text-muted-foreground">
+            <CardDescription className="text-center text-xs md:text-sm text-muted-foreground">
               Enter your details to get started with HASH.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
               {/* Name Field */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
+                <label className="text-xs md:text-sm font-medium text-foreground">
                   Full Name
                 </label>
                 <Input
@@ -159,7 +163,7 @@ export default function Register() {
                   placeholder="Enter your full name"
                   value={form.name}
                   onChange={handleChange}
-                  className={`h-12 ${errors.name ? 'border-destructive focus:ring-destructive' : 'border-border focus:ring-hash-purple'}`}
+                  className={`h-10 md:h-12 ${errors.name ? 'border-destructive focus:ring-destructive' : 'border-border focus:ring-hash-purple'}`}
                 />
                 {errors.name && (
                   <p className="text-sm text-destructive flex items-center gap-1">

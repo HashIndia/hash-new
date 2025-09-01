@@ -133,7 +133,7 @@ export const ordersAPI = {
 
 export const paymentsAPI = {
   createPaymentOrder: (orderData) => api.post('/payments/create-order', orderData),
-  verifyPayment: (orderId) => api.get(`/payments/verify/${orderId}`),
+  verifyPayment: (paymentData) => api.post('/payments/verify', paymentData),
 };
 
 export const reviewsAPI = {

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import Header from './Header';
 
 export default function Layout() {
   // Always call hooks at the top level
@@ -19,10 +20,10 @@ export default function Layout() {
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div
-            className="fixed inset-0 bg-gray-600 bg-opacity-75"
+            className="fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity"
             onClick={() => setSidebarOpen(false)}
           />
-          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white">
+          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white transform transition-transform">
             <Sidebar mobile onClose={() => setSidebarOpen(false)} />
           </div>
         </div>
@@ -31,21 +32,11 @@ export default function Layout() {
       {/* Main content */}
       <div className="flex-1 overflow-hidden">
         <div className="flex flex-col h-full">
-          {/* Mobile header */}
-          <header className="bg-white shadow-sm border-b border-gray-200 lg:hidden">
-            <div className="px-4 py-2">
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-              >
-                <span className="sr-only">Open sidebar</span>
-                ☰
-              </button>
-            </div>
-          </header>
+          {/* Header - responsive for both mobile and desktop */}
+          <Header onMenuClick={() => setSidebarOpen(true)} />
 
           {/* Page content */}
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1 overflow-y-auto p-4 md:p-6">
             <Outlet />
           </main>
         </div>

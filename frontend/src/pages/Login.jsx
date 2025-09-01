@@ -58,24 +58,28 @@ export default function Login() {
   };
 
   return (
-    <div className="container mx-auto flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-background via-card to-background relative">
+    <div className="container mx-auto flex items-center justify-center min-h-screen p-4 md:p-6 bg-gradient-to-br from-background via-card to-background relative">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_75%_75%,hsl(var(--hash-blue))_0%,transparent_50%)] opacity-5"></div>
       
       <Card className="w-full max-w-md bg-card/80 backdrop-blur-xl border border-border shadow-2xl shadow-hash-purple/10 relative z-10">
-        <CardHeader className="text-center space-y-4">
+        <CardHeader className="text-center space-y-3 md:space-y-4">
           {/* Logo */}
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-hash-purple via-hash-blue to-hash-pink rounded-2xl flex items-center justify-center shadow-lg">
-            <span className="text-2xl font-bold text-white font-space">#</span>
+          <div className="mx-auto w-14 h-14 md:w-16 md:h-16 rounded-2xl overflow-hidden shadow-lg">
+            <img 
+              src="/hash-logo.jpg" 
+              alt="Hash Logo" 
+              className="w-full h-full object-cover"
+            />
           </div>
-          <CardTitle className="text-2xl font-bold text-foreground font-space">Welcome Back</CardTitle>
-          <CardDescription className="text-muted-foreground">Sign in to your HASH account to continue your style journey</CardDescription>
+          <CardTitle className="text-xl md:text-2xl font-bold text-foreground font-space">Welcome Back</CardTitle>
+          <CardDescription className="text-xs md:text-sm text-muted-foreground px-2">Sign in to your HASH account to continue your style journey</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
             {errors.form && (
-              <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-                <p className="text-destructive text-sm">{errors.form}</p>
+              <div className="p-3 md:p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                <p className="text-destructive text-xs md:text-sm">{errors.form}</p>
               </div>
             )}
             <div className="space-y-2">
@@ -86,9 +90,9 @@ export default function Login() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className={`h-12 ${errors.email ? "border-destructive focus:ring-destructive" : "border-border focus:ring-hash-purple"}`}
+                className={`h-10 md:h-12 text-sm md:text-base ${errors.email ? "border-destructive focus:ring-destructive" : "border-border focus:ring-hash-purple"}`}
               />
-              {errors.email && <p className="text-destructive text-sm">{errors.email}</p>}
+              {errors.email && <p className="text-destructive text-xs md:text-sm">{errors.email}</p>}
             </div>
             <div className="space-y-2">
               <Input
@@ -98,18 +102,18 @@ export default function Login() {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className={`h-12 ${errors.password ? "border-destructive focus:ring-destructive" : "border-border focus:ring-hash-purple"}`}
+                className={`h-10 md:h-12 text-sm md:text-base ${errors.password ? "border-destructive focus:ring-destructive" : "border-border focus:ring-hash-purple"}`}
               />
-              {errors.password && <p className="text-destructive text-sm">{errors.password}</p>}
+              {errors.password && <p className="text-destructive text-xs md:text-sm">{errors.password}</p>}
             </div>
             <div className="text-right">
-              <Link to="/forgot-password" className="text-sm text-hash-purple hover:text-hash-blue transition-colors font-medium">
+              <Link to="/forgot-password" className="text-xs md:text-sm text-hash-purple hover:text-hash-blue transition-colors font-medium">
                 Forgot Password?
               </Link>
             </div>
             <Button 
               type="submit" 
-              className="w-full h-12 bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink hover:shadow-lg hover:shadow-hash-purple/25 transition-all duration-300 hover:scale-[1.02] font-semibold font-space" 
+              className="w-full h-10 md:h-12 text-sm md:text-base bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink hover:shadow-lg hover:shadow-hash-purple/25 transition-all duration-300 hover:scale-[1.02] font-semibold font-space" 
               disabled={isLoading}
             >
               {isLoading ? "Signing In..." : "Sign In"}

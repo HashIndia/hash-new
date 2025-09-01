@@ -74,10 +74,10 @@ export default function Cart() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-8">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-background py-6 md:py-8">
+      <div className="container mx-auto px-4 md:px-6">
         <motion.h1
-          className="text-4xl font-bold text-foreground mb-8 text-center font-space"
+          className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-6 md:mb-8 text-center font-space"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -86,7 +86,7 @@ export default function Cart() {
         </motion.h1>
 
         <motion.div 
-          className="grid lg:grid-cols-3 gap-8"
+          className="grid gap-6 lg:grid-cols-3 lg:gap-8"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
@@ -100,14 +100,14 @@ export default function Cart() {
                 layout
                 className="bg-card rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border border-border"
               >
-                <div className="p-6">
-                  <div className="flex gap-6">
+                <div className="p-4 md:p-6">
+                  <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
                     {/* Product Image */}
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 mx-auto sm:mx-0">
                       <img
                         src={item.product.images?.[0]?.url || item.product.images?.[0] || "https://placehold.co/150x150/64748b/fff?text=Product"}
                         alt={item.product.name}
-                        className="w-24 h-24 rounded-xl object-cover"
+                        className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover"
                         onError={(e) => {
                           e.target.src = "https://placehold.co/150x150/64748b/fff?text=Product";
                         }}
@@ -115,46 +115,46 @@ export default function Cart() {
                     </div>
 
                     {/* Product Details */}
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-lg font-semibold text-foreground">{item.product.name}</h3>
+                    <div className="flex-1 text-center sm:text-left">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-2">
+                        <h3 className="text-base md:text-lg font-semibold text-foreground">{item.product.name}</h3>
                         <button
                           onClick={() => removeFromCart(item.id)}
-                          className="text-destructive hover:text-destructive/80 font-bold text-xl"
+                          className="text-destructive hover:text-destructive/80 font-bold text-xl self-center sm:self-start"
                         >
                           ×
                         </button>
                       </div>
                       
-                      <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{item.product.description}</p>
+                      <p className="text-muted-foreground text-xs md:text-sm mb-3 md:mb-4 line-clamp-2">{item.product.description}</p>
                         
-                      <div className="flex items-center gap-4">
+                      <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4">
                         {/* Quantity Controls */}
                         <div className="flex items-center border-2 border-border rounded-xl overflow-hidden">
                           <button
                             onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                            className="px-3 py-1 bg-accent hover:bg-accent/80 text-foreground transition-colors"
+                            className="px-2 md:px-3 py-1 bg-accent hover:bg-accent/80 text-foreground transition-colors text-sm md:text-base"
                           >
                             -
                           </button>
-                          <span className="px-4 py-1 font-semibold text-foreground">{item.quantity}</span>
+                          <span className="px-3 md:px-4 py-1 font-semibold text-foreground text-sm md:text-base">{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="px-3 py-1 bg-accent hover:bg-accent/80 text-foreground transition-colors"
+                            className="px-2 md:px-3 py-1 bg-accent hover:bg-accent/80 text-foreground transition-colors text-sm md:text-base"
                           >
                             +
                           </button>
                         </div>
 
                         {/* Size & Color */}
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                           {item.size && (
-                            <span className="px-3 py-1 bg-hash-blue/10 text-hash-blue rounded-lg text-sm font-medium border border-hash-blue/20">
+                            <span className="px-2 md:px-3 py-1 bg-hash-blue/10 text-hash-blue rounded-lg text-xs md:text-sm font-medium border border-hash-blue/20">
                               Size: {item.size}
                             </span>
                           )}
                           {item.color && (
-                            <span className="px-3 py-1 bg-hash-green/10 text-hash-green rounded-lg text-sm font-medium border border-hash-green/20">
+                            <span className="px-2 md:px-3 py-1 bg-hash-green/10 text-hash-green rounded-lg text-xs md:text-sm font-medium border border-hash-green/20">
                               Color: {item.color}
                             </span>
                           )}
@@ -162,11 +162,11 @@ export default function Cart() {
                       </div>
 
                       {/* Price */}
-                      <div className="mt-4 flex justify-between items-center">
-                        <div className="text-xl font-bold text-hash-purple">
+                      <div className="mt-3 md:mt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+                        <div className="text-lg md:text-xl font-bold text-hash-purple text-center sm:text-left">
                           ₹{item.price * item.quantity}
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-xs md:text-sm text-muted-foreground text-center sm:text-right">
                           {item.quantity} × ₹{item.price}
                         </div>
                       </div>

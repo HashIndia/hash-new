@@ -75,9 +75,13 @@ export default function NotFound() {
               repeat: Infinity,
               ease: "linear"
             }}
-            className="mt-12 mx-auto w-16 h-16 bg-gradient-to-br from-hash-purple to-hash-blue rounded-2xl flex items-center justify-center opacity-20"
+            className="mt-12 mx-auto w-16 h-16 rounded-2xl flex items-center justify-center opacity-20 overflow-hidden"
           >
-            <span className="text-white font-bold text-xl font-space">#</span>
+            <img 
+              src="/hash-logo.jpg" 
+              alt="Hash Logo" 
+              className="w-full h-full object-cover"
+            />
           </motion.div>
         </motion.div>
       </div>

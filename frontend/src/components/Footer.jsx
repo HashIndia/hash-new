@@ -93,10 +93,18 @@ export default function Footer() {
           {/* Brand Section */}
           <motion.div variants={itemVariants} className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-3 mb-6 group">
-              <div className="w-12 h-12 bg-gradient-to-br from-hash-purple via-hash-blue to-hash-pink rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                <span className="text-xl font-bold text-white font-space">#</span>
+              <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg group-hover:scale-110 transition-transform">
+                <img 
+                  src="/hash-logo.jpg" 
+                  alt="Hash Logo" 
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <h3 className="text-3xl font-bold bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink bg-clip-text text-transparent font-space">HASH</h3>
+              <img 
+                src="/hash-logo-text.jpg" 
+                alt="Hash" 
+                className="h-10 object-contain"
+              />
             </Link>
             <p className="text-muted-foreground mb-8 leading-relaxed text-lg">
               Define your style story with premium fashion that speaks your language. 

@@ -36,10 +36,21 @@ const Sidebar = ({ mobile = false, onClose }) => {
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-gray-200">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">A</span>
+          <div className="w-8 h-8 rounded-lg overflow-hidden">
+            <img 
+              src="/hash-logo.jpg" 
+              alt="Hash Logo" 
+              className="w-full h-full object-cover"
+            />
           </div>
-          <h2 className="text-xl font-bold text-gray-900">Admin Panel</h2>
+          <div className="flex items-center space-x-2">
+            <img 
+              src="/hash-logo-text.jpg" 
+              alt="Hash" 
+              className="h-6 object-contain"
+            />
+            <span className="text-sm font-medium text-gray-600">Admin</span>
+          </div>
         </div>
         {mobile && (
           <button

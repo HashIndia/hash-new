@@ -108,10 +108,10 @@ export default function Shop() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 font-space">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-space">
               <span className="text-white/90">#Shop</span> Collection
             </h1>
-            <p className="text-xl text-white/80 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto px-4">
               Discover our complete range of premium fashion pieces
             </p>
           </motion.div>
@@ -120,24 +120,24 @@ export default function Shop() {
 
       {/* Search & Filters Section */}
       <section className="bg-card border-b border-border sticky top-16 z-40 backdrop-blur-sm">
-        <div className="container mx-auto px-6 py-6">
-          <div className="flex flex-col lg:flex-row gap-4 items-center">
+        <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
+          <div className="flex flex-col gap-4">
             {/* Search */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+            <div className="relative w-full">
+              <Search className="absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 md:w-5 md:h-5" />
               <Input
                 type="text"
                 placeholder="Search products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12 pr-4 py-3 text-lg bg-background border-border focus:ring-hash-purple"
+                className="pl-10 md:pl-12 pr-4 py-2 md:py-3 text-base md:text-lg bg-background border-border focus:ring-hash-purple"
               />
             </div>
             
             {/* Quick Filters */}
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex flex-wrap gap-2 md:gap-3">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-40 bg-background border-border">
+                <SelectTrigger className="w-full sm:w-40 bg-background border-border text-sm md:text-base">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -150,7 +150,7 @@ export default function Shop() {
               </Select>
               
               <Select value={priceRange} onValueChange={setPriceRange}>
-                <SelectTrigger className="w-40 bg-background border-border">
+                <SelectTrigger className="w-full sm:w-40 bg-background border-border text-sm md:text-base">
                   <SelectValue placeholder="Price Range" />
                 </SelectTrigger>
                 <SelectContent>
@@ -164,7 +164,7 @@ export default function Shop() {
               </Select>
               
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-40 bg-background border-border">
+                <SelectTrigger className="w-full sm:w-40 bg-background border-border text-sm md:text-base">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -180,17 +180,17 @@ export default function Shop() {
                   variant={viewMode === 'grid' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('grid')}
-                  className="rounded-none border-r border-border"
+                  className="rounded-none border-r border-border px-2 md:px-3"
                 >
-                  <Grid className="w-4 h-4" />
+                  <Grid className="w-3 h-3 md:w-4 md:h-4" />
                 </Button>
                 <Button
                   variant={viewMode === 'list' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('list')}
-                  className="rounded-none"
+                  className="rounded-none px-2 md:px-3"
                 >
-                  <List className="w-4 h-4" />
+                  <List className="w-3 h-3 md:w-4 md:h-4" />
                 </Button>
               </div>
             </div>
@@ -199,14 +199,14 @@ export default function Shop() {
       </section>
 
       {/* Products Grid */}
-      <section className="py-12 bg-background">
-        <div className="container mx-auto px-6">
+      <section className="py-8 md:py-12 bg-background">
+        <div className="container mx-auto px-4 md:px-6">
           {/* Results Summary */}
-          <div className="flex justify-between items-center mb-8">
-            <div className="text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 md:mb-8 gap-2">
+            <div className="text-sm md:text-base text-muted-foreground">
               Showing {filteredProducts.length} of {pagination.total} products
               {searchTerm && (
-                <span className="ml-2">
+                <span className="ml-2 block sm:inline">
                   for "<span className="font-medium text-foreground">{searchTerm}</span>"
                 </span>
               )}

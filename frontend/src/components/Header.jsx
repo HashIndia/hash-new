@@ -71,12 +71,20 @@ export default function Header() {
       <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 bg-gradient-to-br from-hash-purple via-hash-blue to-hash-pink rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-            <span className="text-white font-bold text-lg font-space">#</span>
+          <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+            <img 
+              src="/hash-logo.jpg" 
+              alt="Hash Logo" 
+              className="w-full h-full object-cover"
+            />
           </div>
-          <span className="text-2xl font-bold font-space bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink bg-clip-text text-transparent">
-            HASH
-          </span>
+          <div className="hidden sm:block">
+            <img 
+              src="/hash-logo-text.jpg" 
+              alt="Hash" 
+              className="h-8 object-contain"
+            />
+          </div>
         </Link>
 
         {/* Desktop Navigation */}

@@ -54,8 +54,12 @@ const Login = () => {
         className="max-w-md w-full space-y-8"
       >
         <div>
-          <div className="mx-auto h-16 w-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-2xl">A</span>
+          <div className="mx-auto h-16 w-16 rounded-xl overflow-hidden shadow-lg">
+            <img 
+              src="/hash-logo.jpg" 
+              alt="Hash Logo" 
+              className="w-full h-full object-cover"
+            />
           </div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
             Admin Login

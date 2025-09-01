@@ -197,7 +197,7 @@ export default function Home() {
               </motion.div>
               
               <motion.h1 
-                className="text-6xl md:text-8xl font-bold mb-8 leading-tight font-space"
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-6 md:mb-8 leading-tight font-space"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.8 }}
@@ -214,7 +214,7 @@ export default function Home() {
               </motion.h1>
               
               <motion.p 
-                className="text-xl text-muted-foreground mb-10 max-w-lg mx-auto lg:mx-0 leading-relaxed font-inter"
+                className="text-lg md:text-xl text-muted-foreground mb-8 md:mb-10 max-w-lg mx-auto lg:mx-0 leading-relaxed font-inter px-4 lg:px-0"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
@@ -223,27 +223,27 @@ export default function Home() {
               </motion.p>
               
               <motion.div 
-                className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12"
+                className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center lg:justify-start mb-8 md:mb-12 px-4 lg:px-0"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.8 }}
               >
-                <Button asChild className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink hover:shadow-xl hover:shadow-hash-purple/25 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:scale-105 group font-space">
+                <Button asChild className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink hover:shadow-xl hover:shadow-hash-purple/25 px-6 md:px-8 py-3 md:py-4 rounded-xl font-semibold text-base md:text-lg transition-all duration-300 hover:scale-105 group font-space">
                   <a href="/shop">
                     Shop Collection
-                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-4 md:w-5 h-4 md:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </a>
                 </Button>
-                <Button asChild variant="outline" className="px-8 py-4 rounded-xl font-semibold text-lg border-2 border-hash-purple/30 hover:border-hash-purple hover:bg-hash-purple/10 hover:text-hash-purple transition-all duration-300 hover:scale-105 font-space">
+                <Button asChild variant="outline" className="px-6 md:px-8 py-3 md:py-4 rounded-xl font-semibold text-base md:text-lg border-2 border-hash-purple/30 hover:border-hash-purple hover:bg-hash-purple/10 hover:text-hash-purple transition-all duration-300 hover:scale-105 font-space">
                   <a href="#featured" className="flex items-center gap-2">
-                    <Eye className="w-5 h-5" />
+                    <Eye className="w-4 md:w-5 h-4 md:h-5" />
                     Explore Trends
                   </a>
                 </Button>
               </motion.div>
 
               <motion.div 
-                className="flex items-center justify-center lg:justify-start gap-8 text-sm text-muted-foreground"
+                className="flex flex-wrap items-center justify-center lg:justify-start gap-4 md:gap-8 text-xs md:text-sm text-muted-foreground px-4 lg:px-0"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8, duration: 0.8 }}
@@ -251,17 +251,17 @@ export default function Home() {
                 <div className="flex items-center gap-2">
                   <div className="flex text-hash-orange">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-current" />
+                      <Star key={i} className="w-3 md:w-4 h-3 md:h-4 fill-current" />
                     ))}
                   </div>
                   <span className="font-medium text-foreground">4.9/5 Rating</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-hash-green" />
+                  <Users className="w-3 md:w-4 h-3 md:h-4 text-hash-green" />
                   <span>10,000+ Customers</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Truck className="w-4 h-4 text-hash-blue" />
+                  <Truck className="w-3 md:w-4 h-3 md:h-4 text-hash-blue" />
                   <span>Free Shipping</span>
                 </div>
               </motion.div>
@@ -269,15 +269,15 @@ export default function Home() {
 
             {/* Right Content - Creative Hero Visual */}
             <motion.div 
-              className="relative flex items-center justify-center"
+              className="relative flex items-center justify-center mt-8 lg:mt-0"
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <div className="relative max-w-md">
+              <div className="relative max-w-xs sm:max-w-sm md:max-w-md">
                 {/* Main circular design with gradient border */}
                 <motion.div
-                  className="relative w-80 h-80 rounded-full bg-gradient-to-br from-hash-purple via-hash-blue to-hash-pink p-1"
+                  className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 rounded-full bg-gradient-to-br from-hash-purple via-hash-blue to-hash-pink p-1"
                   animate={{ 
                     rotate: 360,
                   }}
@@ -300,14 +300,14 @@ export default function Home() {
                         ease: "linear"
                       }}
                     >
-                      <div className="w-48 h-48 rounded-2xl bg-gradient-to-br from-hash-purple/10 via-hash-blue/10 to-hash-pink/10 backdrop-blur-sm border border-hash-purple/20 flex items-center justify-center mb-4">
+                      <div className="w-36 h-36 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-2xl bg-gradient-to-br from-hash-purple/10 via-hash-blue/10 to-hash-pink/10 backdrop-blur-sm border border-hash-purple/20 flex items-center justify-center mb-4">
                         <img
                           src="https://placehold.co/180x180/404040/ffffff?text=HASH+Style"
                           alt="HASH Fashion"
-                          className="w-40 h-40 object-cover rounded-xl"
+                          className="w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 object-cover rounded-xl"
                         />
                       </div>
-                      <div className="text-hash-purple font-space font-bold text-lg">#FASHION</div>
+                      <div className="text-hash-purple font-space font-bold text-base md:text-lg">#FASHION</div>
                     </motion.div>
                     
                     {/* Background pattern */}
@@ -317,55 +317,55 @@ export default function Home() {
                 
                 {/* Floating Elements */}
                 <motion.div 
-                  className="absolute -top-8 -left-8 w-16 h-16 bg-gradient-to-br from-hash-purple to-hash-blue rounded-2xl flex items-center justify-center shadow-lg"
+                  className="absolute -top-6 -left-6 sm:-top-8 sm:-left-8 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-hash-purple to-hash-blue rounded-2xl flex items-center justify-center shadow-lg"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1, duration: 0.6 }}
                   whileHover={{ scale: 1.1, rotate: 10 }}
                 >
-                  <Shield className="w-8 h-8 text-white" />
+                  <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </motion.div>
 
                 <motion.div 
-                  className="absolute -top-4 -right-12 w-12 h-12 bg-gradient-to-br from-hash-pink to-hash-orange rounded-xl flex items-center justify-center shadow-lg"
+                  className="absolute -top-3 -right-8 sm:-top-4 sm:-right-12 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-hash-pink to-hash-orange rounded-xl flex items-center justify-center shadow-lg"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.2, duration: 0.6 }}
                   whileHover={{ scale: 1.1, rotate: -10 }}
                 >
-                  <Award className="w-6 h-6 text-white" />
+                  <Award className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </motion.div>
 
                 <motion.div 
-                  className="absolute -bottom-8 -right-8 w-16 h-16 bg-gradient-to-br from-hash-green to-hash-blue rounded-2xl flex items-center justify-center shadow-lg"
+                  className="absolute -bottom-6 -right-6 sm:-bottom-8 sm:-right-8 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-hash-green to-hash-blue rounded-2xl flex items-center justify-center shadow-lg"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.4, duration: 0.6 }}
                   whileHover={{ scale: 1.1, rotate: 15 }}
                 >
-                  <Truck className="w-8 h-8 text-white" />
+                  <Truck className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </motion.div>
 
                 <motion.div 
-                  className="absolute -bottom-4 -left-12 w-12 h-12 bg-gradient-to-br from-hash-orange to-hash-pink rounded-xl flex items-center justify-center shadow-lg"
+                  className="absolute -bottom-3 -left-8 sm:-bottom-4 sm:-left-12 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-hash-orange to-hash-pink rounded-xl flex items-center justify-center shadow-lg"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.6, duration: 0.6 }}
                   whileHover={{ scale: 1.1, rotate: -15 }}
                 >
-                  <Star className="w-6 h-6 text-white fill-current" />
+                  <Star className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-current" />
                 </motion.div>
 
                 {/* Orbiting dots */}
                 <motion.div 
-                  className="absolute top-1/2 left-1/2 w-96 h-96 -translate-x-1/2 -translate-y-1/2"
+                  className="absolute top-1/2 left-1/2 w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 -translate-x-1/2 -translate-y-1/2"
                   animate={{ rotate: 360 }}
                   transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
                 >
                   {[...Array(8)].map((_, i) => (
                     <motion.div
                       key={i}
-                      className="absolute w-3 h-3 bg-hash-purple/30 rounded-full"
+                      className="absolute w-2 h-2 sm:w-3 sm:h-3 bg-hash-purple/30 rounded-full"
                       style={{
                         top: `${50 + 45 * Math.cos(i * Math.PI / 4)}%`,
                         left: `${50 + 45 * Math.sin(i * Math.PI / 4)}%`,
