@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ordersAPI } from "../services/api";
 import toast from "react-hot-toast";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export default function Orders() {
   const { orders, setOrders, user } = useUserStore();
@@ -32,6 +34,217 @@ export default function Orders() {
 
     loadOrders();
   }, [user, setOrders]);
+
+  // PDF Invoice Generation Function
+  const generateInvoicePDF = async (order) => {
+    try {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const margin = 20;
+      const contentWidth = pageWidth - 2 * margin;
+
+      // Colors - Black and White Theme
+      const blackColor = '#000000';
+      const grayColor = '#666666';
+      const lightGrayColor = '#f8f9fa';
+
+      // Add Hash Header with Black Theme
+      pdf.setFillColor(0, 0, 0); // Black background
+      pdf.rect(0, 0, pageWidth, 70, 'F');
+      
+      // Hash Logo (text-based) - Larger and more prominent
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(42);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('HASH', margin, 40);
+      
+      // Subtitle
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('PREMIUM E-COMMERCE PLATFORM', margin, 52);
+      
+      // Invoice title
+      pdf.setFontSize(24);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('INVOICE', pageWidth - margin - 45, 40);
+      
+      // Company details
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('support@hash.com | www.hash.com', margin, 62);
+
+      // Invoice details section
+      let yPos = 90;
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Invoice Details', margin, yPos);
+      
+      // Add a line under the heading
+      pdf.setDrawColor(0, 0, 0);
+      pdf.setLineWidth(0.5);
+      pdf.line(margin, yPos + 2, margin + 60, yPos + 2);
+      
+      yPos += 12;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(11);
+      pdf.text(`Invoice #: ${order.orderNumber || order._id.slice(-8)}`, margin, yPos);
+      pdf.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, margin + 90, yPos);
+      
+      yPos += 8;
+      pdf.text(`Order ID: ${order._id}`, margin, yPos);
+      pdf.text(`Status: ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}`, margin + 90, yPos);
+
+      // Customer details
+      yPos += 25;
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(14);
+      pdf.text('Bill To:', margin, yPos);
+      pdf.line(margin, yPos + 2, margin + 30, yPos + 2);
+      
+      yPos += 12;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(11);
+      pdf.text(order.shippingAddress?.name || 'N/A', margin, yPos);
+      yPos += 7;
+      pdf.text(order.user?.email || 'N/A', margin, yPos);
+      yPos += 7;
+      if (order.shippingAddress?.phone) {
+        pdf.text(`Phone: ${order.shippingAddress.phone}`, margin, yPos);
+        yPos += 7;
+      }
+      
+      // Address
+      if (order.shippingAddress) {
+        const address = `${order.shippingAddress.address || ''}, ${order.shippingAddress.city || ''}, ${order.shippingAddress.state || ''} ${order.shippingAddress.zipCode || ''}`;
+        // Split long address into multiple lines
+        const addressLines = pdf.splitTextToSize(address, 80);
+        pdf.text(addressLines, margin, yPos);
+        yPos += addressLines.length * 7;
+      }
+
+      // Payment details
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(14);
+      pdf.text('Payment Information:', margin + 110, yPos - 35);
+      pdf.line(margin + 110, yPos - 33, margin + 170, yPos - 33);
+      
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(11);
+      pdf.text(`Method: ${order.paymentMethod || 'Online'}`, margin + 110, yPos - 23);
+      pdf.text(`Transaction ID: ${order.paymentId || 'N/A'}`, margin + 110, yPos - 15);
+
+      // Products table header
+      yPos += 15;
+      
+      // Table header background
+      pdf.setFillColor(248, 249, 250); // Light gray
+      pdf.rect(margin, yPos, contentWidth, 12, 'F');
+      
+      // Table header border
+      pdf.setDrawColor(0, 0, 0);
+      pdf.setLineWidth(0.5);
+      pdf.rect(margin, yPos, contentWidth, 12);
+      
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(11);
+      pdf.text('Product', margin + 3, yPos + 8);
+      pdf.text('Qty', margin + 100, yPos + 8);
+      pdf.text('Price', margin + 125, yPos + 8);
+      pdf.text('Total', margin + 155, yPos + 8);
+
+      // Products table content
+      yPos += 15;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      
+      order.items?.forEach((item, index) => {
+        if (yPos > 250) { // Check if we need a new page
+          pdf.addPage();
+          yPos = 20;
+        }
+        
+        const productName = item.product?.name || 'Unknown Product';
+        const quantity = item.quantity || 1;
+        const price = item.price || 0;
+        const total = quantity * price;
+        
+        // Add row border
+        pdf.setDrawColor(233, 236, 239);
+        pdf.setLineWidth(0.3);
+        pdf.line(margin, yPos + 5, margin + contentWidth, yPos + 5);
+        
+        pdf.text(productName.length > 45 ? productName.substring(0, 45) + '...' : productName, margin + 3, yPos + 3);
+        pdf.text(quantity.toString(), margin + 100, yPos + 3);
+        pdf.text(`₹${price.toFixed(2)}`, margin + 125, yPos + 3);
+        pdf.text(`₹${total.toFixed(2)}`, margin + 155, yPos + 3);
+        
+        yPos += 10;
+      });
+
+      // Total section
+      yPos += 15;
+      
+      // Summary box background
+      pdf.setFillColor(248, 249, 250);
+      pdf.rect(margin + 100, yPos - 5, contentWidth - 100, 45, 'F');
+      
+      // Summary box border
+      pdf.setDrawColor(0, 0, 0);
+      pdf.setLineWidth(0.5);
+      pdf.rect(margin + 100, yPos - 5, contentWidth - 100, 45);
+      
+      const subtotal = order.subtotal || 0;
+      const shipping = order.shippingCost || 0;
+      const total = order.totalAmount || 0;
+
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(11);
+      pdf.text('Subtotal:', margin + 105, yPos + 5);
+      pdf.text(`₹${subtotal.toFixed(2)}`, margin + 155, yPos + 5);
+      
+      yPos += 8;
+      pdf.text('Shipping:', margin + 105, yPos + 5);
+      pdf.text(`₹${shipping.toFixed(2)}`, margin + 155, yPos + 5);
+      
+      yPos += 12;
+      // Total line
+      pdf.setDrawColor(0, 0, 0);
+      pdf.setLineWidth(0.8);
+      pdf.line(margin + 105, yPos, margin + contentWidth - 5, yPos);
+      
+      yPos += 8;
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(14);
+      pdf.text('TOTAL:', margin + 105, yPos + 5);
+      pdf.text(`₹${total.toFixed(2)}`, margin + 155, yPos + 5);
+
+      // Footer
+      yPos = pageHeight - 40;
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(0, 0, 0);
+      pdf.text('Thank you for shopping with Hash!', margin, yPos);
+      
+      yPos += 8;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      pdf.setTextColor(102, 102, 102);
+      pdf.text('For support, contact us at support@hash.com', margin, yPos);
+      
+      yPos += 6;
+      pdf.text('© Hash - Premium E-commerce Platform', margin, yPos);
+
+      // Save the PDF
+      pdf.save(`Hash_Invoice_${order.orderNumber || order._id.slice(-8)}.pdf`);
+      toast.success('Invoice downloaded successfully!');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Failed to generate invoice');
+    }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -199,13 +412,12 @@ export default function Orders() {
                       </Button>
                     )}
                     
-                    {order.status !== 'delivered' && order.status !== 'cancelled' && (
-                      <Button variant="outline" size="sm">
-                        Track Package
-                      </Button>
-                    )}
-                    
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => generateInvoicePDF(order)}
+                      className="text-xs sm:text-sm"
+                    >
                       Download Invoice
                     </Button>
                   </div>

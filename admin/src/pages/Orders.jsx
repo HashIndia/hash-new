@@ -10,7 +10,10 @@ import {
   Clock,
   Package,
   AlertCircle,
-  Send
+  Send,
+  Square,
+  CheckSquare,
+  Users
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -33,6 +36,10 @@ const Orders = () => {
   const [otpLoading, setOTPLoading] = useState(false);
   const [otp, setOTP] = useState('');
   const [currentOrderForOTP, setCurrentOrderForOTP] = useState(null);
+  
+  // Bulk selection state
+  const [selectedOrders, setSelectedOrders] = useState([]);
+  const [bulkActionLoading, setBulkActionLoading] = useState(false);
   
   // Real state from API
   const [orders, setOrders] = useState([]);
@@ -135,6 +142,55 @@ const Orders = () => {
     setCurrentOrderForOTP(null);
   };
 
+  // Bulk selection functions
+  const handleSelectOrder = (orderId) => {
+    setSelectedOrders(prev => 
+      prev.includes(orderId) 
+        ? prev.filter(id => id !== orderId)
+        : [...prev, orderId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedOrders.length === orders.length) {
+      setSelectedOrders([]);
+    } else {
+      setSelectedOrders(orders.map(order => order._id));
+    }
+  };
+
+  const handleBulkStatusUpdate = async (newStatus) => {
+    if (selectedOrders.length === 0) {
+      toast.error('Please select orders to update');
+      return;
+    }
+
+    setBulkActionLoading(true);
+    try {
+      // Update orders in parallel
+      const updatePromises = selectedOrders.map(orderId =>
+        ordersAPI.updateOrderStatus(orderId, { status: newStatus })
+      );
+      
+      await Promise.all(updatePromises);
+      
+      // Update local state
+      setOrders(prev => prev.map(order => 
+        selectedOrders.includes(order._id) 
+          ? { ...order, status: newStatus }
+          : order
+      ));
+      
+      setSelectedOrders([]);
+      toast.success(`${selectedOrders.length} orders updated to ${newStatus}`);
+    } catch (error) {
+      console.error('Error updating orders:', error);
+      toast.error('Failed to update some orders');
+    } finally {
+      setBulkActionLoading(false);
+    }
+  };
+
   const getStatusIcon = (status) => {
     switch (status) {
       case 'pending': return <Clock className="w-4 h-4" />;
@@ -204,6 +260,55 @@ const Orders = () => {
         </Select>
       </div>
 
+      {/* Bulk Actions */}
+      {selectedOrders.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          className="bg-blue-50 border border-blue-200 rounded-lg p-4"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-blue-600" />
+              <span className="text-blue-700 font-medium">
+                {selectedOrders.length} order{selectedOrders.length !== 1 ? 's' : ''} selected
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleBulkStatusUpdate('confirmed')}
+                disabled={bulkActionLoading}
+                className="text-blue-600 border-blue-300 hover:bg-blue-100"
+              >
+                <CheckCircle className="w-4 h-4 mr-1" />
+                Mark as Confirmed
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleBulkStatusUpdate('shipped')}
+                disabled={bulkActionLoading}
+                className="text-green-600 border-green-300 hover:bg-green-100"
+              >
+                <Truck className="w-4 h-4 mr-1" />
+                Mark as Shipped
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedOrders([])}
+                className="text-gray-600"
+              >
+                Clear Selection
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Orders List */}
       <div className="space-y-4">
         {orders.length === 0 ? (
@@ -212,7 +317,29 @@ const Orders = () => {
             <p className="text-gray-500">No orders found</p>
           </div>
         ) : (
-          <AnimatePresence>
+          <div className="space-y-4">
+            {/* Select All Header */}
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border">
+              <button
+                onClick={handleSelectAll}
+                className="flex items-center justify-center w-5 h-5 border-2 border-gray-300 rounded hover:border-blue-500 transition-colors"
+              >
+                {selectedOrders.length === orders.length ? (
+                  <CheckSquare className="w-4 h-4 text-blue-600" />
+                ) : selectedOrders.length > 0 ? (
+                  <div className="w-3 h-3 bg-blue-600 rounded-sm" />
+                ) : (
+                  <Square className="w-4 h-4 text-gray-400" />
+                )}
+              </button>
+              <span className="text-sm font-medium text-gray-700">
+                {selectedOrders.length === orders.length ? 'Deselect All' : 
+                 selectedOrders.length > 0 ? `${selectedOrders.length} selected` : 
+                 'Select All'}
+              </span>
+            </div>
+            
+            <AnimatePresence>
             {orders.map((order) => (
               <motion.div
                 key={order._id}
@@ -223,28 +350,42 @@ const Orders = () => {
               >
                 <Card className="p-6">
                   <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-3">
-                        <h3 className="font-semibold text-lg">
-                          Order #{order.orderNumber || order._id.slice(-8)}
-                        </h3>
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                          {getStatusIcon(order.status)}
-                          {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
-                        </span>
-                      </div>
-                      <div className="text-sm text-gray-600 space-y-1">
-                        <p>Customer: {order.user?.email || order.shippingAddress?.name || 'N/A'}</p>
-                        <p>Date: {format(new Date(order.createdAt), 'MMM dd, yyyy HH:mm')}</p>
-                        <p>Amount: ₹{order.totalAmount?.toFixed(2)}</p>
-                        <p>Payment: {
-                          order.paymentMethod === 'upi' ? 'UPI' :
-                          order.paymentMethod === 'netbanking' ? 'Net Banking' :
-                          order.paymentMethod === 'wallet' ? 'Wallet' :
-                          order.paymentMethod === 'card' ? 'Card' :
-                          order.paymentMethod === 'emi' ? 'EMI' :
-                          order.paymentMethod || 'Online Payment'
-                        }</p>
+                    <div className="flex items-center gap-4">
+                      {/* Checkbox for bulk selection */}
+                      <button
+                        onClick={() => handleSelectOrder(order._id)}
+                        className="flex items-center justify-center w-5 h-5 border-2 border-gray-300 rounded hover:border-blue-500 transition-colors"
+                      >
+                        {selectedOrders.includes(order._id) ? (
+                          <CheckSquare className="w-4 h-4 text-blue-600" />
+                        ) : (
+                          <Square className="w-4 h-4 text-gray-400" />
+                        )}
+                      </button>
+                      
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-semibold text-lg">
+                            Order #{order.orderNumber || order._id.slice(-8)}
+                          </h3>
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                            {getStatusIcon(order.status)}
+                            {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-600 space-y-1">
+                          <p>Customer: {order.user?.email || order.shippingAddress?.name || 'N/A'}</p>
+                          <p>Date: {format(new Date(order.createdAt), 'MMM dd, yyyy HH:mm')}</p>
+                          <p>Amount: ₹{order.totalAmount?.toFixed(2)}</p>
+                          <p>Payment: {
+                            order.paymentMethod === 'upi' ? 'UPI' :
+                            order.paymentMethod === 'netbanking' ? 'Net Banking' :
+                            order.paymentMethod === 'wallet' ? 'Wallet' :
+                            order.paymentMethod === 'card' ? 'Card' :
+                            order.paymentMethod === 'emi' ? 'EMI' :
+                            order.paymentMethod || 'Online Payment'
+                          }</p>
+                        </div>
                       </div>
                     </div>
                     
@@ -293,6 +434,7 @@ const Orders = () => {
               </motion.div>
             ))}
           </AnimatePresence>
+          </div>
         )}
       </div>
 

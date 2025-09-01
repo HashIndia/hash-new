@@ -98,23 +98,29 @@ class EmailService {
   async sendOTPEmail(user, otp) {
     const subject = 'Your Hash Store Verification Code';
     const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: #667eea; padding: 30px 20px; text-align: center;">
-          <h1 style="color: white; margin: 0;">Verification Code</h1>
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: white;">
+        <div style="background: #000000; padding: 40px 20px; text-align: center; border-bottom: 4px solid #f8f9fa;">
+          <h1 style="color: white; margin: 0; font-size: 36px; font-weight: 300; letter-spacing: 8px;">HASH</h1>
+          <p style="color: #f8f9fa; margin: 8px 0 0 0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">Premium E-commerce</p>
         </div>
-        <div style="padding: 40px 20px; background: #f8f9fa;">
-          <h2 style="color: #333; margin-bottom: 20px;">Hello ${user.name}</h2>
-          <p style="color: #666; font-size: 16px; line-height: 1.6;">
+        <div style="padding: 40px 30px; background: white;">
+          <h2 style="color: #000000; margin-bottom: 20px; font-weight: 400; font-size: 24px;">Hello ${user.name}</h2>
+          <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
             Your verification code is:
           </p>
-          <div style="text-align: center; margin: 30px 0;">
-            <div style="background: #667eea; color: white; padding: 20px; font-size: 32px; font-weight: bold; letter-spacing: 5px; border-radius: 5px; display: inline-block;">
+          <div style="text-align: center; margin: 40px 0;">
+            <div style="background: #f8f9fa; border: 2px solid #000000; color: #000000; padding: 25px 30px; font-size: 36px; font-weight: bold; letter-spacing: 8px; border-radius: 8px; display: inline-block; font-family: 'Courier New', monospace;">
               ${otp}
             </div>
           </div>
-          <p style="color: #666; font-size: 14px; line-height: 1.6;">
+          <p style="color: #666666; font-size: 14px; line-height: 1.6; text-align: center;">
             This code will expire in 10 minutes. If you didn't request this code, please ignore this email.
           </p>
+          <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid #e9ecef; text-align: center;">
+            <p style="color: #999999; font-size: 12px; margin: 0;">
+              © Hash - Premium E-commerce Platform
+            </p>
+          </div>
         </div>
       </div>
     `;
@@ -145,26 +151,30 @@ class EmailService {
     `).join('');
 
     const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: #28a745; padding: 30px 20px; text-align: center;">
-          <h1 style="color: white; margin: 0;">Order Confirmed!</h1>
-          <p style="color: white; margin: 10px 0 0 0; font-size: 18px;">Order #${order.orderNumber}</p>
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: white;">
+        <div style="background: #000000; padding: 40px 20px; text-align: center; border-bottom: 4px solid #f8f9fa;">
+          <h1 style="color: white; margin: 0; font-size: 36px; font-weight: 300; letter-spacing: 8px;">HASH</h1>
+          <p style="color: #f8f9fa; margin: 8px 0 0 0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">Premium E-commerce</p>
+          <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
+            <h2 style="color: white; margin: 0; font-size: 24px; font-weight: 400;">Order Confirmed!</h2>
+            <p style="color: #f8f9fa; margin: 10px 0 0 0; font-size: 16px;">Order #${order.orderNumber}</p>
+          </div>
         </div>
-        <div style="padding: 30px 20px; background: #f8f9fa;">
-          <h2 style="color: #333; margin-bottom: 20px;">Hello ${order.customerInfo.name}</h2>
-          <p style="color: #666; font-size: 16px; line-height: 1.6;">
+        <div style="padding: 40px 30px; background: white;">
+          <h2 style="color: #000000; margin-bottom: 20px; font-weight: 400; font-size: 24px;">Hello ${order.customerInfo.name}</h2>
+          <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
             Thank you for your order! We've received your order and will process it soon.
           </p>
           
-          <h3 style="color: #333; margin: 30px 0 15px 0;">Order Details</h3>
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+          <h3 style="color: #000000; margin: 40px 0 20px 0; font-size: 20px; font-weight: 500;">Order Details</h3>
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 1px solid #e9ecef;">
             <thead>
-              <tr style="background: #e9ecef;">
-                <th style="padding: 15px 10px; text-align: left;">Image</th>
-                <th style="padding: 15px 10px; text-align: left;">Product</th>
-                <th style="padding: 15px 10px; text-align: center;">Details</th>
-                <th style="padding: 15px 10px; text-align: center;">Qty</th>
-                <th style="padding: 15px 10px; text-align: right;">Price</th>
+              <tr style="background: #f8f9fa; border-bottom: 2px solid #000000;">
+                <th style="padding: 15px 10px; text-align: left; color: #000000; font-weight: 600;">Image</th>
+                <th style="padding: 15px 10px; text-align: left; color: #000000; font-weight: 600;">Product</th>
+                <th style="padding: 15px 10px; text-align: center; color: #000000; font-weight: 600;">Details</th>
+                <th style="padding: 15px 10px; text-align: center; color: #000000; font-weight: 600;">Qty</th>
+                <th style="padding: 15px 10px; text-align: right; color: #000000; font-weight: 600;">Price</th>
               </tr>
             </thead>
             <tbody>
@@ -172,31 +182,37 @@ class EmailService {
             </tbody>
           </table>
           
-          <div style="background: white; padding: 20px; border-radius: 5px; margin-bottom: 30px;">
-            <h4 style="margin: 0 0 10px 0; color: #333;">Order Summary</h4>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+          <div style="background: #f8f9fa; padding: 25px; border: 1px solid #e9ecef; border-radius: 8px; margin-bottom: 30px;">
+            <h4 style="margin: 0 0 15px 0; color: #000000; font-size: 18px; font-weight: 600;">Order Summary</h4>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #333333;">
               <span>Subtotal:</span>
               <span>₹${order.subtotal}</span>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #333333;">
               <span>Shipping:</span>
               <span>₹${order.shipping}</span>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #333333;">
               <span>Tax:</span>
               <span>₹${order.tax}</span>
             </div>
-            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 20px; border-top: 2px solid #000000; padding-top: 15px; margin-top: 15px; color: #000000;">
               <span>Total:</span>
               <span>₹${order.total}</span>
             </div>
           </div>
           
-          <div style="text-align: center;">
+          <div style="text-align: center; margin: 40px 0;">
             <a href="${process.env.FRONTEND_URL}/orders/${order._id}" 
-               style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+               style="background: #000000; color: white; padding: 15px 40px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; font-size: 14px;">
               Track Your Order
             </a>
+          </div>
+          
+          <div style="margin-top: 50px; padding-top: 30px; border-top: 1px solid #e9ecef; text-align: center;">
+            <p style="color: #999999; font-size: 12px; margin: 0;">
+              © Hash - Premium E-commerce Platform
+            </p>
           </div>
         </div>
       </div>
@@ -213,30 +229,40 @@ class EmailService {
   async sendShippingNotification(order) {
     const subject = `Your order has been shipped - ${order.orderNumber}`;
     const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: #17a2b8; padding: 30px 20px; text-align: center;">
-          <h1 style="color: white; margin: 0;">Order Shipped!</h1>
-          <p style="color: white; margin: 10px 0 0 0; font-size: 18px;">Order #${order.orderNumber}</p>
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: white;">
+        <div style="background: #000000; padding: 40px 20px; text-align: center; border-bottom: 4px solid #f8f9fa;">
+          <h1 style="color: white; margin: 0; font-size: 36px; font-weight: 300; letter-spacing: 8px;">HASH</h1>
+          <p style="color: #f8f9fa; margin: 8px 0 0 0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">Premium E-commerce</p>
+          <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
+            <h2 style="color: white; margin: 0; font-size: 24px; font-weight: 400;">Order Shipped!</h2>
+            <p style="color: #f8f9fa; margin: 10px 0 0 0; font-size: 16px;">Order #${order.orderNumber}</p>
+          </div>
         </div>
-        <div style="padding: 30px 20px; background: #f8f9fa;">
-          <h2 style="color: #333; margin-bottom: 20px;">Hello ${order.customerInfo.name}</h2>
-          <p style="color: #666; font-size: 16px; line-height: 1.6;">
+        <div style="padding: 40px 30px; background: white;">
+          <h2 style="color: #000000; margin-bottom: 20px; font-weight: 400; font-size: 24px;">Hello ${order.customerInfo.name}</h2>
+          <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
             Great news! Your order has been shipped and is on its way to you.
           </p>
           
           ${order.trackingNumber ? `
-            <div style="background: white; padding: 20px; border-radius: 5px; margin: 30px 0;">
-              <h4 style="margin: 0 0 10px 0; color: #333;">Tracking Information</h4>
-              <p style="margin: 0; color: #666;">Tracking Number: <strong>${order.trackingNumber}</strong></p>
-              ${order.carrier ? `<p style="margin: 5px 0 0 0; color: #666;">Carrier: ${order.carrier}</p>` : ''}
+            <div style="background: #f8f9fa; padding: 25px; border: 1px solid #e9ecef; border-radius: 8px; margin: 30px 0;">
+              <h4 style="margin: 0 0 15px 0; color: #000000; font-size: 18px; font-weight: 600;">Tracking Information</h4>
+              <p style="margin: 0; color: #333333; font-size: 16px;">Tracking Number: <strong style="font-family: 'Courier New', monospace; background: #e9ecef; padding: 4px 8px; border-radius: 4px;">${order.trackingNumber}</strong></p>
+              ${order.carrier ? `<p style="margin: 10px 0 0 0; color: #333333; font-size: 16px;">Carrier: <strong>${order.carrier}</strong></p>` : ''}
             </div>
           ` : ''}
           
-          <div style="text-align: center; margin: 30px 0;">
+          <div style="text-align: center; margin: 40px 0;">
             <a href="${process.env.FRONTEND_URL}/orders/${order._id}" 
-               style="background: #17a2b8; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+               style="background: #000000; color: white; padding: 15px 40px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; font-size: 14px;">
               Track Your Package
             </a>
+          </div>
+          
+          <div style="margin-top: 50px; padding-top: 30px; border-top: 1px solid #e9ecef; text-align: center;">
+            <p style="color: #999999; font-size: 12px; margin: 0;">
+              © Hash - Premium E-commerce Platform
+            </p>
           </div>
         </div>
       </div>
@@ -294,26 +320,36 @@ class EmailService {
   async sendDeliveryOTP(order, otp) {
     const subject = `Delivery OTP - ${order.orderNumber}`;
     const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: #ffc107; padding: 30px 20px; text-align: center;">
-          <h1 style="color: #212529; margin: 0;">Out for Delivery</h1>
-          <p style="color: #212529; margin: 10px 0 0 0; font-size: 18px;">Order #${order.orderNumber}</p>
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: white;">
+        <div style="background: #000000; padding: 40px 20px; text-align: center; border-bottom: 4px solid #f8f9fa;">
+          <h1 style="color: white; margin: 0; font-size: 36px; font-weight: 300; letter-spacing: 8px;">HASH</h1>
+          <p style="color: #f8f9fa; margin: 8px 0 0 0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">Premium E-commerce</p>
+          <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
+            <h2 style="color: white; margin: 0; font-size: 24px; font-weight: 400;">Out for Delivery</h2>
+            <p style="color: #f8f9fa; margin: 10px 0 0 0; font-size: 16px;">Order #${order.orderNumber}</p>
+          </div>
         </div>
-        <div style="padding: 30px 20px; background: #f8f9fa;">
-          <h2 style="color: #333; margin-bottom: 20px;">Hello ${order.customerInfo.name}</h2>
-          <p style="color: #666; font-size: 16px; line-height: 1.6;">
+        <div style="padding: 40px 30px; background: white;">
+          <h2 style="color: #000000; margin-bottom: 20px; font-weight: 400; font-size: 24px;">Hello ${order.customerInfo.name}</h2>
+          <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
             Your order is out for delivery! Please share this OTP with the delivery partner:
           </p>
           
-          <div style="text-align: center; margin: 30px 0;">
-            <div style="background: #ffc107; color: #212529; padding: 20px; font-size: 32px; font-weight: bold; letter-spacing: 5px; border-radius: 5px; display: inline-block;">
+          <div style="text-align: center; margin: 40px 0;">
+            <div style="background: #f8f9fa; border: 2px solid #000000; color: #000000; padding: 25px 30px; font-size: 36px; font-weight: bold; letter-spacing: 8px; border-radius: 8px; display: inline-block; font-family: 'Courier New', monospace;">
               ${otp}
             </div>
           </div>
           
-          <p style="color: #666; font-size: 14px; line-height: 1.6;">
+          <p style="color: #666666; font-size: 14px; line-height: 1.6; text-align: center;">
             This OTP is valid for 24 hours and is required for delivery confirmation.
           </p>
+          
+          <div style="margin-top: 50px; padding-top: 30px; border-top: 1px solid #e9ecef; text-align: center;">
+            <p style="color: #999999; font-size: 12px; margin: 0;">
+              © Hash - Premium E-commerce Platform
+            </p>
+          </div>
         </div>
       </div>
     `;

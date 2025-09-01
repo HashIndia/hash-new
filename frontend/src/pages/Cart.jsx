@@ -219,15 +219,6 @@ export default function Cart() {
                     Clear Cart
                   </Button>
                 </div>
-
-                {/* Free Shipping Notice */}
-                {subtotal < 1000 && (
-                  <div className="bg-hash-orange/10 border border-hash-orange/20 rounded-xl p-3 text-center">
-                    <p className="text-hash-orange text-sm">
-                      Add ₹{Math.round(1000 - subtotal)} more for free shipping!
-                    </p>
-                  </div>
-                )}
               </CardContent>
             </Card>
           </motion.div>
