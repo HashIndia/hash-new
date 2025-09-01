@@ -512,7 +512,7 @@ export default function Checkout() {
                           <div className="font-medium text-sm text-foreground">{item.product.name}</div>
                           <div className="text-xs text-muted-foreground">Qty: {item.quantity}</div>
                         </div>
-                        <div className="font-semibold text-hash-purple">₹{item.price * item.quantity}</div>
+                        <div className="font-semibold text-hash-purple">₹{(item.price * item.quantity).toFixed(2)}</div>
                       </motion.div>
                     ))}
                   </div>
@@ -521,19 +521,21 @@ export default function Checkout() {
                   <div className="border-t border-border pt-4 space-y-2">
                     <div className="flex justify-between text-muted-foreground">
                       <span>Subtotal</span>
-                      <span>₹{subtotal}</span>
+                      <span>₹{subtotal.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between text-muted-foreground">
-                      <span>Shipping</span>
-                      <span>{shipping === 0 ? 'FREE' : `₹${shipping}`}</span>
-                    </div>
+                    {shipping > 0 && (
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Shipping</span>
+                        <span>₹{shipping.toFixed(2)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-muted-foreground">
                       <span>Gateway Charges (2%)</span>
-                      <span>₹{tax}</span>
+                      <span>₹{tax.toFixed(2)}</span>
                     </div>
                     <div className="border-t border-border pt-2 flex justify-between font-bold text-lg text-foreground">
                       <span>Total</span>
-                      <span>₹{total}</span>
+                      <span>₹{total.toFixed(2)}</span>
                     </div>
                   </div>
 
@@ -547,7 +549,7 @@ export default function Checkout() {
                       disabled={isLoading}
                       className="w-full py-4 text-lg font-semibold bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 shadow-hash-purple/25"
                     >
-                      {isLoading ? 'Placing Order...' : `Place Order - ₹${total}`}
+                      {isLoading ? 'Placing Order...' : `Place Order - ₹${total.toFixed(2)}`}
                     </Button>
                   </motion.div>
                 </div>

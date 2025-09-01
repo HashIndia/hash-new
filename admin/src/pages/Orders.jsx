@@ -236,7 +236,16 @@ const Orders = () => {
                       <div className="text-sm text-gray-600 space-y-1">
                         <p>Customer: {order.user?.email || order.shippingAddress?.name || 'N/A'}</p>
                         <p>Date: {format(new Date(order.createdAt), 'MMM dd, yyyy HH:mm')}</p>
-                        <p>Amount: ₹{order.totalAmount}</p>
+                        <p>Amount: ₹{order.totalAmount?.toFixed(2)}</p>
+                        <p>Payment: {
+                          order.paymentMethod === 'cod' ? 'COD' :
+                          order.paymentMethod === 'upi' ? 'UPI' :
+                          order.paymentMethod === 'netbanking' ? 'Net Banking' :
+                          order.paymentMethod === 'wallet' ? 'Wallet' :
+                          order.paymentMethod === 'card' ? 'Card' :
+                          order.paymentMethod === 'emi' ? 'EMI' :
+                          order.paymentMethod || 'Not Specified'
+                        }</p>
                       </div>
                     </div>
                     
@@ -325,7 +334,30 @@ const Orders = () => {
                   </div>
                   <div>
                     <span className="text-gray-600">Total Amount:</span>
-                    <p className="font-medium">₹{selectedOrder.totalAmount}</p>
+                    <p className="font-medium">₹{selectedOrder.totalAmount?.toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Payment Method:</span>
+                    <p className="font-medium capitalize">
+                      {selectedOrder.paymentMethod === 'cod' ? 'Cash on Delivery' : 
+                       selectedOrder.paymentMethod === 'upi' ? 'UPI' :
+                       selectedOrder.paymentMethod === 'netbanking' ? 'Net Banking' :
+                       selectedOrder.paymentMethod === 'wallet' ? 'Wallet' :
+                       selectedOrder.paymentMethod === 'card' ? 'Card' :
+                       selectedOrder.paymentMethod === 'emi' ? 'EMI' :
+                       selectedOrder.paymentMethod || 'Not Specified'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Payment Status:</span>
+                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ml-2 ${
+                      selectedOrder.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
+                      selectedOrder.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      selectedOrder.paymentStatus === 'failed' ? 'bg-red-100 text-red-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {selectedOrder.paymentStatus || 'pending'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -369,8 +401,8 @@ const Orders = () => {
                         {item.color && <p className="text-sm text-gray-600">Color: {item.color}</p>}
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">₹{item.price}</p>
-                        <p className="text-sm text-gray-600">₹{item.price * item.quantity}</p>
+                        <p className="font-medium">₹{item.price?.toFixed(2)}</p>
+                        <p className="text-sm text-gray-600">₹{(item.price * item.quantity)?.toFixed(2)}</p>
                       </div>
                     </div>
                   ))}
@@ -382,19 +414,23 @@ const Orders = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>Subtotal:</span>
-                    <span>₹{selectedOrder.subtotal}</span>
+                    <span>₹{selectedOrder.subtotal?.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Shipping:</span>
-                    <span>₹{selectedOrder.shippingCost || 0}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Tax:</span>
-                    <span>₹{selectedOrder.taxAmount || 0}</span>
-                  </div>
+                  {selectedOrder.shippingCost > 0 && (
+                    <div className="flex justify-between">
+                      <span>Shipping:</span>
+                      <span>₹{selectedOrder.shippingCost?.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {selectedOrder.taxAmount > 0 && (
+                    <div className="flex justify-between">
+                      <span>Gateway Charges:</span>
+                      <span>₹{selectedOrder.taxAmount?.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between font-semibold text-base border-t pt-2">
                     <span>Total:</span>
-                    <span>₹{selectedOrder.totalAmount}</span>
+                    <span>₹{selectedOrder.totalAmount?.toFixed(2)}</span>
                   </div>
                 </div>
               </div>

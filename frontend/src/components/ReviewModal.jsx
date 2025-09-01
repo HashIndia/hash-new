@@ -82,29 +82,29 @@ export default function ReviewModal({ isOpen, onClose, product, orderId, onRevie
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Write a Review</DialogTitle>
+      <DialogContent className="sm:max-w-md max-w-[95vw] w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-lg sm:text-xl font-semibold">Write a Review</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Product Info */}
           <div className="flex items-center gap-3 p-3 bg-accent/50 rounded-lg">
             <img
               src={product?.images?.[0]?.url || product?.images?.[0] || product?.image || `https://placehold.co/60x60/64748b/fff?text=Product`}
               alt={product?.name || "Product"}
-              className="w-12 h-12 object-cover rounded-lg"
+              className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-lg flex-shrink-0"
               onError={(e) => {
                 e.target.src = `https://placehold.co/60x60/64748b/fff?text=Product`;
               }}
             />
-            <div>
-              <h4 className="font-medium text-foreground">{product?.name || "Product"}</h4>
-              <p className="text-sm text-muted-foreground">Rate your experience</p>
+            <div className="min-w-0 flex-1">
+              <h4 className="font-medium text-foreground text-sm sm:text-base truncate">{product?.name || "Product"}</h4>
+              <p className="text-xs sm:text-sm text-muted-foreground">Rate your experience</p>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             {/* Star Rating */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
@@ -121,7 +121,7 @@ export default function ReviewModal({ isOpen, onClose, product, orderId, onRevie
                     onMouseLeave={() => setHoveredStar(0)}
                   >
                     <Star
-                      className={`w-8 h-8 ${
+                      className={`w-6 h-6 sm:w-8 sm:h-8 ${
                         star <= (hoveredStar || rating)
                           ? "fill-yellow-400 text-yellow-400"
                           : "text-gray-300"
@@ -129,7 +129,7 @@ export default function ReviewModal({ isOpen, onClose, product, orderId, onRevie
                     />
                   </button>
                 ))}
-                <span className="ml-2 text-sm text-muted-foreground">
+                <span className="ml-2 text-xs sm:text-sm text-muted-foreground">
                   {rating > 0 && (
                     <>
                       {rating} star{rating !== 1 ? "s" : ""} - {
@@ -153,8 +153,9 @@ export default function ReviewModal({ isOpen, onClose, product, orderId, onRevie
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Summarize your review in a few words..."
+                placeholder="Summarize your review..."
                 maxLength={100}
+                className="text-sm sm:text-base"
               />
               <div className="text-xs text-muted-foreground mt-1 text-right">
                 {title.length}/100 characters
@@ -170,8 +171,8 @@ export default function ReviewModal({ isOpen, onClose, product, orderId, onRevie
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Share your experience with this product... (minimum 10 characters)"
-                rows={4}
-                className="resize-none"
+                rows={3}
+                className="resize-none text-sm sm:text-base"
                 maxLength={500}
               />
               <div className="text-xs text-muted-foreground mt-1 text-right">
@@ -180,20 +181,20 @@ export default function ReviewModal({ isOpen, onClose, product, orderId, onRevie
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3 pt-4">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2 sm:pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleClose}
                 disabled={isSubmitting}
-                className="flex-1"
+                className="flex-1 h-10 sm:h-11 text-sm sm:text-base"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting || rating === 0 || title.trim().length < 3 || comment.trim().length < 10}
-                className="flex-1 bg-gradient-to-r from-hash-purple to-hash-blue hover:from-hash-blue hover:to-hash-purple"
+                className="flex-1 h-10 sm:h-11 text-sm sm:text-base bg-gradient-to-r from-hash-purple to-hash-blue hover:from-hash-blue hover:to-hash-purple"
               >
                 {isSubmitting ? "Submitting..." : "Submit Review"}
               </Button>

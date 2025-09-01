@@ -107,9 +107,10 @@ const useCartStore = create(
       // Computed Values
       getCartTotal: () => {
         const { items } = get();
-        return items.reduce((total, item) => {
+        const total = items.reduce((total, item) => {
           return total + (item.price * item.quantity);
         }, 0);
+        return parseFloat(total.toFixed(2));
       },
 
       getCartCount: () => {
@@ -119,19 +120,22 @@ const useCartStore = create(
 
       getShippingCost: () => {
         const total = get().getCartTotal();
-        return total > 1000 ? 0 : 100; // Free shipping over ₹1000, otherwise ₹100
+        // Always return 0 for shipping (free shipping)
+        return 0;
       },
 
       getTax: () => {
         const total = get().getCartTotal();
-        return total * 0.02; // 2% Gateway charges
+        const tax = total * 0.02; // 2% Gateway charges
+        return parseFloat(tax.toFixed(2));
       },
 
       getGrandTotal: () => {
         const subtotal = get().getCartTotal();
         const shipping = get().getShippingCost();
         const tax = get().getTax();
-        return subtotal + shipping + tax;
+        const total = subtotal + shipping + tax;
+        return parseFloat(total.toFixed(2));
       },
 
       // Validation

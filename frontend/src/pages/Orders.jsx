@@ -116,21 +116,21 @@ export default function Orders() {
   return (
     <div className="min-h-screen bg-background">
       <motion.div 
-        className="container mx-auto py-12 px-6"
+        className="container mx-auto py-6 sm:py-12 px-4 sm:px-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         {/* Header */}
         <motion.div 
-          className="text-center mb-12"
+          className="text-center mb-8 sm:mb-12"
           variants={itemVariants}
         >
-          <h1 className="text-4xl font-bold text-foreground mb-4 font-space">Order History</h1>
-          <p className="text-muted-foreground">Track your orders and view purchase history</p>
+          <h1 className="text-2xl sm:text-4xl font-bold text-foreground mb-4 font-space">Order History</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Track your orders and view purchase history</p>
         </motion.div>
 
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
           {orders.map((order) => (
             <motion.div
               key={order._id || order.id}
@@ -138,20 +138,20 @@ export default function Orders() {
               layout
             >
               <Card className="bg-card/80 backdrop-blur-sm border border-border hover:shadow-lg transition-all duration-300 shadow-lg">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <div>
-                      <h3 className="text-lg font-semibold text-foreground">
-                        Order #{order.orderNumber || order._id}
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 mb-4 sm:mb-6">
+                    <div className="flex-1">
+                      <h3 className="text-base sm:text-lg font-semibold text-foreground">
+                        Order #{order.orderNumber || order._id?.slice(-8)}
                       </h3>
-                      <p className="text-muted-foreground">Placed on {new Date(order.createdAt).toLocaleDateString()}</p>
+                      <p className="text-sm text-muted-foreground">Placed on {new Date(order.createdAt).toLocaleDateString()}</p>
                     </div>
                     
-                    <div className="text-right">
-                      <div className="text-xl font-bold text-hash-purple mb-2">
-                        ₹{order.totalAmount}
+                    <div className="flex items-center justify-between sm:text-right sm:flex-col sm:items-end gap-2">
+                      <div className="text-lg sm:text-xl font-bold text-hash-purple">
+                        ₹{order.totalAmount?.toFixed(2)}
                       </div>
-                      <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
+                      <span className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getStatusColor(order.status)}`}>
                         <span>{getStatusIcon(order.status)}</span>
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </span>
@@ -160,14 +160,14 @@ export default function Orders() {
 
                   {/* Order Progress */}
                   {order.status !== 'cancelled' && (
-                    <div className="mb-6">
-                      <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
+                    <div className="mb-4 sm:mb-6">
+                      <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground mb-2">
                         <span>Order Progress</span>
                         <span>{order.status === 'delivered' ? '100%' : order.status === 'shipped' ? '66%' : '33%'}%</span>
                       </div>
-                      <div className="w-full bg-muted rounded-full h-2">
+                      <div className="w-full bg-muted rounded-full h-1.5 sm:h-2">
                         <div 
-                          className="bg-gradient-to-r from-hash-purple to-hash-blue h-2 rounded-full transition-all duration-500"
+                          className="bg-gradient-to-r from-hash-purple to-hash-blue h-1.5 sm:h-2 rounded-full transition-all duration-500"
                           style={{ 
                             width: order.status === 'delivered' ? '100%' : 
                                    order.status === 'shipped' ? '66%' : '33%' 
@@ -183,17 +183,18 @@ export default function Orders() {
                   )}
 
                   {/* Action Buttons */}
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-2 sm:gap-3">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}
+                      className="text-xs sm:text-sm"
                     >
                       {expandedOrder === order._id ? 'Hide Details' : 'View Details'}
                     </Button>
                     
                     {order.status === 'delivered' && (
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="text-xs sm:text-sm">
                         Reorder
                       </Button>
                     )}
@@ -216,39 +217,39 @@ export default function Orders() {
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="mt-6 pt-6 border-t border-border"
+                      className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border"
                     >
-                      <h4 className="font-semibold text-foreground mb-4">Order Items</h4>
-                      <div className="space-y-4">
+                      <h4 className="font-semibold text-foreground mb-3 sm:mb-4 text-sm sm:text-base">Order Items</h4>
+                      <div className="space-y-3 sm:space-y-4">
                         {(order.items || []).map((item, index) => (
-                          <div key={index} className="flex items-center gap-4 p-4 bg-accent/50 rounded-xl border border-border">
+                          <div key={index} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-accent/50 rounded-xl border border-border">
                             <img
                               src={item.image || item.product?.images?.[0]?.url || item.product?.images?.[0] || `https://placehold.co/60x60/64748b/fff?text=Item`}
                               alt={item.name}
-                              className="w-12 h-12 object-cover rounded-lg"
+                              className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-lg flex-shrink-0"
                               onError={(e) => {
                                 e.target.src = `https://placehold.co/60x60/64748b/fff?text=Item`;
                               }}
                             />
-                            <div className="flex-1">
-                              <h5 className="font-medium text-foreground">{item.name}</h5>
-                              <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
-                              {item.size && <p className="text-sm text-muted-foreground">Size: {item.size}</p>}
+                            <div className="flex-1 min-w-0">
+                              <h5 className="font-medium text-foreground text-sm sm:text-base truncate">{item.name}</h5>
+                              <p className="text-xs sm:text-sm text-muted-foreground">Qty: {item.quantity}</p>
+                              {item.size && <p className="text-xs sm:text-sm text-muted-foreground">Size: {item.size}</p>}
                             </div>
-                            <div className="text-right">
-                              <div className="font-semibold text-hash-purple">₹{item.price}</div>
+                            <div className="text-right flex-shrink-0">
+                              <div className="font-semibold text-hash-purple text-sm sm:text-base">₹{item.price?.toFixed(2)}</div>
                               {order.status === 'delivered' && (
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="mt-2"
+                                  className="mt-1 sm:mt-2 text-xs sm:text-sm h-7 sm:h-9 px-2 sm:px-3"
                                   onClick={() => setReviewModal({ 
                                     isOpen: true, 
                                     product: item.product || item,
                                     orderId: order._id || order.id
                                   })}
                                 >
-                                  Write Review
+                                  Review
                                 </Button>
                               )}
                             </div>
@@ -256,9 +257,9 @@ export default function Orders() {
                         ))}
                       </div>
                       
-                      <div className="mt-6 p-4 bg-accent/50 rounded-xl border border-border">
-                        <h4 className="font-semibold text-foreground mb-3">Delivery Address</h4>
-                        <div className="text-muted-foreground">
+                      <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-accent/50 rounded-xl border border-border">
+                        <h4 className="font-semibold text-foreground mb-2 sm:mb-3 text-sm sm:text-base">Delivery Address</h4>
+                        <div className="text-muted-foreground text-sm sm:text-base">
                           <p>{order.shippingAddress?.line1}</p>
                           {order.shippingAddress?.line2 && <p>{order.shippingAddress.line2}</p>}
                           <p>{order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.pincode}</p>
@@ -275,33 +276,33 @@ export default function Orders() {
 
         {/* Order Summary Stats */}
         <motion.div 
-          className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto"
+          className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto"
           variants={itemVariants}
         >
           <Card className="bg-card/80 backdrop-blur-sm border border-border">
-            <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-hash-purple mb-2">
+            <CardContent className="p-4 sm:p-6 text-center">
+              <div className="text-2xl sm:text-3xl font-bold text-hash-purple mb-2">
                 {orders.length}
               </div>
-              <div className="text-muted-foreground">Total Orders</div>
+              <div className="text-sm sm:text-base text-muted-foreground">Total Orders</div>
             </CardContent>
           </Card>
           
           <Card className="bg-card/80 backdrop-blur-sm border border-border">
-            <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-hash-blue mb-2">
-                ₹{orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0)}
+            <CardContent className="p-4 sm:p-6 text-center">
+              <div className="text-2xl sm:text-3xl font-bold text-hash-blue mb-2">
+                ₹{orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0).toFixed(2)}
               </div>
-              <div className="text-muted-foreground">Total Spent</div>
+              <div className="text-sm sm:text-base text-muted-foreground">Total Spent</div>
             </CardContent>
           </Card>
           
           <Card className="bg-card/80 backdrop-blur-sm border border-border">
-            <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-hash-green mb-2">
+            <CardContent className="p-4 sm:p-6 text-center">
+              <div className="text-2xl sm:text-3xl font-bold text-hash-green mb-2">
                 {orders.filter(order => order.status === 'delivered').length}
               </div>
-              <div className="text-muted-foreground">Delivered</div>
+              <div className="text-sm sm:text-base text-muted-foreground">Delivered</div>
             </CardContent>
           </Card>
         </motion.div>

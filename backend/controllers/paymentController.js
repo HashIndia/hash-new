@@ -81,7 +81,8 @@ export const verifyPaymentStatus = catchAsync(async (req, res, next) => {
   if (verification.verified && verification.paymentStatus === 'captured') {
     order.paymentStatus = 'paid';
     order.paymentId = verification.paymentId;
-    order.paymentMethod = verification.method;
+    // Set the actual payment method from Razorpay (card, upi, netbanking, wallet, etc.)
+    order.paymentMethod = verification.method || 'online';
     order.status = 'confirmed';
     await order.save();
   } else {
@@ -116,7 +117,8 @@ export const handlePaymentWebhook = catchAsync(async (req, res, next) => {
       if (order) {
         order.paymentStatus = 'paid';
         order.paymentId = payment_id;
-        order.paymentMethod = method;
+        // Set the actual payment method from webhook data
+        order.paymentMethod = method || 'online';
         order.status = 'confirmed';
         await order.save();
       }
