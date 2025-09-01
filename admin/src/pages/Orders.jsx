@@ -238,13 +238,12 @@ const Orders = () => {
                         <p>Date: {format(new Date(order.createdAt), 'MMM dd, yyyy HH:mm')}</p>
                         <p>Amount: ₹{order.totalAmount?.toFixed(2)}</p>
                         <p>Payment: {
-                          order.paymentMethod === 'cod' ? 'COD' :
                           order.paymentMethod === 'upi' ? 'UPI' :
                           order.paymentMethod === 'netbanking' ? 'Net Banking' :
                           order.paymentMethod === 'wallet' ? 'Wallet' :
                           order.paymentMethod === 'card' ? 'Card' :
                           order.paymentMethod === 'emi' ? 'EMI' :
-                          order.paymentMethod || 'Not Specified'
+                          order.paymentMethod || 'Online Payment'
                         }</p>
                       </div>
                     </div>
@@ -339,13 +338,12 @@ const Orders = () => {
                   <div>
                     <span className="text-gray-600">Payment Method:</span>
                     <p className="font-medium capitalize">
-                      {selectedOrder.paymentMethod === 'cod' ? 'Cash on Delivery' : 
-                       selectedOrder.paymentMethod === 'upi' ? 'UPI' :
+                      {selectedOrder.paymentMethod === 'upi' ? 'UPI' :
                        selectedOrder.paymentMethod === 'netbanking' ? 'Net Banking' :
                        selectedOrder.paymentMethod === 'wallet' ? 'Wallet' :
                        selectedOrder.paymentMethod === 'card' ? 'Card' :
                        selectedOrder.paymentMethod === 'emi' ? 'EMI' :
-                       selectedOrder.paymentMethod || 'Not Specified'}
+                       selectedOrder.paymentMethod || 'Online Payment'}
                     </p>
                   </div>
                   <div>

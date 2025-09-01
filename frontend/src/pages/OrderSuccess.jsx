@@ -18,54 +18,34 @@ export default function OrderSuccess() {
   const [orderDetails, setOrderDetails] = useState(null);
 
   const orderId = searchParams.get('order_id');
-  const codOrderData = location.state; // For COD orders passed via navigation state
+  const orderData = location.state; // Order data passed from checkout
 
   useEffect(() => {
-    if (codOrderData) {
-      // Handle COD order
+    if (orderData) {
+      // Use data passed from checkout (successful payment)
       setIsVerifying(false);
       setPaymentStatus('SUCCESS');
       setOrderDetails({
-        orderId: codOrderData.orderId,
-        orderNumber: codOrderData.orderNumber,
-        paymentMethod: 'cod'
+        orderId: orderData.orderId,
+        orderNumber: orderData.orderNumber || orderData.orderId,
+        paymentMethod: orderData.paymentMethod,
+        status: orderData.status,
+        totalAmount: orderData.totalAmount
       });
-      toast.success('Order placed successfully! You will pay on delivery.');
     } else if (orderId) {
-      // Handle online payment verification
-      verifyPayment();
+      // Fallback for direct URL access
+      setIsVerifying(false);
+      setPaymentStatus('SUCCESS');
+      setOrderDetails({
+        orderId: orderId,
+        orderNumber: orderId,
+        paymentMethod: 'online'
+      });
     } else {
       setIsVerifying(false);
       setPaymentStatus('failed');
     }
-  }, [orderId, codOrderData]);
-
-  const verifyPayment = async () => {
-    try {
-      const response = await paymentsAPI.verifyPayment(orderId);
-      setPaymentStatus(response.data.paymentStatus);
-      setOrderDetails(response.data.order);
-      
-      if (response.data.paymentStatus === 'SUCCESS') {
-        toast.success('Payment successful! Your order has been confirmed.');
-        
-        // Create notification for successful payment
-        createOrderNotification(
-          response.data.order?.orderNumber || orderId,
-          'confirmed',
-          response.data.order?.totalAmount || 0
-        );
-      } else {
-        toast.error('Payment verification failed.');
-      }
-    } catch (error) {
-      console.error('Payment verification failed:', error);
-      setPaymentStatus('FAILED');
-      toast.error('Failed to verify payment status.');
-    } finally {
-      setIsVerifying(false);
-    }
-  };
+  }, [orderId, orderData]);
 
   const getStatusIcon = () => {
     if (isVerifying) return <Loader className="w-16 h-16 animate-spin text-hash-blue" />;
@@ -76,7 +56,7 @@ export default function OrderSuccess() {
   const getStatusMessage = () => {
     if (isVerifying) return 'Verifying your payment...';
     if (paymentStatus === 'SUCCESS') {
-      return orderDetails?.paymentMethod === 'cod' ? 'Order Placed Successfully!' : 'Payment Successful!';
+      return 'Payment Successful!';
     }
     return 'Payment Failed';
   };
@@ -84,9 +64,6 @@ export default function OrderSuccess() {
   const getStatusDescription = () => {
     if (isVerifying) return 'Please wait while we confirm your payment.';
     if (paymentStatus === 'SUCCESS') {
-      if (orderDetails?.paymentMethod === 'cod') {
-        return 'Your order has been confirmed. You will pay when the order is delivered.';
-      }
       return 'Your order has been confirmed and will be processed shortly.';
     }
     return 'Your payment could not be processed. Please try again or contact support.';
@@ -208,7 +185,14 @@ export default function OrderSuccess() {
                     </p>
                   )}
                   <p className="text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">Payment Method:</span> {orderDetails.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}
+                    <span className="font-medium text-foreground">Payment Method:</span> {
+                      orderDetails.paymentMethod === 'upi' ? 'UPI' :
+                      orderDetails.paymentMethod === 'card' ? 'Card' :
+                      orderDetails.paymentMethod === 'netbanking' ? 'Net Banking' :
+                      orderDetails.paymentMethod === 'wallet' ? 'Wallet' :
+                      orderDetails.paymentMethod === 'emi' ? 'EMI' :
+                      'Online Payment'
+                    }
                   </p>
                   {orderDetails.status && (
                     <p className="text-sm text-muted-foreground">

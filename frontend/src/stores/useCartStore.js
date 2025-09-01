@@ -64,7 +64,7 @@ const useCartStore = create(
       clearCart: () => set({ items: [] }),
 
       // Order Actions
-      createOrder: async (shippingAddress, paymentMethod = 'cod') => {
+      createOrder: async (shippingAddress, paymentMethod = 'online') => {
         const { items } = get();
         
         if (items.length === 0) {

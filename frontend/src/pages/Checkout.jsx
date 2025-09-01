@@ -108,30 +108,8 @@ export default function Checkout() {
       const orderResponse = await ordersAPI.createOrder(orderData);
       const order = orderResponse.data.order;
       
-      if (paymentMethod === 'cod') {
-        // For COD, just show success and navigate
-        toast.success("Order placed successfully!");
-        
-        // Create notification for order confirmation
-        createOrderNotification(
-          order.orderNumber || order._id, 
-          'confirmed', 
-          total
-        );
-        
-        clearCart();
-        navigate('/order-success', { 
-          state: { 
-            orderId: order._id,
-            orderNumber: order.orderNumber || 'N/A',
-            paymentMethod: 'cod',
-            status: 'confirmed'
-          }
-        });
-      } else {
-        // For online payment, integrate Razorpay
-        await initiateRazorpayPayment(order._id, total);
-      }
+      // For online payment, integrate Razorpay
+      await initiateRazorpayPayment(order._id, total);
     } catch (error) {
       toast.error(error.message || "Failed to place order. Please try again.");
     } finally {
@@ -201,9 +179,11 @@ export default function Checkout() {
               navigate('/order-success', { 
                 state: { 
                   orderId: orderId,
+                  orderNumber: verifyResponse.data.order?.orderNumber || orderId,
                   paymentId: response.razorpay_payment_id,
-                  paymentMethod: 'online',
-                  status: 'confirmed'
+                  paymentMethod: verifyResponse.data.order?.paymentMethod || 'online',
+                  status: 'confirmed',
+                  totalAmount: amount
                 }
               });
             } else {
@@ -356,8 +336,7 @@ export default function Checkout() {
                   {/* Payment Method Selection */}
                   <div className="grid grid-cols-1 gap-3">
                     {[
-                      { id: 'online', icon: '💳', label: 'Online Payment (Card/UPI/Net Banking)' },
-                      { id: 'cod', icon: '💰', label: 'Cash on Delivery' }
+                      { id: 'online', icon: '💳', label: 'Online Payment (Card/UPI/Net Banking/Wallet)' }
                     ].map((method) => (
                       <motion.label 
                         key={method.id}
@@ -451,22 +430,6 @@ export default function Checkout() {
                             </Button>
                           ))}
                         </div>
-                      </motion.div>
-                    )}
-
-                    {paymentMethod === 'cod' && (
-                      <motion.div
-                        key="cod-info"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
-                        className="p-4 bg-slate-50 rounded-lg"
-                      >
-                        <h4 className="font-semibold text-slate-900 mb-2">Cash on Delivery</h4>
-                        <p className="text-sm text-slate-600">
-                          Pay when your order is delivered to your doorstep. Additional charges may apply.
-                        </p>
                       </motion.div>
                     )}
                   </AnimatePresence>

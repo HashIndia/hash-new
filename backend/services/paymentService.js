@@ -85,7 +85,8 @@ export const verifyPayment = async (paymentData) => {
         paymentStatus: 'captured',
         paymentId: razorpay_payment_id || `test_payment_${Date.now()}`,
         orderId: razorpay_order_id || 'test_order',
-        verified: true
+        verified: true,
+        method: 'card' // Default to card for test mode
       };
     }
 
