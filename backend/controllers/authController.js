@@ -229,24 +229,49 @@ export const resendOTP = catchAsync(async (req, res, next) => {
 
 // Forgot password
 export const forgotPassword = catchAsync(async (req, res, next) => {
+  console.log('📧 [Forgot Password] Request received for email:', req.body.email);
+  
   // Get user based on POSTed email
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
+    console.log('❌ [Forgot Password] User not found for email:', req.body.email);
     return next(new AppError('There is no user with that email address.', 404));
   }
+
+  console.log('✅ [Forgot Password] User found:', user.name, user.email);
 
   // Generate the random reset token
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
+  
+  console.log('🔑 [Forgot Password] Reset token generated, length:', resetToken.length);
 
   try {
-    await emailService.sendPasswordResetEmail(user, resetToken);
+    console.log('📧 [Forgot Password] Attempting to send email...');
+    const emailResult = await emailService.sendPasswordResetEmail(user, resetToken);
+    
+    if (emailResult.success) {
+      console.log('✅ [Forgot Password] Email sent successfully. Message ID:', emailResult.messageId);
+      
+      res.status(200).json({
+        status: 'success',
+        message: 'Token sent to email!'
+      });
+    } else {
+      console.error('❌ [Forgot Password] Email sending failed:', emailResult.error);
+      
+      // Clean up the reset token
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      await user.save({ validateBeforeSave: false });
 
-    res.status(200).json({
-      status: 'success',
-      message: 'Token sent to email!'
-    });
+      return next(
+        new AppError('There was an error sending the email. Try again later.', 500)
+      );
+    }
   } catch (err) {
+    console.error('❌ [Forgot Password] Email sending exception:', err);
+    
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
