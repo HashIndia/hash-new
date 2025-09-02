@@ -20,6 +20,15 @@ class EmailService {
     this.verifyConnection();
   }
 
+  // Get reliable image URLs for email templates
+  getEmailImageUrls() {
+    // Use Cloudinary URLs for better email delivery and reliability
+    return {
+      hashLogo: 'https://res.cloudinary.com/dqpgsn9qw/image/upload/v1735835280/hash/email/hash-logo.jpg',
+      hashLogoText: 'https://res.cloudinary.com/dqpgsn9qw/image/upload/v1735835280/hash/email/hash-logo-text.jpg'
+    };
+  }
+
   async verifyConnection() {
     try {
       await this.transporter.verify();
@@ -60,29 +69,45 @@ class EmailService {
 
   // Send welcome email
   async sendWelcomeEmail(user) {
+    const imageUrls = this.getEmailImageUrls();
     const subject = 'Welcome to Hash Store!';
     const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center;">
-          <h1 style="color: white; margin: 0; font-size: 32px;">Welcome to Hash Store</h1>
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: white;">
+        <div style="background: #000000; padding: 40px 20px; text-align: center; border-bottom: 4px solid #f8f9fa;">
+          <div style="display: inline-block; position: relative; margin-bottom: 15px;">
+            <!-- Hash Logo Images Side by Side -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;">
+              <img src="${imageUrls.hashLogo}" alt="Hash Logo" style="height: 50px; width: auto; object-fit: contain; display: block;" />
+              <img src="${imageUrls.hashLogoText}" alt="Hash Text" style="height: 50px; width: auto; object-fit: contain; display: block;" />
+            </div>
+          </div>
+          <p style="color: #f8f9fa; margin: 8px 0 0 0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">Premium E-commerce</p>
+          <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
+            <h2 style="color: white; margin: 0; font-size: 24px; font-weight: 400;">Welcome to Hash Store!</h2>
+          </div>
         </div>
-        <div style="padding: 40px 20px; background: #f8f9fa;">
-          <h2 style="color: #333; margin-bottom: 20px;">Hello ${user.name}!</h2>
-          <p style="color: #666; font-size: 16px; line-height: 1.6;">
+        <div style="padding: 40px 30px; background: white;">
+          <h2 style="color: #000000; margin-bottom: 20px; font-weight: 400; font-size: 24px;">Hello ${user.name}!</h2>
+          <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
             Thank you for joining Hash Store! We're excited to have you as part of our community.
           </p>
-          <p style="color: #666; font-size: 16px; line-height: 1.6;">
+          <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
             Get ready to explore our amazing collection of fashion items and enjoy exclusive deals.
           </p>
-          <div style="text-align: center; margin: 30px 0;">
+          <div style="text-align: center; margin: 40px 0;">
             <a href="${process.env.FRONTEND_URL}/shop" 
-               style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+               style="background: #000000; color: white; padding: 15px 40px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; font-size: 14px;">
               Start Shopping
             </a>
           </div>
-          <p style="color: #999; font-size: 14px; margin-top: 40px;">
+          <p style="color: #666666; font-size: 14px; line-height: 1.6; text-align: center;">
             If you have any questions, feel free to contact our support team.
           </p>
+          <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid #e9ecef; text-align: center;">
+            <p style="color: #999999; font-size: 12px; margin: 0;">
+              © Hash - Premium E-commerce Platform
+            </p>
+          </div>
         </div>
       </div>
     `;
@@ -96,6 +121,7 @@ class EmailService {
 
   // Send OTP email
   async sendOTPEmail(user, otp) {
+    const imageUrls = this.getEmailImageUrls();
     const subject = 'Your Hash Store Verification Code';
     const html = `
       <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: white;">
@@ -103,8 +129,8 @@ class EmailService {
           <div style="display: inline-block; position: relative; margin-bottom: 15px;">
             <!-- Hash Logo Images Side by Side -->
             <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;">
-              <img src="${process.env.FRONTEND_URL}/hash-logo.jpg" alt="Hash Logo" style="height: 50px; width: auto; object-fit: contain;" />
-              <img src="${process.env.FRONTEND_URL}/hash-logo-text.jpg" alt="Hash Text" style="height: 50px; width: auto; object-fit: contain;" />
+              <img src="${imageUrls.hashLogo}" alt="Hash Logo" style="height: 50px; width: auto; object-fit: contain; display: block;" />
+              <img src="${imageUrls.hashLogoText}" alt="Hash Text" style="height: 50px; width: auto; object-fit: contain; display: block;" />
             </div>
           </div>
           <p style="color: #f8f9fa; margin: 8px 0 0 0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">Premium E-commerce</p>
@@ -140,6 +166,7 @@ class EmailService {
 
   // Send order confirmation email
   async sendOrderConfirmationEmail(order) {
+    const imageUrls = this.getEmailImageUrls();
     const subject = `Order Confirmation - ${order.orderNumber}`;
     
     const itemsHtml = order.items.map(item => `
@@ -162,8 +189,8 @@ class EmailService {
           <div style="display: inline-block; position: relative; margin-bottom: 15px;">
             <!-- Hash Logo Images Side by Side -->
             <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;">
-              <img src="${process.env.FRONTEND_URL}/hash-logo.jpg" alt="Hash Logo" style="height: 50px; width: auto; object-fit: contain;" />
-              <img src="${process.env.FRONTEND_URL}/hash-logo-text.jpg" alt="Hash Text" style="height: 50px; width: auto; object-fit: contain;" />
+              <img src="${imageUrls.hashLogo}" alt="Hash Logo" style="height: 50px; width: auto; object-fit: contain; display: block;" />
+              <img src="${imageUrls.hashLogoText}" alt="Hash Text" style="height: 50px; width: auto; object-fit: contain; display: block;" />
             </div>
           </div>
           <p style="color: #f8f9fa; margin: 8px 0 0 0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">Premium E-commerce</p>
@@ -295,34 +322,47 @@ class EmailService {
 
   // Send password reset email
   async sendPasswordResetEmail(user, resetToken) {
+    const imageUrls = this.getEmailImageUrls();
     const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
     
     const subject = 'Password Reset Request';
     const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: #dc3545; padding: 30px 20px; text-align: center;">
-          <h1 style="color: white; margin: 0;">Password Reset</h1>
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: white;">
+        <div style="background: #000000; padding: 40px 20px; text-align: center; border-bottom: 4px solid #f8f9fa;">
+          <div style="display: inline-block; position: relative; margin-bottom: 15px;">
+            <!-- Hash Logo Images Side by Side -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;">
+              <img src="${imageUrls.hashLogo}" alt="Hash Logo" style="height: 50px; width: auto; object-fit: contain; display: block;" />
+              <img src="${imageUrls.hashLogoText}" alt="Hash Text" style="height: 50px; width: auto; object-fit: contain; display: block;" />
+            </div>
+          </div>
+          <p style="color: #f8f9fa; margin: 8px 0 0 0; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">Premium E-commerce</p>
+          <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
+            <h2 style="color: white; margin: 0; font-size: 24px; font-weight: 400;">Password Reset</h2>
+          </div>
         </div>
-        <div style="padding: 30px 20px; background: #f8f9fa;">
-          <h2 style="color: #333; margin-bottom: 20px;">Hello ${user.name}</h2>
-          <p style="color: #666; font-size: 16px; line-height: 1.6;">
+        <div style="padding: 40px 30px; background: white;">
+          <h2 style="color: #000000; margin-bottom: 20px; font-weight: 400; font-size: 24px;">Hello ${user.name}</h2>
+          <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
             We received a request to reset your password. Click the button below to reset it:
           </p>
           
-          <div style="text-align: center; margin: 30px 0;">
+          <div style="text-align: center; margin: 40px 0;">
             <a href="${resetURL}" 
-               style="background: #dc3545; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+               style="background: #000000; color: white; padding: 15px 40px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; font-size: 14px;">
               Reset Password
             </a>
           </div>
           
-          <p style="color: #666; font-size: 14px; line-height: 1.6;">
+          <p style="color: #666666; font-size: 14px; line-height: 1.6; text-align: center;">
             This link will expire in 1 hour. If you didn't request a password reset, please ignore this email.
           </p>
           
-          <p style="color: #999; font-size: 12px; margin-top: 30px; word-break: break-all;">
-            If the button doesn't work, copy and paste this URL into your browser: ${resetURL}
-          </p>
+          <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid #e9ecef; text-align: center;">
+            <p style="color: #999999; font-size: 12px; margin: 0;">
+              © Hash - Premium E-commerce Platform
+            </p>
+          </div>
         </div>
       </div>
     `;
