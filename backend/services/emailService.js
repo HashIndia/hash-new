@@ -355,7 +355,7 @@ class EmailService {
           </div>
           
           <p style="color: #666666; font-size: 14px; line-height: 1.6; text-align: center;">
-            This link will expire in 1 hour. If you didn't request a password reset, please ignore this email.
+            This link will expire in 10 minutes. If you didn't request a password reset, please ignore this email.
           </p>
           
           <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid #e9ecef; text-align: center;">
