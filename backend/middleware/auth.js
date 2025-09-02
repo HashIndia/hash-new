@@ -12,8 +12,18 @@ const protect = (userType = 'user') =>
     const prefix = userType === 'admin' ? 'admin' : 'user';
     const cookieName = `${prefix}AccessToken`;
 
+    // First try to get token from cookies (primary method)
     if (req.cookies && req.cookies[cookieName]) {
       token = req.cookies[cookieName];
+    }
+    
+    // Fallback for Safari/iOS: Check Authorization header or custom headers
+    if (!token) {
+      if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+        token = req.headers.authorization.split(' ')[1];
+      } else if (req.headers['x-auth-token']) {
+        token = req.headers['x-auth-token'];
+      }
     }
 
     if (!token) {

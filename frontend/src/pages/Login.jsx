@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { authAPI } from "../services/api";
+import { setSafariAuthToken } from "../services/api";
 import toast from "react-hot-toast";
 import useUserStore from "../stores/useUserStore";
 import { Button } from "../components/ui/button";
@@ -34,6 +35,11 @@ export default function Login() {
     try {
       const response = await authAPI.login(formData);
       toast.success('Logged in successfully!');
+      
+      // For Safari/iOS, extract and store auth token from response headers
+      if (response.token) {
+        setSafariAuthToken(response.token);
+      }
       
       // Call the setUser action from the store with the user data
       setUser(response.data.user);

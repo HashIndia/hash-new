@@ -17,6 +17,10 @@ const useUserStore = create(
       },
       
       logout: () => {
+        // Clear Safari/iOS fallback token
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('safari_auth_token');
+        }
         set({ 
           user: null, 
           isAuthenticated: false, 

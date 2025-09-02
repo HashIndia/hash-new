@@ -1,5 +1,14 @@
 import axios from 'axios';
 
+// Safari/iOS detection utility
+const isSafariOrIOS = () => {
+  const userAgent = navigator.userAgent;
+  const isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
+  const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+  const isMac = /Macintosh/.test(userAgent);
+  return isSafari || isIOS || isMac;
+};
+
 // Create axios instance for admin API
 const adminApi = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
@@ -13,9 +22,10 @@ const adminApi = axios.create({
   },
 });
 
-// Response interceptor with token refresh
+// Response interceptor with token refresh and Safari/iOS support
 let isRefreshing = false;
 let failedQueue = [];
+let adminAuthToken = null; // Fallback token storage for Safari/iOS
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach(prom => {
@@ -28,12 +38,33 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
+// Request interceptor for Safari/iOS fallback
+adminApi.interceptors.request.use(
+  (config) => {
+    // For Safari/iOS, also send token in Authorization header as fallback
+    if (isSafariOrIOS() && adminAuthToken) {
+      config.headers.Authorization = `Bearer ${adminAuthToken}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 adminApi.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    // Extract token from response headers for Safari/iOS fallback
+    if (isSafariOrIOS() && response.headers['x-auth-token']) {
+      adminAuthToken = response.headers['x-auth-token'];
+      localStorage.setItem('safari_admin_auth_token', adminAuthToken);
+    }
+    return response.data;
+  },
   async (error) => {
-    // For now, just redirect on 401 - disable refresh logic temporarily
+    // For now, just redirect on 401 with Safari token cleanup
     if (error.response?.status === 401) {
+      adminAuthToken = null;
       localStorage.removeItem('admin-auth');
+      localStorage.removeItem('safari_admin_auth_token');
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }
@@ -43,12 +74,35 @@ adminApi.interceptors.response.use(
   }
 );
 
+// Initialize Safari/iOS fallback token on app start
+if (isSafariOrIOS()) {
+  const storedAdminToken = localStorage.getItem('safari_admin_auth_token');
+  if (storedAdminToken) {
+    adminAuthToken = storedAdminToken;
+  }
+}
+
 // Admin Auth API
 export const adminAuthAPI = {
   login: (credentials) => adminApi.post('/admin/auth/login', credentials),
   logout: () => adminApi.post('/admin/auth/logout'),
   getCurrentAdmin: () => adminApi.get('/admin/auth/me'),
   refreshToken: () => adminApi.post('/admin/auth/refresh'),
+};
+
+// Export the token management functions for Safari/iOS
+export const setAdminSafariAuthToken = (token) => {
+  if (isSafariOrIOS()) {
+    adminAuthToken = token;
+    localStorage.setItem('safari_admin_auth_token', token);
+  }
+};
+
+export const clearAdminSafariAuthToken = () => {
+  if (isSafariOrIOS()) {
+    adminAuthToken = null;
+    localStorage.removeItem('safari_admin_auth_token');
+  }
 };
 
 // Products API for admin

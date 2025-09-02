@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { adminAuthAPI, handleAPIError } from '../services/api.js';
+import { adminAuthAPI, handleAPIError, setAdminSafariAuthToken } from '../services/api.js';
 
 const useAuthStore = create(persist(
   (set, get) => ({
@@ -16,6 +16,12 @@ const useAuthStore = create(persist(
       try {
         const response = await adminAuthAPI.login(credentials);
         const { user } = response.data; // Backend returns { data: { user: admin } }
+        
+        // For Safari/iOS, extract and store auth token from response
+        if (response.token) {
+          // Store Safari fallback token using centralized function
+          setAdminSafariAuthToken(response.token);
+        }
         
         set({ 
           user, 
@@ -42,6 +48,10 @@ const useAuthStore = create(persist(
         } catch (error) {
           console.error('Logout error:', error);
         } finally {
+          // Clear Safari/iOS fallback token
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('safari_admin_auth_token');
+          }
           set({ 
             user: null, 
             isAuthenticated: false,
@@ -56,6 +66,10 @@ const useAuthStore = create(persist(
         } catch (error) {
           console.error('Logout all error:', error);
         } finally {
+          // Clear Safari/iOS fallback token
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('safari_admin_auth_token');
+          }
           set({ 
             user: null, 
             isAuthenticated: false,

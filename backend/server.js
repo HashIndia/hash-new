@@ -55,15 +55,30 @@ const connectDB = async () => {
 
 connectDB();
 
-// CORS Configuration
+// CORS Configuration - Enhanced for Safari/iOS compatibility
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? [process.env.FRONTEND_URL, process.env.ADMIN_URL]
     : true, // Allow all origins in development
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'Cache-Control', 'Pragma', 'Expires'],
-  exposedHeaders: ['Set-Cookie'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'Cookie', 
+    'Cache-Control', 
+    'Pragma', 
+    'Expires',
+    'X-Auth-Token', // For Safari/iOS fallback
+    'X-Refresh-Token'
+  ],
+  exposedHeaders: [
+    'Set-Cookie',
+    'X-Auth-Token', // Expose custom headers for Safari/iOS
+    'X-Refresh-Token'
+  ],
+  optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
+  preflightContinue: false, // Pass control to the next handler
 };
 
 app.use(cors(corsOptions));

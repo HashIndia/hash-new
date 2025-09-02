@@ -70,7 +70,7 @@ export const generateTokens = (payload, userType = 'user') => {
 export const setAuthCookies = (res, accessToken, refreshToken, userType) => {
   const prefix = userType === 'admin' ? 'admin' : 'user';
   
-  // Cookie options based on environment
+  // Enhanced cookie options for Safari/iOS compatibility
   const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
@@ -80,25 +80,50 @@ export const setAuthCookies = (res, accessToken, refreshToken, userType) => {
     domain: process.env.NODE_ENV === 'production' ? undefined : undefined
   };
   
+  // Safari-compatible cookie options for better compatibility
+  const safariCompatibleOptions = {
+    ...cookieOptions,
+    // Add explicit SameSite=None for Safari compatibility
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    // Ensure secure flag is set for SameSite=None in production
+    secure: process.env.NODE_ENV === 'production' ? true : false,
+  };
+  
   // Set access token cookie
   res.cookie(`${prefix}AccessToken`, accessToken, {
-    ...cookieOptions,
+    ...safariCompatibleOptions,
     maxAge: 15 * 60 * 1000, // 15 minutes
   });
   
   // Set refresh token cookie
   res.cookie(`${prefix}RefreshToken`, refreshToken, {
-    ...cookieOptions,
+    ...safariCompatibleOptions,
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   });
+  
+  // Add fallback headers for Safari/iOS (in case cookies are blocked)
+  res.setHeader('X-Auth-Token', accessToken);
+  res.setHeader('X-Refresh-Token', refreshToken);
 };
 
 // --- Clear Cookies ---
 export const clearAuthCookies = (res, userType) => {
   const prefix = userType === 'admin' ? 'admin' : 'user';
   
-  res.clearCookie(`${prefix}AccessToken`);
-  res.clearCookie(`${prefix}RefreshToken`);
+  // Clear cookies with the same options used when setting them
+  const clearOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    path: '/',
+  };
+  
+  res.clearCookie(`${prefix}AccessToken`, clearOptions);
+  res.clearCookie(`${prefix}RefreshToken`, clearOptions);
+  
+  // Also clear any fallback headers
+  res.removeHeader('X-Auth-Token');
+  res.removeHeader('X-Refresh-Token');
 };
 
 // --- Main Token Creation and Sending Function ---

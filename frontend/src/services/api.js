@@ -1,6 +1,15 @@
 import axios from 'axios';
 import useUserStore from '../stores/useUserStore';
 
+// Safari/iOS detection utility
+const isSafariOrIOS = () => {
+  const userAgent = navigator.userAgent;
+  const isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
+  const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+  const isMac = /Macintosh/.test(userAgent);
+  return isSafari || isIOS || isMac;
+};
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   withCredentials: true, // Essential for cookies
@@ -13,6 +22,7 @@ let isRefreshing = false;
 let failedQueue = [];
 let refreshAttempts = 0;
 const MAX_REFRESH_ATTEMPTS = 1; // Reduced to 1 to prevent loops
+let authToken = null; // Fallback token storage for Safari/iOS
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach(prom => {
@@ -25,17 +35,29 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// Add request interceptor to log cookies
+// Add request interceptor to handle Safari/iOS token fallback
 api.interceptors.request.use(
   (config) => {
+    // For Safari/iOS, also send token in Authorization header as fallback
+    if (isSafariOrIOS() && authToken) {
+      config.headers.Authorization = `Bearer ${authToken}`;
+    }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Simple response interceptor
+// Simple response interceptor with Safari/iOS handling
 api.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    // Extract token from response headers for Safari/iOS fallback
+    if (isSafariOrIOS() && response.headers['x-auth-token']) {
+      authToken = response.headers['x-auth-token'];
+      // Store in localStorage as additional fallback for Safari/iOS
+      localStorage.setItem('safari_auth_token', authToken);
+    }
+    return response.data;
+  },
   async (error) => {
     const originalRequest = error.config;
 
@@ -53,6 +75,8 @@ api.interceptors.response.use(
       
       if (shouldSkipRefresh) {
         refreshAttempts = 0;
+        authToken = null;
+        localStorage.removeItem('safari_auth_token');
         useUserStore.getState().logout();
         if (!window.location.pathname.includes('/login')) {
           window.location.href = '/login';
@@ -71,12 +95,21 @@ api.interceptors.response.use(
       refreshAttempts++;
 
       try {
-        await api.post('/auth/refresh-token');
+        const refreshResponse = await api.post('/auth/refresh-token');
         refreshAttempts = 0;
+        
+        // Update Safari/iOS fallback token
+        if (isSafariOrIOS() && refreshResponse.headers?.['x-auth-token']) {
+          authToken = refreshResponse.headers['x-auth-token'];
+          localStorage.setItem('safari_auth_token', authToken);
+        }
+        
         processQueue(null);
         return api(originalRequest);
       } catch (refreshError) {
         refreshAttempts = 0;
+        authToken = null;
+        localStorage.removeItem('safari_auth_token');
         processQueue(refreshError, null);
         useUserStore.getState().logout();
         if (!window.location.pathname.includes('/login')) {
@@ -91,6 +124,8 @@ api.interceptors.response.use(
     // If we've hit the refresh limit, logout immediately
     if (refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
       refreshAttempts = 0;
+      authToken = null;
+      localStorage.removeItem('safari_auth_token');
       useUserStore.getState().logout();
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
@@ -100,6 +135,29 @@ api.interceptors.response.use(
     return Promise.reject(error.response?.data || error);
   }
 );
+
+// Initialize Safari/iOS fallback token on app start
+if (isSafariOrIOS()) {
+  const storedToken = localStorage.getItem('safari_auth_token');
+  if (storedToken) {
+    authToken = storedToken;
+  }
+}
+
+// Export the token management functions for Safari/iOS
+export const setSafariAuthToken = (token) => {
+  if (isSafariOrIOS()) {
+    authToken = token;
+    localStorage.setItem('safari_auth_token', token);
+  }
+};
+
+export const clearSafariAuthToken = () => {
+  if (isSafariOrIOS()) {
+    authToken = null;
+    localStorage.removeItem('safari_auth_token');
+  }
+};
 
 // API endpoints
 export const authAPI = {

@@ -1,10 +1,10 @@
 import express from 'express';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import { body, validationResult } from 'express-validator';
 import Admin from '../../models/Admin.js';
 import { protectAdmin } from '../../middleware/auth.js';
-import { setAuthCookies, clearAuthCookies, generateTokens } from '../../utils/tokenUtils.js';
+import { createSendTokens, clearAuthCookies } from '../../utils/tokenUtils.js';
+import catchAsync from '../../utils/catchAsync.js';
+import AppError from '../../utils/appError.js';
 
 const router = express.Router();
 
@@ -14,7 +14,7 @@ const router = express.Router();
 router.post('/login', [
   body('email', 'Please include a valid email').isEmail(),
   body('password', 'Password is required').exists()
-], async (req, res) => {
+], catchAsync(async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -22,217 +22,82 @@ router.post('/login', [
 
   const { email, password } = req.body;
 
-  try {
-    console.log('[Admin Login] Attempting login for:', email);
-    
-    // Check if admin exists
-    let admin = await Admin.findOne({ email: email.toLowerCase() }).select('+password');
-    console.log('[Admin Login] Admin found:', admin ? 'Yes' : 'No');
-    
-    if (!admin) {
-      console.log('[Admin Login] Admin not found for email:', email);
-      return res.status(400).json({ 
-        status: 'error',
-        message: 'Invalid credentials' 
-      });
-    }
-
-    // Check if password exists
-    if (!admin.password) {
-      console.error('[Admin Login] Admin has no password set');
-      return res.status(500).json({ 
-        status: 'error',
-        message: 'Admin account configuration error. Please contact system administrator.' 
-      });
-    }
-
-    // Check password
-    const isMatch = await bcrypt.compare(password, admin.password);
-    console.log('[Admin Login] Password match:', isMatch);
-    
-    if (!isMatch) {
-      console.log('[Admin Login] Password mismatch for:', email);
-      return res.status(400).json({ 
-        status: 'error',
-        message: 'Invalid credentials' 
-      });
-    }
-
-    // Generate tokens using centralized function
-    try {
-      const { accessToken, refreshToken } = generateTokens({
-        id: admin._id,
-        email: admin.email,
-        role: admin.role
-      }, 'admin');
-
-      // Set cookies using centralized function
-      setAuthCookies(res, accessToken, refreshToken, 'admin');
-      
-      console.log('[Admin Login] Login successful for:', email);
-
-      res.json({
-        status: 'success',
-        token: accessToken,
-        data: {
-          user: {
-            id: admin._id,
-            email: admin.email,
-            name: admin.name,
-            role: admin.role
-          }
-        }
-      });
-    } catch (tokenError) {
-      console.error('[Admin Login] Token generation error:', tokenError.message);
-      
-      // Fallback: Create simple access token without refresh
-      try {
-        const secret = process.env.ADMIN_JWT_SECRET || process.env.JWT_SECRET;
-        const payload = {
-          id: admin._id,
-          email: admin.email,
-          role: admin.role
-        };
-        
-        const token = jwt.sign(payload, secret, { expiresIn: '8h' });
-        
-        // Set simple cookie
-        res.cookie('adminAccessToken', token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-          maxAge: 8 * 60 * 60 * 1000 // 8 hours
-        });
-        
-        console.log('[Admin Login] Using fallback token generation');
-        
-        res.json({
-          status: 'success',
-          token: token,
-          data: {
-            user: {
-              id: admin._id,
-              email: admin.email,
-              name: admin.name,
-              role: admin.role
-            }
-          }
-        });
-      } catch (fallbackError) {
-        console.error('[Admin Login] Fallback token error:', fallbackError.message);
-        return res.status(500).json({ 
-          status: 'error',
-          message: 'Authentication system error. Please check server configuration.' 
-        });
-      }
-    }
-  } catch (err) {
-    console.error('Admin login error:', err.message);
-    res.status(500).json({ 
-      status: 'error',
-      message: 'Server error during login'
-    });
+  if (!email || !password) {
+    return next(new AppError('Please provide email and password!', 400));
   }
-});
+
+  const admin = await Admin.findOne({ email: email.toLowerCase() }).select('+password +loginAttempts +lockUntil');
+  
+  if (!admin || !(await admin.correctPassword(password, admin.password))) {
+    if (admin && admin.incLoginAttempts) await admin.incLoginAttempts();
+    return next(new AppError('Invalid credentials', 401));
+  }
+
+  if (admin.isLocked) {
+    return next(new AppError('Account locked due to too many failed login attempts.', 403));
+  }
+
+  // Reset login attempts on successful login
+  admin.loginAttempts = 0;
+  admin.lastLogin = Date.now();
+  await admin.save({ validateBeforeSave: false });
+
+  // Use centralized token creation with Safari/iOS support
+  await createSendTokens(admin, 200, res, req, 'admin');
+}));
 
 // @route   GET /api/admin/auth/me
 // @desc    Get current admin
 // @access  Private (Admin)
-router.get('/me', protectAdmin, async (req, res) => {
-  try {
-    res.json({ 
-      data: {
-        user: req.user 
-      }
-    });
-  } catch (err) {
-    console.error('Get admin error:', err.message);
-    res.status(500).json({ 
-      status: 'error', 
-      message: 'Server error' 
-    });
-  }
+router.get('/me', protectAdmin, (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user: req.user,
+    },
+  });
 });
 
 // @route   POST /api/admin/auth/logout
 // @desc    Admin logout
 // @access  Private (Admin)
-router.post('/logout', protectAdmin, async (req, res) => {
-  try {
-    // Clear admin cookies using centralized function
-    clearAuthCookies(res, 'admin');
-    res.json({ 
-      status: 'success',
-      message: 'Logged out successfully' 
-    });
-  } catch (err) {
-    console.error('Admin logout error:', err.message);
-    res.status(500).json({ 
-      status: 'error', 
-      message: 'Server error' 
-    });
+router.post('/logout', protectAdmin, catchAsync(async (req, res, next) => {
+  const token = req.cookies.adminRefreshToken;
+  if (token) {
+    // Import RefreshToken model
+    const RefreshToken = (await import('../../models/RefreshToken.js')).default;
+    await RefreshToken.findOneAndDelete({ token });
   }
-});
+  clearAuthCookies(res, 'admin');
+  res.status(200).json({ status: 'success' });
+}));
 
 // @route   POST /api/admin/auth/refresh
 // @desc    Refresh admin access token
 // @access  Public (requires refresh token cookie)
-router.post('/refresh', async (req, res) => {
-  try {
-    const refreshToken = req.cookies.adminRefreshToken;
-    
-    if (!refreshToken) {
-      return res.status(401).json({
-        status: 'error',
-        message: 'Refresh token not found'
-      });
-    }
-
-    // Verify refresh token using fallback secret
-    const refreshSecret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
-    const decoded = jwt.verify(refreshToken, refreshSecret);
-    
-    // Find admin
-    const admin = await Admin.findById(decoded.id);
-    if (!admin) {
-      clearAuthCookies(res, 'admin');
-      return res.status(401).json({
-        status: 'error',
-        message: 'Admin not found'
-      });
-    }
-
-    // Generate new tokens
-    const { accessToken, refreshToken: newRefreshToken } = generateTokens({
-      id: admin._id,
-      email: admin.email,
-      role: admin.role
-    }, 'admin');
-
-    // Set new cookies
-    setAuthCookies(res, accessToken, newRefreshToken, 'admin');
-
-    res.json({
-      status: 'success',
-      token: accessToken,
-      data: {
-        user: {
-          id: admin._id,
-          email: admin.email,
-          name: admin.name,
-          role: admin.role
-        }
-      }
-    });
-  } catch (err) {
-    console.error('Admin refresh token error:', err.message);
-    clearAuthCookies(res, 'admin');
-    res.status(401).json({
-      status: 'error',
-      message: 'Invalid refresh token'
-    });
+router.post('/refresh', catchAsync(async (req, res, next) => {
+  const token = req.cookies.adminRefreshToken;
+  
+  if (!token) {
+    return next(new AppError('You are not logged in.', 401));
   }
-});
+
+  // Import RefreshToken model
+  const RefreshToken = (await import('../../models/RefreshToken.js')).default;
+  const refreshTokenDoc = await RefreshToken.findOne({ token }).populate('admin');
+
+  if (!refreshTokenDoc || !refreshTokenDoc.admin) {
+    clearAuthCookies(res, 'admin');
+    return next(new AppError('Invalid session. Please log in again.', 401));
+  }
+
+  if (refreshTokenDoc.expires < new Date()) {
+    await refreshTokenDoc.deleteOne();
+    clearAuthCookies(res, 'admin');
+    return next(new AppError('Session expired. Please log in again.', 401));
+  }
+
+  await createSendTokens(refreshTokenDoc.admin, 200, res, req, 'admin');
+}));
 
 export default router;
