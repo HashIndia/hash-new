@@ -222,14 +222,60 @@ export default function Home() {
               >
                 Discover premium fashion that speaks your language. Bold, modern, and uniquely you.
               </motion.p>
+
+              {/* Mobile Action Buttons - Moved here to be above circular element */}
+              <motion.div 
+                className="flex flex-col gap-3 justify-center mb-6 px-2"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.8 }}
+              >
+                <Button asChild className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink hover:shadow-xl hover:shadow-hash-purple/25 px-6 py-3 rounded-xl font-semibold text-base transition-all duration-300 hover:scale-105 group font-space">
+                  <a href="/shop">
+                    Shop Collection
+                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </a>
+                </Button>
+                <Button asChild variant="outline" className="px-6 py-3 rounded-xl font-semibold text-base border-2 border-hash-purple/30 hover:border-hash-purple hover:bg-hash-purple/10 hover:text-hash-purple transition-all duration-300 hover:scale-105 font-space">
+                  <a href="#featured" className="flex items-center gap-2">
+                    <Eye className="w-5 h-5" />
+                    Explore Trends
+                  </a>
+                </Button>
+              </motion.div>
+
+              {/* Mobile Stats - Moved here to be above circular element */}
+              <motion.div 
+                className="flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground px-2 mb-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8, duration: 0.8 }}
+              >
+                <div className="flex items-center gap-1">
+                  <div className="flex text-hash-orange">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-3 h-3 fill-current" />
+                    ))}
+                  </div>
+                  <span className="font-medium text-foreground">4.9/5</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Users className="w-3 h-3 text-hash-green" />
+                  <span>10K+ Customers</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Truck className="w-3 h-3 text-hash-blue" />
+                  <span>Free Shipping</span>
+                </div>
+              </motion.div>
             </motion.div>
 
-            {/* Mobile Circular Element */}
+            {/* Mobile Circular Element - Now appears after all content */}
             <motion.div 
               className="relative flex items-center justify-center mb-8"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
+              transition={{ duration: 0.8, delay: 1 }}
             >
               <div className="relative max-w-xs">
                 {/* Main circular design with gradient border */}
@@ -312,52 +358,6 @@ export default function Home() {
                 >
                   <Star className="w-5 h-5 text-white fill-current" />
                 </motion.div>
-              </div>
-            </motion.div>
-
-            {/* Mobile Action Buttons */}
-            <motion.div 
-              className="flex flex-col gap-3 justify-center mb-6 px-2"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.8 }}
-            >
-              <Button asChild className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink hover:shadow-xl hover:shadow-hash-purple/25 px-6 py-3 rounded-xl font-semibold text-base transition-all duration-300 hover:scale-105 group font-space">
-                <a href="/shop">
-                  Shop Collection
-                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                </a>
-              </Button>
-              <Button asChild variant="outline" className="px-6 py-3 rounded-xl font-semibold text-base border-2 border-hash-purple/30 hover:border-hash-purple hover:bg-hash-purple/10 hover:text-hash-purple transition-all duration-300 hover:scale-105 font-space">
-                <a href="#featured" className="flex items-center gap-2">
-                  <Eye className="w-5 h-5" />
-                  Explore Trends
-                </a>
-              </Button>
-            </motion.div>
-
-            {/* Mobile Stats */}
-            <motion.div 
-              className="flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground px-2"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1, duration: 0.8 }}
-            >
-              <div className="flex items-center gap-1">
-                <div className="flex text-hash-orange">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3 h-3 fill-current" />
-                  ))}
-                </div>
-                <span className="font-medium text-foreground">4.9/5</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Users className="w-3 h-3 text-hash-green" />
-                <span>10K+ Customers</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Truck className="w-3 h-3 text-hash-blue" />
-                <span>Free Shipping</span>
               </div>
             </motion.div>
           </div>
