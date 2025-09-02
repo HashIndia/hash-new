@@ -36,26 +36,26 @@ export default function Home() {
 
   const stats = [
     {
-      title: "Products Available",
-      value: "500+",
+      title: "T-Shirts Sold",
+      value: "3000+",
       change: "+12.5%",
       changeType: "increase",
       icon: ShoppingCart,
       color: "bg-blue-500",
-      description: "Premium collection"
+      description: "Premium T-shirts"
     },
     {
       title: "Happy Customers",
-      value: "10K+",
+      value: "1000+",
       change: "+8.2%",
       changeType: "increase",
       icon: Users,
       color: "bg-green-500",
-      description: "Worldwide"
+      description: "Satisfied customers"
     },
     {
       title: "Customer Rating",
-      value: "4.9/5",
+      value: "4.5/5",
       change: "+0.8%",
       changeType: "increase",
       icon: Star,
@@ -63,13 +63,13 @@ export default function Home() {
       description: "Average rating"
     },
     {
-      title: "Orders Delivered",
-      value: "25K+",
+      title: "Collections",
+      value: "20+",
       change: "+15.1%",
       changeType: "increase",
-      icon: Truck,
+      icon: Award,
       color: "bg-orange-500",
-      description: "On time delivery"
+      description: "Fashion collections"
     }
   ];
 
@@ -257,15 +257,15 @@ export default function Home() {
                       <Star key={i} className="w-3 h-3 fill-current" />
                     ))}
                   </div>
-                  <span className="font-medium text-foreground">4.9/5</span>
+                  <span className="font-medium text-foreground">4.5/5</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Users className="w-3 h-3 text-hash-green" />
-                  <span>10K+ Customers</span>
+                  <span>1000+ Customers</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Truck className="w-3 h-3 text-hash-blue" />
-                  <span>Free Shipping</span>
+                  <ShoppingCart className="w-3 h-3 text-hash-blue" />
+                  <span>3000+ T-shirts</span>
                 </div>
               </motion.div>
             </motion.div>
@@ -440,15 +440,15 @@ export default function Home() {
                       <Star key={i} className="w-4 h-4 fill-current" />
                     ))}
                   </div>
-                  <span className="font-medium text-foreground">4.9/5</span>
+                  <span className="font-medium text-foreground">4.5/5</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-hash-green" />
-                  <span>10K+ Customers</span>
+                  <span>1000+ Customers</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Truck className="w-4 h-4 text-hash-blue" />
-                  <span>Free Shipping</span>
+                  <ShoppingCart className="w-4 h-4 text-hash-blue" />
+                  <span>3000+ T-shirts</span>
                 </div>
               </motion.div>
             </motion.div>
@@ -577,7 +577,7 @@ export default function Home() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 1.8, duration: 0.6 }}
                 >
-                  <div className="text-2xl font-bold text-hash-purple font-space">4.9★</div>
+                  <div className="text-2xl font-bold text-hash-purple font-space">4.5★</div>
                   <div className="text-xs text-muted-foreground">Rating</div>
                 </motion.div>
 
@@ -587,7 +587,7 @@ export default function Home() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 2, duration: 0.6 }}
                 >
-                  <div className="text-2xl font-bold text-hash-blue font-space">10K+</div>
+                  <div className="text-2xl font-bold text-hash-blue font-space">1000+</div>
                   <div className="text-xs text-muted-foreground">Customers</div>
                 </motion.div>
               </div>

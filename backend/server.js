@@ -56,9 +56,29 @@ const connectDB = async () => {
 connectDB();
 
 // CORS Configuration - Enhanced for Safari/iOS compatibility
+const getAllowedOrigins = () => {
+  const origins = [];
+  
+  // Add environment-specified origins
+  if (process.env.FRONTEND_URL) origins.push(process.env.FRONTEND_URL);
+  if (process.env.ADMIN_URL) origins.push(process.env.ADMIN_URL);
+  
+  // Add custom domain origins
+  origins.push('https://www.hashindia.in');
+  origins.push('https://hashindia.in');
+  
+  // Add any additional origins from environment variable
+  if (process.env.ADDITIONAL_ORIGINS) {
+    const additionalOrigins = process.env.ADDITIONAL_ORIGINS.split(',').map(origin => origin.trim());
+    origins.push(...additionalOrigins);
+  }
+  
+  return origins.filter(Boolean); // Remove any undefined URLs
+};
+
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL, process.env.ADMIN_URL]
+    ? getAllowedOrigins()
     : true, // Allow all origins in development
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -82,6 +102,11 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+// Log CORS configuration in production
+if (process.env.NODE_ENV === 'production') {
+  console.log('🌐 CORS allowed origins:', getAllowedOrigins());
+}
 
 // Handle preflight requests
 app.options('*', cors());
