@@ -78,6 +78,12 @@ export default function Header() {
               className="w-full h-full object-cover"
             />
           </div>
+          {/* Show text logo on mobile, image logo on larger screens */}
+          <div className="sm:hidden">
+            <span className="text-2xl font-bold bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink bg-clip-text text-transparent font-space">
+              HASH
+            </span>
+          </div>
           <div className="hidden sm:block">
             <img 
               src="/hash-logo-text.jpg" 
