@@ -169,3 +169,20 @@ export const createSendTokens = async (user, statusCode, res, req, userType = 'u
     throw error;
   }
 };
+
+// --- Revoke All Refresh Tokens ---
+export const revokeAllRefreshTokens = async (userId, userType = 'user') => {
+  try {
+    const query = userType === 'admin' ? { admin: userId } : { user: userId };
+    
+    // Delete all refresh tokens for the user
+    const result = await RefreshToken.deleteMany(query);
+    
+    console.log(`🗑️ [Token Utils] Revoked ${result.deletedCount} refresh tokens for ${userType} ${userId}`);
+    
+    return result;
+  } catch (error) {
+    console.error('❌ [Token Utils] Failed to revoke refresh tokens:', error);
+    throw error;
+  }
+};

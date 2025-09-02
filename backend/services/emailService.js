@@ -24,8 +24,8 @@ class EmailService {
   getEmailImageUrls() {
     // Use Cloudinary URLs for better email delivery and reliability
     return {
-      hashLogo: 'https://res.cloudinary.com/dqpgsn9qw/image/upload/v1735835280/hash/email/hash-logo.jpg',
-      hashLogoText: 'https://res.cloudinary.com/dqpgsn9qw/image/upload/v1735835280/hash/email/hash-logo-text.jpg'
+      hashLogo: 'https://res.cloudinary.com/dyiqxmzim/image/upload/v1756843781/hash-logo_zeabgj.jpg',
+      hashLogoText: 'https://res.cloudinary.com/dyiqxmzim/image/upload/v1756843794/hash-logo-text_zxzvhz.jpg'
     };
   }
 

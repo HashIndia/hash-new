@@ -6,7 +6,7 @@ import RefreshToken from '../models/RefreshToken.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 import emailService from '../services/emailService.js';
-import { createSendTokens, clearAuthCookies } from '../utils/tokenUtils.js';
+import { createSendTokens, clearAuthCookies, revokeAllRefreshTokens } from '../utils/tokenUtils.js';
 
 // Register a new user
 export const register = catchAsync(async (req, res, next) => {
@@ -284,12 +284,17 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
 
 // Reset password
 export const resetPassword = catchAsync(async (req, res, next) => {
+  console.log('🔑 [Reset Password] Request received for token:', req.params.token);
+  console.log('🔑 [Reset Password] Password provided:', req.body.password ? 'Yes' : 'No');
+  
   // Get user based on the token
   const hashedToken = crypto
     .createHash('sha256')
     .update(req.params.token)
     .digest('hex');
 
+  console.log('🔑 [Reset Password] Looking for user with hashed token...');
+  
   const user = await User.findOne({
     passwordResetToken: hashedToken,
     passwordResetExpires: { $gt: Date.now() }
@@ -297,19 +302,39 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 
   // If token has not expired, and there is user, set the new password
   if (!user) {
+    console.log('❌ [Reset Password] Invalid or expired token');
     return next(new AppError('Token is invalid or has expired', 400));
   }
 
-  user.password = req.body.password;
-  user.passwordResetToken = undefined;
-  user.passwordResetExpires = undefined;
-  await user.save();
+  console.log('✅ [Reset Password] Valid token found for user:', user.email);
 
-  // Revoke all existing refresh tokens for security
-  await revokeAllRefreshTokens(user._id, 'user');
+  // Validate password
+  if (!req.body.password || req.body.password.length < 6) {
+    console.log('❌ [Reset Password] Invalid password provided');
+    return next(new AppError('Password must be at least 6 characters long', 400));
+  }
 
-  // Log the user in, send JWT
-  await createSendTokens(user, 200, res, req);
+  try {
+    // Set new password and clear reset token
+    user.password = req.body.password;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+    
+    console.log('✅ [Reset Password] Password updated successfully');
+
+    // Revoke all existing refresh tokens for security
+    await revokeAllRefreshTokens(user._id, 'user');
+    console.log('✅ [Reset Password] All refresh tokens revoked');
+
+    // Log the user in, send JWT
+    await createSendTokens(user, 200, res, req);
+    console.log('✅ [Reset Password] New tokens created and sent');
+    
+  } catch (error) {
+    console.error('❌ [Reset Password] Error during password reset:', error);
+    return next(new AppError('Failed to reset password. Please try again.', 500));
+  }
 });
 
 // Update password (for authenticated users)
