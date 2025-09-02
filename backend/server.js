@@ -30,6 +30,7 @@ import debugRoutes from './routes/debugRoutes.js';
 
 import AppError from './utils/appError.js';
 import globalErrorHandler from './controllers/errorController.js';
+import { getAllowedOrigins } from './utils/domainUtils.js';
 
 const app = express();
 
@@ -56,26 +57,6 @@ const connectDB = async () => {
 connectDB();
 
 // CORS Configuration - Enhanced for Safari/iOS compatibility
-const getAllowedOrigins = () => {
-  const origins = [];
-  
-  // Add environment-specified origins
-  if (process.env.FRONTEND_URL) origins.push(process.env.FRONTEND_URL);
-  if (process.env.ADMIN_URL) origins.push(process.env.ADMIN_URL);
-  
-  // Add custom domain origins
-  origins.push('https://www.hashindia.in');
-  origins.push('https://hashindia.in');
-  
-  // Add any additional origins from environment variable
-  if (process.env.ADDITIONAL_ORIGINS) {
-    const additionalOrigins = process.env.ADDITIONAL_ORIGINS.split(',').map(origin => origin.trim());
-    origins.push(...additionalOrigins);
-  }
-  
-  return origins.filter(Boolean); // Remove any undefined URLs
-};
-
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? getAllowedOrigins()
