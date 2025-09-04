@@ -101,9 +101,7 @@ export default function Shipping() {
           animate="visible"
         >
           <motion.div variants={itemVariants}>
-            <h1 className="text-5xl md:text-6xl font-light tracking-[0.2em] mb-4">HASH</h1>
-            <p className="text-muted-foreground text-sm tracking-[0.15em] uppercase mb-8">Delivery Information</p>
-            <h2 className="text-3xl md:text-4xl font-light mb-4">Shipping & Delivery</h2>
+            <h1 className="text-3xl md:text-4xl font-light mb-4">Shipping & Delivery</h1>
             <p className="text-muted-foreground">Fast, reliable delivery to your doorstep</p>
           </motion.div>
         </motion.div>
@@ -350,16 +348,6 @@ export default function Shipping() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
-
-        {/* Footer Section */}
-        <motion.div 
-          className="mt-16 text-center py-8 border-t border-border"
-          variants={itemVariants}
-        >
-          <p className="text-muted-foreground text-sm">
-            © 2024 Hash - Premium E-commerce Platform. All rights reserved.
-          </p>
         </motion.div>
       </motion.div>
     </div>

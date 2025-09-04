@@ -59,9 +59,7 @@ export default function About() {
           animate="visible"
         >
           <motion.div variants={itemVariants}>
-            <h1 className="text-5xl md:text-6xl font-light tracking-[0.2em] mb-4">HASH</h1>
-            <p className="text-gray-300 text-sm tracking-[0.15em] uppercase mb-8">About Our Story</p>
-            <h2 className="text-3xl md:text-4xl font-light mb-4">Redefining Fashion Commerce</h2>
+            <h1 className="text-3xl md:text-4xl font-light mb-4">About Us</h1>
             <p className="text-gray-400">Building the future of premium online shopping</p>
           </motion.div>
         </motion.div>
@@ -213,16 +211,6 @@ export default function About() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
-
-        {/* Footer Section */}
-        <motion.div 
-          className="mt-16 text-center py-8 border-t border-border"
-          variants={itemVariants}
-        >
-          <p className="text-muted-foreground text-sm">
-            © 2024 Hash - Student-Run Clothing Brand. All rights reserved.
-          </p>
         </motion.div>
       </motion.div>
     </div>
