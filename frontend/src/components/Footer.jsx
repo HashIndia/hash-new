@@ -31,6 +31,7 @@ export default function Footer() {
 
   const footerLinks = {
     'Quick Links': [
+      { name: 'About Us', href: '/about', description: 'Our story' },
       { name: 'Shop', href: '/shop', description: 'Browse our collection' },
       { name: 'New Arrivals', href: '/shop?category=new', description: 'Latest trends' },
       { name: 'Best Sellers', href: '/shop?category=bestsellers', description: 'Popular items' },
@@ -46,6 +47,7 @@ export default function Footer() {
       { name: 'Privacy Policy', href: '/privacy', description: 'Your data protection' },
       { name: 'Terms of Service', href: '/terms', description: 'Service agreement' },
       { name: 'Return Policy', href: '/returns', description: 'Easy returns' },
+      { name: 'Business Info', href: '/business', description: 'Company details' },
     ],
   };
 
