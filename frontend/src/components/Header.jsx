@@ -99,7 +99,7 @@ export default function Header() {
             <div className="p-2 rounded-xl hover:bg-hash-purple/10 transition-all duration-200 group-hover:scale-105">
               <ShoppingCart className="w-6 h-6 text-foreground/80 group-hover:text-hash-purple transition-colors" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-hash-pink text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg">
+                <span className="absolute -top-1 -right-1 bg-hash-purple text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg">
                   {cartCount}
                 </span>
               )}
@@ -110,7 +110,7 @@ export default function Header() {
             <div className="flex items-center space-x-4">
               {/* Wishlist */}
               <Link to="/wishlist" className="group">
-                <div className="p-2 rounded-xl hover:bg-hash-pink/10 transition-all duration-200 group-hover:scale-105">
+                <div className="p-2 rounded-xl hover:bg-hash-purple/10 transition-all duration-200 group-hover:scale-105">
                   <Heart className="w-6 h-6 text-foreground/80 group-hover:text-hash-pink transition-colors" />
                 </div>
               </Link>
@@ -119,11 +119,11 @@ export default function Header() {
               <div className="relative">
                 <button
                   onClick={() => setShowNotifications(!showNotifications)}
-                  className="p-2 rounded-xl hover:bg-hash-blue/10 transition-all duration-200 hover:scale-105 group"
+                  className="p-2 rounded-xl hover:bg-hash-purple/10 transition-all duration-200 hover:scale-105 group"
                 >
                   <Bell className="w-6 h-6 text-foreground/80 group-hover:text-hash-blue transition-colors" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-hash-orange text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg animate-pulse">
+                    <span className="absolute -top-1 -right-1 bg-hash-purple text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg animate-pulse">
                       {unreadCount}
                     </span>
                   )}
@@ -265,7 +265,7 @@ export default function Header() {
                   >
                     <span>Cart</span>
                     {cartCount > 0 && (
-                      <span className="bg-hash-pink text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
+                      <span className="bg-hash-purple text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
                         {cartCount}
                       </span>
                     )}

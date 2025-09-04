@@ -409,7 +409,7 @@ export default function Orders() {
               variants={itemVariants}
               layout
             >
-              <Card className="bg-card/80 backdrop-blur-sm border border-border hover:shadow-lg transition-all duration-300 shadow-lg">
+              <Card className="bg-card border border-border hover:shadow-lg transition-all duration-300 shadow-lg">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 mb-4 sm:mb-6">
                     <div className="flex-1">
@@ -420,7 +420,7 @@ export default function Orders() {
                     </div>
                     
                     <div className="flex items-center justify-between sm:text-right sm:flex-col sm:items-end gap-2">
-                      <div className="text-lg sm:text-xl font-bold text-hash-purple">
+                      <div className="text-lg sm:text-xl font-bold text-foreground">
                         ₹{order.totalAmount?.toFixed(2)}
                       </div>
                       <span className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getStatusColor(order.status)}`}>
@@ -493,7 +493,7 @@ export default function Orders() {
                       <h4 className="font-semibold text-foreground mb-3 sm:mb-4 text-sm sm:text-base">Order Items</h4>
                       <div className="space-y-3 sm:space-y-4">
                         {(order.items || []).map((item, index) => (
-                          <div key={index} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-accent/50 rounded-xl border border-border">
+                          <div key={index} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-muted/30 rounded-xl border border-border">
                             <img
                               src={item.image || item.product?.images?.[0]?.url || item.product?.images?.[0] || `https://placehold.co/60x60/64748b/fff?text=Item`}
                               alt={item.name}
@@ -508,7 +508,7 @@ export default function Orders() {
                               {item.size && <p className="text-xs sm:text-sm text-muted-foreground">Size: {item.size}</p>}
                             </div>
                             <div className="text-right flex-shrink-0">
-                              <div className="font-semibold text-hash-purple text-sm sm:text-base">₹{item.price?.toFixed(2)}</div>
+                              <div className="font-semibold text-foreground text-sm sm:text-base">₹{item.price?.toFixed(2)}</div>
                               {order.status === 'delivered' && (
                                 <Button
                                   size="sm"
@@ -528,7 +528,7 @@ export default function Orders() {
                         ))}
                       </div>
                       
-                      <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-accent/50 rounded-xl border border-border">
+                      <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-muted/30 rounded-xl border border-border">
                         <h4 className="font-semibold text-foreground mb-2 sm:mb-3 text-sm sm:text-base">Delivery Address</h4>
                         <div className="text-muted-foreground text-sm sm:text-base">
                           <p>{order.shippingAddress?.line1}</p>
@@ -550,27 +550,27 @@ export default function Orders() {
           className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto"
           variants={itemVariants}
         >
-          <Card className="bg-card/80 backdrop-blur-sm border border-border">
+          <Card className="bg-card border border-border">
             <CardContent className="p-4 sm:p-6 text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-hash-purple mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
                 {orders.length}
               </div>
               <div className="text-sm sm:text-base text-muted-foreground">Total Orders</div>
             </CardContent>
           </Card>
           
-          <Card className="bg-card/80 backdrop-blur-sm border border-border">
+          <Card className="bg-card border border-border">
             <CardContent className="p-4 sm:p-6 text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-hash-blue mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
                 ₹{orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0).toFixed(2)}
               </div>
               <div className="text-sm sm:text-base text-muted-foreground">Total Spent</div>
             </CardContent>
           </Card>
           
-          <Card className="bg-card/80 backdrop-blur-sm border border-border">
+          <Card className="bg-card border border-border">
             <CardContent className="p-4 sm:p-6 text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-hash-green mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
                 {orders.filter(order => order.status === 'delivered').length}
               </div>
               <div className="text-sm sm:text-base text-muted-foreground">Delivered</div>

@@ -23,10 +23,10 @@ export default function Footer() {
   };
 
   const socialLinks = [
-    { name: 'Facebook', icon: Facebook, href: '#', color: 'hover:bg-hash-blue/10 hover:text-hash-blue' },
-    { name: 'Twitter', icon: Twitter, href: '#', color: 'hover:bg-hash-blue/10 hover:text-hash-blue' },
-    { name: 'Instagram', icon: Instagram, href: '#', color: 'hover:bg-hash-pink/10 hover:text-hash-pink' },
-    { name: 'YouTube', icon: Youtube, href: '#', color: 'hover:bg-hash-orange/10 hover:text-hash-orange' },
+    { name: 'Facebook', icon: Facebook, href: '#', color: 'hover:bg-hash-purple/10 hover:text-hash-purple' },
+    { name: 'Twitter', icon: Twitter, href: '#', color: 'hover:bg-hash-purple/10 hover:text-hash-purple' },
+    { name: 'Instagram', icon: Instagram, href: '#', color: 'hover:bg-hash-purple/10 hover:text-hash-purple' },
+    { name: 'YouTube', icon: Youtube, href: '#', color: 'hover:bg-hash-purple/10 hover:text-hash-purple' },
   ];
 
   const footerLinks = {

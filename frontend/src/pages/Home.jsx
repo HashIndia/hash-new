@@ -173,8 +173,6 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="relative bg-background border-b border-border overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_80%_80%,hsl(var(--hash-blue))_0%,transparent_50%),radial-gradient(circle_at_40%_40%,hsl(var(--hash-pink))_0%,transparent_50%)] opacity-10"></div>
         
         <div className="container mx-auto px-4 sm:px-6 pt-4 sm:pt-8 pb-8 sm:pb-16 relative z-10">
           {/* Mobile Layout: Title First, Then Circular Element */}
@@ -313,50 +311,48 @@ export default function Home() {
                       <div className="text-hash-purple font-space font-bold text-sm sm:text-base">#FASHION</div>
                     </motion.div>
                     
-                    {/* Background pattern */}
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_70%_70%,hsl(var(--hash-blue))_0%,transparent_50%)] opacity-10"></div>
                   </div>
                 </motion.div>
                 
                 {/* Floating Elements - Smaller on mobile */}
                 <motion.div 
-                  className="absolute -top-3 -left-3 w-8 h-8 bg-hash-purple rounded-2xl flex items-center justify-center shadow-lg"
+                  className="absolute -top-3 -left-3 w-8 h-8 bg-hash-purple/10 border border-hash-purple/20 rounded-2xl flex items-center justify-center shadow-sm"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1, duration: 0.6 }}
                   whileHover={{ scale: 1.1, rotate: 10 }}
                 >
-                  <Shield className="w-4 h-4 text-white" />
+                  <Shield className="w-4 h-4 text-hash-purple" />
                 </motion.div>
 
                 <motion.div 
-                  className="absolute -top-2 -right-4 w-6 h-6 bg-hash-pink rounded-xl flex items-center justify-center shadow-lg"
+                  className="absolute -top-2 -right-4 w-6 h-6 bg-hash-purple/10 border border-hash-purple/20 rounded-xl flex items-center justify-center shadow-sm"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.2, duration: 0.6 }}
                   whileHover={{ scale: 1.1, rotate: -10 }}
                 >
-                  <Award className="w-3 h-3 text-white" />
+                  <Award className="w-3 h-3 text-hash-purple" />
                 </motion.div>
 
                 <motion.div 
-                  className="absolute -bottom-3 -right-3 w-8 h-8 bg-hash-green rounded-2xl flex items-center justify-center shadow-lg"
+                  className="absolute -bottom-3 -right-3 w-8 h-8 bg-hash-purple/10 border border-hash-purple/20 rounded-2xl flex items-center justify-center shadow-sm"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.4, duration: 0.6 }}
                   whileHover={{ scale: 1.1, rotate: 15 }}
                 >
-                  <Truck className="w-4 h-4 text-white" />
+                  <Truck className="w-4 h-4 text-hash-purple" />
                 </motion.div>
 
                 <motion.div 
-                  className="absolute -bottom-2 -left-4 w-6 h-6 bg-hash-orange rounded-xl flex items-center justify-center shadow-lg"
+                  className="absolute -bottom-2 -left-4 w-6 h-6 bg-hash-purple/10 border border-hash-purple/20 rounded-xl flex items-center justify-center shadow-sm"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.6, duration: 0.6 }}
                   whileHover={{ scale: 1.1, rotate: -15 }}
                 >
-                  <Star className="w-5 h-5 text-white fill-current" />
+                  <Star className="w-5 h-5 text-hash-purple fill-current" />
                 </motion.div>
               </div>
             </motion.div>
@@ -496,50 +492,48 @@ export default function Home() {
                       <div className="text-hash-purple font-space font-bold text-lg">#FASHION</div>
                     </motion.div>
                     
-                    {/* Background pattern */}
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_70%_70%,hsl(var(--hash-blue))_0%,transparent_50%)] opacity-10"></div>
                   </div>
                 </motion.div>
                 
                 {/* Floating Elements */}
                 <motion.div 
-                  className="absolute -top-8 -left-8 w-16 h-16 bg-hash-purple rounded-2xl flex items-center justify-center shadow-lg"
+                  className="absolute -top-8 -left-8 w-16 h-16 bg-hash-purple/10 border border-hash-purple/20 rounded-2xl flex items-center justify-center shadow-sm"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1, duration: 0.6 }}
                   whileHover={{ scale: 1.1, rotate: 10 }}
                 >
-                  <Shield className="w-8 h-8 text-white" />
+                  <Shield className="w-8 h-8 text-hash-purple" />
                 </motion.div>
 
                 <motion.div 
-                  className="absolute -top-4 -right-12 w-12 h-12 bg-hash-pink rounded-xl flex items-center justify-center shadow-lg"
+                  className="absolute -top-4 -right-12 w-12 h-12 bg-hash-purple/10 border border-hash-purple/20 rounded-xl flex items-center justify-center shadow-sm"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.2, duration: 0.6 }}
                   whileHover={{ scale: 1.1, rotate: -10 }}
                 >
-                  <Award className="w-6 h-6 text-white" />
+                  <Award className="w-6 h-6 text-hash-purple" />
                 </motion.div>
 
                 <motion.div 
-                  className="absolute -bottom-8 -right-8 w-16 h-16 bg-hash-green rounded-2xl flex items-center justify-center shadow-lg"
+                  className="absolute -bottom-8 -right-8 w-16 h-16 bg-hash-purple/10 border border-hash-purple/20 rounded-2xl flex items-center justify-center shadow-sm"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.4, duration: 0.6 }}
                   whileHover={{ scale: 1.1, rotate: 15 }}
                 >
-                  <Truck className="w-8 h-8 text-white" />
+                  <Truck className="w-8 h-8 text-hash-purple" />
                 </motion.div>
 
                 <motion.div 
-                  className="absolute -bottom-4 -left-12 w-12 h-12 bg-hash-orange rounded-xl flex items-center justify-center shadow-lg"
+                  className="absolute -bottom-4 -left-12 w-12 h-12 bg-hash-purple/10 border border-hash-purple/20 rounded-xl flex items-center justify-center shadow-sm"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.6, duration: 0.6 }}
                   whileHover={{ scale: 1.1, rotate: -15 }}
                 >
-                  <Star className="w-6 h-6 text-white fill-current" />
+                  <Star className="w-6 h-6 text-hash-purple fill-current" />
                 </motion.div>
 
                 {/* Orbiting dots */}
@@ -620,13 +614,8 @@ export default function Home() {
                         <span className="text-sm font-medium text-muted-foreground">{stat.description}</span>
                         <span className="text-3xl md:text-4xl font-extrabold text-foreground font-space">{stat.value}</span>
                       </div>
-                      <div className={`w-12 h-12 ${
-                        index === 0 ? 'bg-hash-purple' :
-                        index === 1 ? 'bg-hash-blue' :
-                        index === 2 ? 'bg-hash-pink' :
-                        'bg-hash-orange'
-                      } rounded-xl flex items-center justify-center shadow-lg`}>
-                        <stat.icon className="w-7 h-7 text-white" />
+                      <div className="w-12 h-12 bg-hash-purple/10 border border-hash-purple/20 rounded-xl flex items-center justify-center shadow-sm">
+                        <stat.icon className="w-7 h-7 text-hash-purple" />
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mb-4">
@@ -647,8 +636,6 @@ export default function Home() {
 
       {/* Categories Section */}
       <section className="py-20 bg-background relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_80%_20%,hsl(var(--hash-blue))_0%,transparent_50%)] opacity-5"></div>
         
         <div className="container mx-auto px-6 relative z-10">
           <motion.div 
@@ -658,7 +645,7 @@ export default function Home() {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6 font-space">
-              Shop by <span className="hash-text-gradient">#Category</span>
+              Shop by <span className="text-hash-purple">#Category</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Explore our diverse collection across different styles and occasions.
@@ -679,30 +666,17 @@ export default function Home() {
                 whileHover={{ y: -8, scale: 1.03 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card className={`overflow-hidden rounded-2xl border border-border hover:border-hash-purple/50 group flex flex-col justify-end min-h-[260px] aspect-[1.1/1] relative transition-all duration-300 ${
-                  index === 0 ? 'bg-hash-purple/20' :
-                  index === 1 ? 'bg-hash-blue/20' :
-                  index === 2 ? 'bg-hash-pink/20' :
-                  'bg-hash-orange/20'
-                } hover:shadow-2xl hover:shadow-hash-purple/20`}>
-                  {/* Background Pattern */}
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,hsl(var(--hash-purple))_0%,transparent_70%)] opacity-10 group-hover:opacity-20 transition-opacity"></div>
-                  
+                <Card className="overflow-hidden rounded-2xl border border-border hover:border-hash-purple/30 group flex flex-col justify-end min-h-[260px] aspect-[1.1/1] relative transition-all duration-300 bg-card hover:shadow-lg hover:shadow-hash-purple/10">
                   {/* Content */}
                   <div className="relative z-20 flex flex-col h-full justify-between p-8">
                     <div className="flex justify-between items-start">
                       {category.trending && (
-                        <span className="bg-hash-orange text-white text-xs font-bold px-3 py-1 rounded-full shadow-md tracking-wide animate-pulse">
+                        <span className="bg-hash-purple text-white text-xs font-bold px-3 py-1 rounded-full shadow-md tracking-wide">
                           🔥 Trending
                         </span>
                       )}
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                        index === 0 ? 'bg-hash-purple' :
-                        index === 1 ? 'bg-hash-blue' :
-                        index === 2 ? 'bg-hash-pink' :
-                        'bg-hash-orange'
-                      } shadow-lg group-hover:scale-110 transition-transform`}>
-                        <span className="text-white text-xl font-bold">#</span>
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-hash-purple/10 border border-hash-purple/20 shadow-sm group-hover:bg-hash-purple/20 transition-colors">
+                        <span className="text-hash-purple text-xl font-bold">#</span>
                       </div>
                     </div>
                     <div>
@@ -710,9 +684,6 @@ export default function Home() {
                       <span className="text-base text-muted-foreground font-medium">{category.count}</span>
                     </div>
                   </div>
-                  
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-hash-purple/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </Card>
               </motion.div>
             ))}
@@ -722,8 +693,6 @@ export default function Home() {
 
       {/* Features Section */}
       <section className="py-20 bg-card border-b border-border relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--hash-blue))_0%,transparent_50%)] opacity-5"></div>
         
         <div className="container mx-auto px-6 relative z-10">
           <motion.div 
@@ -733,7 +702,7 @@ export default function Home() {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6 font-space">
-              Why Choose <span className="hash-text-gradient">#HASH</span>?
+              Why Choose <span className="text-hash-purple">#HASH</span>?
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               We're committed to delivering exceptional quality and service with every order.
@@ -756,12 +725,8 @@ export default function Home() {
               >
                 <Card className="text-center px-6 py-8 border border-border hover:border-hash-purple/50 rounded-2xl bg-card h-full flex flex-col items-center justify-center min-h-0 hover:shadow-lg hover:shadow-hash-purple/10 transition-all duration-300 group" style={{ minHeight: '180px', height: '100%' }}>
                   <CardContent className="p-0 flex flex-col items-center">
-                    <div className={`w-16 h-16 ${
-                      index === 0 ? 'bg-hash-purple' :
-                      index === 1 ? 'bg-hash-green' :
-                      'bg-hash-pink'
-                    } rounded-2xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
-                      <feature.icon className="w-8 h-8 text-white" />
+                    <div className="w-16 h-16 bg-hash-purple/10 border border-hash-purple/20 rounded-2xl flex items-center justify-center mb-4 shadow-sm group-hover:bg-hash-purple/20 transition-colors">
+                      <feature.icon className="w-8 h-8 text-hash-purple" />
                     </div>
                     <h3 className="text-lg font-bold text-foreground mb-2 font-space group-hover:text-hash-purple transition-colors">{feature.title}</h3>
                     <p className="text-muted-foreground leading-relaxed text-base flex-1">{feature.description}</p>
@@ -775,8 +740,6 @@ export default function Home() {
 
       {/* Featured Products Section */}
       <section id="featured" className="py-20 bg-background relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,hsl(var(--hash-pink))_0%,transparent_50%),radial-gradient(circle_at_20%_80%,hsl(var(--hash-blue))_0%,transparent_50%)] opacity-5"></div>
         
         <div className="container mx-auto px-6 relative z-10">
           <motion.div 
@@ -786,7 +749,7 @@ export default function Home() {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6 font-space">
-              <span className="hash-text-gradient">#Trending</span> Now
+              <span className="text-hash-purple">#Trending</span> Now
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Discover our most popular pieces loved by thousands of customers worldwide.
@@ -897,8 +860,6 @@ export default function Home() {
 
       {/* Testimonials Section */}
       <section className="py-20 bg-card border-b border-border relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,hsl(var(--hash-green))_0%,transparent_50%),radial-gradient(circle_at_70%_30%,hsl(var(--hash-pink))_0%,transparent_50%)] opacity-5"></div>
         
         <div className="container mx-auto px-6 relative z-10">
           <motion.div 
@@ -908,7 +869,7 @@ export default function Home() {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6 font-space">
-              What Our <span className="hash-text-gradient">#Community</span> Says
+              What Our <span className="text-hash-purple">#Community</span> Says
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Join thousands of satisfied customers who love our products and service.

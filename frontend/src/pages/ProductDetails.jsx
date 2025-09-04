@@ -475,7 +475,7 @@ export default function ProductDetails() {
                 ) : (
                   <>
                     <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <span className="text-sm font-medium text-yellow-600">
+                    <span className="text-sm font-medium text-muted-foreground">
                       {!selectedSize ? 'Select a size and color to check availability' : 'Select a color to check availability'}
                     </span>
                   </>
@@ -523,7 +523,7 @@ export default function ProductDetails() {
               <Button
                 onClick={handleAddToCart}
                 disabled={safeProduct.stock === 0}
-                className="flex-1 bg-hash-purple hover:bg-hash-purple/90 text-white py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-hash-purple/25"
+                className="flex-1 bg-hash-purple hover:bg-hash-purple/90 text-white py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ShoppingBag className="mr-2 h-5 w-5" />
                 {safeProduct.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
@@ -541,15 +541,15 @@ export default function ProductDetails() {
             {/* Features */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-border">
               <div className="flex items-center gap-3">
-                <Truck className="h-5 w-5 text-hash-green" />
+                <Truck className="h-5 w-5 text-hash-purple" />
                 <span className="text-sm text-muted-foreground">Free Shipping</span>
               </div>
               <div className="flex items-center gap-3">
-                <ShieldCheck className="h-5 w-5 text-hash-blue" />
+                <ShieldCheck className="h-5 w-5 text-hash-purple" />
                 <span className="text-sm text-muted-foreground">Secure Payment</span>
               </div>
               <div className="flex items-center gap-3">
-                <RotateCcw className="h-5 w-5 text-hash-orange" />
+                <RotateCcw className="h-5 w-5 text-hash-purple" />
                 <span className="text-sm text-muted-foreground">Easy Returns</span>
               </div>
             </div>

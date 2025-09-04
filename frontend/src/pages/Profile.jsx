@@ -139,9 +139,9 @@ export default function Profile() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            <Card className="bg-card/80 backdrop-blur-sm border border-border shadow-lg">
-              <CardHeader className="bg-hash-purple text-white rounded-t-lg">
-                <CardTitle className="font-space">My Details</CardTitle>
+            <Card className="bg-card border border-border shadow-sm">
+              <CardHeader className="bg-card border-b border-border">
+                <CardTitle className="font-space text-foreground">My Details</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-4">
@@ -168,12 +168,12 @@ export default function Profile() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <Card className="bg-card/80 backdrop-blur-sm border border-border shadow-lg">
-              <CardHeader className="flex flex-row items-center justify-between bg-hash-blue text-white rounded-t-lg">
-                <CardTitle className="font-space">My Addresses</CardTitle>
+            <Card className="bg-card border border-border shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between bg-card border-b border-border">
+                <CardTitle className="font-space text-foreground">My Addresses</CardTitle>
                 <Button 
                   onClick={() => setShowAddressForm(true)}
-                  className="bg-white/20 hover:bg-white/30 text-white border border-white/30"
+                  className="bg-hash-purple hover:bg-hash-purple/90 text-white"
                 >
                   Add Address
                 </Button>
@@ -182,7 +182,7 @@ export default function Profile() {
                 {addresses.length > 0 ? (
                   <div className="space-y-4">
                     {addresses.map((addr) => (
-                      <div key={addr._id} className="border border-border rounded-lg p-4 bg-accent/30">
+                      <div key={addr._id} className="border border-border rounded-lg p-4 bg-muted/30">
                         <div className="flex justify-between items-start">
                           <div>
                             <p className="font-medium text-foreground">{addr.name}</p>
@@ -229,15 +229,15 @@ export default function Profile() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <Card className="bg-card/80 backdrop-blur-sm border border-border shadow-lg">
-              <CardHeader className="bg-hash-purple text-white rounded-t-lg">
-                <CardTitle className="font-space">Recent Orders</CardTitle>
+            <Card className="bg-card border border-border shadow-lg">
+                            <CardHeader className="bg-card border-b border-border">
+                <CardTitle className="text-foreground">Order History</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 {orders.length > 0 ? (
                   <div className="space-y-4">
                     {orders.slice(0, 5).map((order) => (
-                      <div key={order._id} className="border border-border rounded-lg p-4 bg-accent/20 hover:bg-accent/30 transition-colors">
+                      <div key={order._id} className="border border-border rounded-lg p-4 bg-card hover:bg-muted/30 transition-colors">
                         <div className="flex justify-between items-start mb-3">
                           <div>
                             <h4 className="font-semibold text-foreground text-lg">
