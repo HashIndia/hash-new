@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ShoppingBag, Heart, Star, Share, Truck, ShieldCheck, RotateCcw, Ruler } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Heart, Star, Share, Truck, ShieldCheck, RotateCcw, Ruler, ZoomIn, X } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -27,6 +27,10 @@ export default function ProductDetails() {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [showSizeChart, setShowSizeChart] = useState(false);
   const [totalReviews, setTotalReviews] = useState(0);
+  const [showZoomModal, setShowZoomModal] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   // Load product on mount
   useEffect(() => {
@@ -218,6 +222,57 @@ export default function ProductDetails() {
     }
   };
 
+  // Zoom functionality
+  const handleImageClick = () => {
+    setShowZoomModal(true);
+    setZoomPosition({ x: 0, y: 0 });
+  };
+
+  const handleZoomClose = () => {
+    setShowZoomModal(false);
+    setZoomPosition({ x: 0, y: 0 });
+  };
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - zoomPosition.x,
+      y: e.clientY - zoomPosition.y
+    });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    
+    const newX = e.clientX - dragStart.x;
+    const newY = e.clientY - dragStart.y;
+    
+    // Limit the drag bounds
+    const maxX = 200;
+    const maxY = 200;
+    
+    setZoomPosition({
+      x: Math.max(-maxX, Math.min(maxX, newX)),
+      y: Math.max(-maxY, Math.min(maxY, newY))
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Add escape key handler for zoom modal
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && showZoomModal) {
+        handleZoomClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [showZoomModal]);
+
   const currentPrice = safeProduct.salePrice || safeProduct.price;
   const originalPrice = safeProduct.salePrice ? safeProduct.price : null;
   const discount = originalPrice ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0;
@@ -242,20 +297,28 @@ export default function ProductDetails() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
-              className="relative overflow-hidden rounded-2xl bg-card border border-border shadow-xl"
+              className="relative overflow-hidden rounded-2xl bg-card border border-border shadow-xl cursor-zoom-in group"
+              onClick={handleImageClick}
             >
               <img
                 src={safeProduct.images[activeImage]?.url || '/placeholder-image.jpg'}
                 alt={safeProduct.name}
-                className="w-full h-96 lg:h-[500px] object-cover"
+                className="w-full h-96 lg:h-[500px] object-cover transition-transform duration-300 group-hover:scale-105"
               />
+              {/* Zoom overlay indicator */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center">
+                <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
               {discount > 0 && (
                 <Badge className="absolute top-4 left-4 bg-destructive text-destructive-foreground">
                   -{discount}%
                 </Badge>
               )}
               <Button
-                onClick={handleWishlist}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleWishlist();
+                }}
                 variant="ghost"
                 size="sm"
                 className="absolute top-4 right-4 bg-card/80 backdrop-blur-sm hover:bg-card border border-border"
@@ -582,6 +645,115 @@ export default function ProductDetails() {
           onClose={() => setShowSizeChart(false)}
           product={safeProduct}
         />
+
+        {/* Image Zoom Modal */}
+        {showZoomModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center"
+            onClick={handleZoomClose}
+          >
+            <div className="relative w-full h-full flex items-center justify-center">
+              {/* Close button */}
+              <Button
+                onClick={handleZoomClose}
+                variant="ghost"
+                size="sm"
+                className="absolute top-4 right-4 z-10 bg-white/20 hover:bg-white/30 text-white border border-white/20"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+
+              {/* Navigation buttons for multiple images */}
+              {safeProduct.images.length > 1 && (
+                <>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveImage((prev) => 
+                        prev > 0 ? prev - 1 : safeProduct.images.length - 1
+                      );
+                    }}
+                    variant="ghost"
+                    size="sm"
+                    className="absolute left-4 z-10 bg-white/20 hover:bg-white/30 text-white border border-white/20"
+                  >
+                    ←
+                  </Button>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveImage((prev) => 
+                        prev < safeProduct.images.length - 1 ? prev + 1 : 0
+                      );
+                    }}
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-4 z-10 bg-white/20 hover:bg-white/30 text-white border border-white/20"
+                  >
+                    →
+                  </Button>
+                </>
+              )}
+
+              {/* Zoomable image */}
+              <motion.div
+                className="relative cursor-grab active:cursor-grabbing"
+                style={{
+                  transform: `translate(${zoomPosition.x}px, ${zoomPosition.y}px)`,
+                }}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onClick={(e) => e.stopPropagation()}
+                drag
+                dragConstraints={{
+                  left: -200,
+                  right: 200,
+                  top: -200,
+                  bottom: 200,
+                }}
+                dragElastic={0.1}
+                onDrag={(event, info) => {
+                  setZoomPosition({
+                    x: info.offset.x,
+                    y: info.offset.y
+                  });
+                }}
+              >
+                <img
+                  src={safeProduct.images[activeImage]?.url || '/placeholder-image.jpg'}
+                  alt={safeProduct.name}
+                  className="max-w-none h-screen w-auto object-contain select-none"
+                  style={{
+                    transform: 'scale(1.5)',
+                    transformOrigin: 'center',
+                  }}
+                  draggable={false}
+                />
+              </motion.div>
+
+              {/* Instructions */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                <p className="text-white/70 text-sm text-center">
+                  Click and drag to pan • Press ESC or click outside to close
+                </p>
+              </div>
+
+              {/* Image counter */}
+              {safeProduct.images.length > 1 && (
+                <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
+                  <p className="text-white/70 text-sm">
+                    {activeImage + 1} / {safeProduct.images.length}
+                  </p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );

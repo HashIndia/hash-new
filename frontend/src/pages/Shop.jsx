@@ -119,7 +119,7 @@ export default function Shop() {
       </section>
 
       {/* Search & Filters Section */}
-      <section className="bg-card border-b border-border sticky top-16 z-40 backdrop-blur-sm">
+      <section className="bg-card border-b border-border md:sticky md:top-16 md:z-40 md:backdrop-blur-sm">
         <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
           <div className="flex flex-col gap-4">
             {/* Search */}
