@@ -49,7 +49,7 @@ export default function About() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-white">
       {/* Header Section */}
       <div className="bg-black text-white py-16">
         <motion.div 
@@ -76,22 +76,22 @@ export default function About() {
       >
         {/* Story Section */}
         <motion.div variants={itemVariants} className="mb-16">
-          <Card className="border border-border shadow-sm bg-card">
+          <Card className="border border-gray-200 shadow-sm bg-white">
             <CardContent className="p-8 md:p-12">
               <div className="grid md:grid-cols-2 gap-12 items-center">
                 <div>
-                  <h2 className="text-3xl font-semibold text-foreground mb-6">Our Story</h2>
-                  <p className="text-muted-foreground mb-6 leading-relaxed">
+                  <h2 className="text-3xl font-semibold text-black mb-6">Our Story</h2>
+                  <p className="text-gray-700 mb-6 leading-relaxed">
                     Founded in 2023, Hash began as a passion project by four first-year students at NITK Surathkal - 
                     Hrishab, Ankit, Sutirth, and Himanshu. What started as a simple idea to create cool merchandise 
                     for college events has grown into a thriving student-run clothing brand.
                   </p>
-                  <p className="text-muted-foreground mb-6 leading-relaxed">
+                  <p className="text-gray-700 mb-6 leading-relaxed">
                     Now led by Ankit and Sutirth (both 3rd-year students), Hash has become the go-to brand for college 
                     merchandise, partnering with various clubs for their t-shirts and major college festivals like 
                     Incident (cultural fest) and Engineer (technical fest).
                   </p>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p className="text-gray-700 leading-relaxed">
                     While we primarily serve NITK students, we've expanded to deliver our unique designs across India 
                     through postal services. Our mission is to create affordable, quality clothing that represents 
                     the spirit of student life and creativity.
@@ -99,8 +99,8 @@ export default function About() {
                 </div>
                 <div className="text-center">
                   <div className="bg-gray-50 rounded-lg p-8">
-                    <h3 className="text-2xl font-bold text-foreground mb-4">Our Mission</h3>
-                    <p className="text-muted-foreground leading-relaxed">
+                    <h3 className="text-2xl font-bold text-black mb-4">Our Mission</h3>
+                    <p className="text-gray-700 leading-relaxed">
                       To provide high-quality, affordable clothing and merchandise that celebrates student life, 
                       creativity, and college spirit while building a sustainable student-run business that 
                       inspires other young entrepreneurs.
@@ -115,7 +115,7 @@ export default function About() {
         {/* Values Section */}
         <motion.div variants={itemVariants} className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-semibold text-foreground mb-4">Our Values</h2>
+            <h2 className="text-3xl font-semibold text-black mb-4">Our Values</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               The principles that guide everything we do at Hash
             </p>
@@ -125,10 +125,10 @@ export default function About() {
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow bg-card"
+                className="text-center p-6 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
               >
-                <feature.icon className="w-12 h-12 text-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-3">{feature.title}</h3>
+                <feature.icon className="w-12 h-12 text-black mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-black mb-3">{feature.title}</h3>
                 <p className="text-gray-600 leading-relaxed">{feature.description}</p>
               </motion.div>
             ))}
@@ -137,10 +137,10 @@ export default function About() {
 
         {/* Team Section */}
         <motion.div variants={itemVariants} className="mb-16">
-          <Card className="border border-border shadow-sm bg-card">
+          <Card className="border border-gray-200 shadow-sm bg-white">
             <CardContent className="p-8 md:p-12">
               <div className="text-center mb-12">
-                <h2 className="text-3xl font-semibold text-foreground mb-4">Our Team</h2>
+                <h2 className="text-3xl font-semibold text-black mb-4">Our Team</h2>
                 <p className="text-gray-600 max-w-2xl mx-auto">
                   Meet the student entrepreneurs behind Hash
                 </p>
@@ -150,9 +150,9 @@ export default function About() {
                   <div className="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
                     <Users className="w-16 h-16 text-gray-400" />
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-2">Ankit</h3>
+                  <h3 className="text-xl font-semibold text-black mb-2">Ankit</h3>
                   <p className="text-gray-600 mb-2">Co-Founder & Operations</p>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-gray-500 text-sm">
                     3rd Year student at NITK, handling business operations and club partnerships.
                   </p>
                 </div>
@@ -160,9 +160,9 @@ export default function About() {
                   <div className="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
                     <Award className="w-16 h-16 text-gray-400" />
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-2">Sutirth</h3>
+                  <h3 className="text-xl font-semibold text-black mb-2">Sutirth</h3>
                   <p className="text-gray-600 mb-2">Co-Founder & Design</p>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-gray-500 text-sm">
                     3rd Year student at NITK, leading design and creative direction for all products.
                   </p>
                 </div>
@@ -170,9 +170,9 @@ export default function About() {
                   <div className="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
                     <Heart className="w-16 h-16 text-gray-400" />
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-2">Praveen</h3>
+                  <h3 className="text-xl font-semibold text-black mb-2">Praveen</h3>
                   <p className="text-gray-600 mb-2">Web Developer & Tech</p>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-gray-500 text-sm">
                     Manages the website, online presence, and technical aspects of the business.
                   </p>
                 </div>
@@ -183,32 +183,32 @@ export default function About() {
 
         {/* Contact Information */}
         <motion.div variants={itemVariants}>
-          <Card className="border border-border shadow-sm bg-muted">
+          <Card className="border border-gray-200 shadow-sm bg-gray-50">
             <CardContent className="p-8 md:p-12">
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-semibold text-foreground mb-4">Get in Touch</h2>
+                <h2 className="text-3xl font-semibold text-black mb-4">Get in Touch</h2>
                 <p className="text-gray-600">
                   We'd love to hear from you. Reach out to our team anytime.
                 </p>
               </div>
               <div className="grid md:grid-cols-3 gap-8 text-center">
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-4">Location</h3>
-                  <p className="text-muted-foreground">NITK Surathkal Campus</p>
-                  <p className="text-muted-foreground">Surathkal, Karnataka 575025</p>
-                  <p className="text-muted-foreground">India</p>
+                  <h3 className="text-lg font-semibold text-black mb-4">Location</h3>
+                  <p className="text-gray-700">NITK Surathkal Campus</p>
+                  <p className="text-gray-700">Surathkal, Karnataka 575025</p>
+                  <p className="text-gray-700">India</p>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-4">Contact</h3>
-                  <p className="text-muted-foreground">Ankit: +91 9460262940</p>
-                  <p className="text-muted-foreground">Sutirth: +91 9740452365</p>
-                  <p className="text-muted-foreground">Email: (Coming soon)</p>
+                  <h3 className="text-lg font-semibold text-black mb-4">Contact</h3>
+                  <p className="text-gray-700">Ankit: +91 9460262940</p>
+                  <p className="text-gray-700">Sutirth: +91 9740452365</p>
+                  <p className="text-gray-700">Email: (Coming soon)</p>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-4">Business</h3>
-                  <p className="text-muted-foreground">Student-Run Enterprise</p>
-                  <p className="text-muted-foreground">Founded: 2023</p>
-                  <p className="text-muted-foreground">Delivery: All India via Post</p>
+                  <h3 className="text-lg font-semibold text-black mb-4">Business</h3>
+                  <p className="text-gray-700">Student-Run Enterprise</p>
+                  <p className="text-gray-700">Founded: 2023</p>
+                  <p className="text-gray-700">Delivery: All India via Post</p>
                 </div>
               </div>
             </CardContent>
@@ -217,10 +217,10 @@ export default function About() {
 
         {/* Footer Section */}
         <motion.div 
-          className="mt-16 text-center py-8 border-t border-border"
+          className="mt-16 text-center py-8 border-t border-gray-200"
           variants={itemVariants}
         >
-          <p className="text-muted-foreground text-sm">
+          <p className="text-gray-500 text-sm">
             © 2024 Hash - Student-Run Clothing Brand. All rights reserved.
           </p>
         </motion.div>
