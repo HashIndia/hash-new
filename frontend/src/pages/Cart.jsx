@@ -79,7 +79,7 @@ export default function Cart() {
           >
             <Button asChild
               size="lg" 
-              className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue text-white px-8 py-3 rounded-xl shadow-lg shadow-hash-purple/25"
+              className="bg-hash-purple hover:bg-hash-purple/90 text-white px-8 py-3 rounded-xl shadow-lg shadow-hash-purple/25"
             >
               <Link to="/shop">Start Shopping</Link>
             </Button>
@@ -196,7 +196,7 @@ export default function Cart() {
           {/* Order Summary */}
           <motion.div variants={itemVariants}>
             <Card className="bg-card shadow-lg rounded-2xl overflow-hidden sticky top-4 border border-border">
-              <CardHeader className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple text-white">
+              <CardHeader className="bg-hash-purple text-white">
                 <CardTitle className="text-xl font-space">Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
@@ -221,7 +221,7 @@ export default function Cart() {
                 <div className="space-y-3 pt-4">
                   <Button asChild
                     size="lg" 
-                    className="w-full bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue text-white rounded-xl py-3 shadow-lg hover:shadow-xl transition-all shadow-hash-purple/25"
+                    className="w-full bg-hash-purple hover:bg-hash-purple/90 text-white rounded-xl py-3 shadow-lg hover:shadow-xl transition-all shadow-hash-purple/25"
                   >
                     <Link to="/checkout">Proceed to Checkout</Link>
                   </Button>

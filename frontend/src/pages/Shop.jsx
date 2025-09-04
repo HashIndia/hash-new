@@ -98,7 +98,7 @@ export default function Shop() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-hash-purple via-hash-blue to-hash-pink text-white py-16 relative overflow-hidden">
+      <section className="bg-hash-purple text-white py-16 relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.1)_0%,transparent_50%)] opacity-50"></div>
         
@@ -244,7 +244,7 @@ export default function Shop() {
                               e.target.src = '/placeholder-product.jpg';
                             }}
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         </div>
                         <div className="p-4">
                           <h3 className="font-semibold text-lg mb-2 text-foreground group-hover:text-hash-purple transition-colors duration-200">{product.name}</h3>

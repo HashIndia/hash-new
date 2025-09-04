@@ -122,7 +122,7 @@ export default function Register() {
   const passwordStrength = getPasswordStrength(form.password);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-card to-background flex items-center justify-center p-4 md:p-6 relative">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 md:p-6 relative">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_80%_20%,hsl(var(--hash-blue))_0%,transparent_50%),radial-gradient(circle_at_40%_40%,hsl(var(--hash-pink))_0%,transparent_50%)] opacity-5"></div>
       
@@ -296,7 +296,7 @@ export default function Register() {
 
               {/* Submit Button */}
               <Button 
-                className="w-full h-12 text-base font-semibold bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue transition-all duration-300 shadow-lg hover:shadow-xl shadow-hash-purple/25" 
+                className="w-full h-12 text-base font-semibold bg-hash-purple hover:bg-hash-purple/90 text-white transition-all duration-300 shadow-lg hover:shadow-xl shadow-hash-purple/25" 
                 type="submit"
                 disabled={isLoading}
               >

@@ -4,7 +4,7 @@ import { Home, Search, ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-card to-background flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_75%_75%,hsl(var(--hash-blue))_0%,transparent_50%)] opacity-5"></div>
       
@@ -27,7 +27,7 @@ export default function NotFound() {
               <span className="text-hash-purple">0</span>
               <span className="hash-text-gradient">4</span>
             </h1>
-            <div className="w-24 h-1 bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink mx-auto rounded-full"></div>
+            <div className="w-24 h-1 bg-hash-purple mx-auto rounded-full"></div>
           </motion.div>
 
           <motion.div
@@ -49,7 +49,7 @@ export default function NotFound() {
             transition={{ delay: 0.6, duration: 0.6 }}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
-            <Button asChild className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink hover:shadow-lg hover:shadow-hash-purple/25 transition-all duration-300 hover:scale-105 font-semibold font-space px-8 py-3">
+            <Button asChild className="bg-hash-purple hover:bg-hash-purple/90 hover:shadow-lg hover:shadow-hash-purple/25 transition-all duration-300 hover:scale-105 font-semibold font-space px-8 py-3">
               <a href="/" className="flex items-center gap-2">
                 <Home className="w-5 h-5" />
                 Go Home

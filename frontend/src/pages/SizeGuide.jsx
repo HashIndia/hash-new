@@ -129,7 +129,7 @@ export default function SizeGuide() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header Section */}
-      <div className="bg-gradient-to-br from-hash-dark via-background to-card text-foreground py-16 border-b border-border">
+      <div className="bg-background text-foreground py-16 border-b border-border">
         <motion.div 
           className="container mx-auto px-6 max-w-4xl text-center"
           variants={containerVariants}

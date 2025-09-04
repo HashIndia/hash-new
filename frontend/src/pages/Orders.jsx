@@ -376,7 +376,7 @@ export default function Orders() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Button asChild size="lg" className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue text-white shadow-lg shadow-hash-purple/25">
+            <Button asChild size="lg" className="bg-hash-purple hover:bg-hash-purple/90 text-white shadow-lg shadow-hash-purple/25">
               <a href="/shop">Start Shopping</a>
             </Button>
           </motion.div>
@@ -439,7 +439,7 @@ export default function Orders() {
                       </div>
                       <div className="w-full bg-muted rounded-full h-1.5 sm:h-2">
                         <div 
-                          className="bg-gradient-to-r from-hash-purple to-hash-blue h-1.5 sm:h-2 rounded-full transition-all duration-500"
+                          className="bg-hash-purple h-1.5 sm:h-2 rounded-full transition-all duration-500"
                           style={{ 
                             width: order.status === 'delivered' ? '100%' : 
                                    order.status === 'shipped' ? '66%' : '33%' 

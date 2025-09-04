@@ -134,7 +134,7 @@
   }
 
   .btn-gradient {
-    @apply bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98];
+    @apply bg-hash-purple text-white hover:bg-hash-purple/90 focus:ring-2 focus:ring-hash-purple focus:ring-offset-2 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98];
   }
 
   .btn-ghost {
@@ -155,7 +155,7 @@
   }
 
   .card-gradient {
-    @apply bg-gradient-to-br from-white to-gray-50 border border-gray-200;
+    @apply bg-card border border-gray-200;
   }
   
   /* Enhanced input styles */
@@ -177,7 +177,7 @@
   }
   
   .gradient-text {
-    @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
+    @apply text-hash-purple;
   }
 
   .gradient-border {
@@ -226,7 +226,7 @@
 
   /* Avatar styles */
   .avatar {
-    @apply inline-flex items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white font-medium;
+    @apply inline-flex items-center justify-center rounded-full bg-hash-purple text-white font-medium;
   }
 
   .avatar-sm {

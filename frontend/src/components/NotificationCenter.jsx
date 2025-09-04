@@ -102,7 +102,7 @@ const NotificationCenter = ({ isOpen, onClose }) => {
             <Card className="shadow-lg bg-card/90 backdrop-blur-sm border border-border">
               <CardContent className="p-0">
                 {/* Header */}
-                <div className="p-4 border-b border-border flex justify-between items-center bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple text-white rounded-t-lg">
+                <div className="p-4 border-b border-border flex justify-between items-center bg-hash-purple text-white rounded-t-lg">
                   <h3 className="font-semibold font-space">Notifications</h3>
                   <div className="flex items-center gap-2">
                     {unreadCount > 0 && (

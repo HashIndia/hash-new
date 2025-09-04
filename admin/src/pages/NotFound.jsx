@@ -7,7 +7,7 @@ const NotFound = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -26,7 +26,7 @@ const NotFound = () => {
                 transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
                 className="absolute inset-0 flex items-center justify-center"
               >
-                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-hash-purple rounded-full flex items-center justify-center shadow-lg">
                   <Search className="w-12 h-12 sm:w-16 sm:h-16 text-white" />
                 </div>
               </motion.div>
@@ -69,7 +69,7 @@ const NotFound = () => {
             </Button>
             
             <Link to="/">
-              <Button className="min-w-[160px] bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+              <Button className="min-w-[160px] bg-hash-purple hover:bg-hash-purple/90">
                 <Home className="w-4 h-4 mr-2" />
                 Back to Dashboard
               </Button>

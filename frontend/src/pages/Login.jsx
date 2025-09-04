@@ -64,7 +64,7 @@ export default function Login() {
   };
 
   return (
-    <div className="container mx-auto flex items-center justify-center min-h-screen p-4 md:p-6 bg-gradient-to-br from-background via-card to-background relative">
+    <div className="container mx-auto flex items-center justify-center min-h-screen p-4 md:p-6 bg-background relative">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_75%_75%,hsl(var(--hash-blue))_0%,transparent_50%)] opacity-5"></div>
       
@@ -119,7 +119,7 @@ export default function Login() {
             </div>
             <Button 
               type="submit" 
-              className="w-full h-10 md:h-12 text-sm md:text-base bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink hover:shadow-lg hover:shadow-hash-purple/25 transition-all duration-300 hover:scale-[1.02] font-semibold font-space" 
+              className="w-full h-10 md:h-12 text-sm md:text-base bg-hash-purple hover:bg-hash-purple/90 text-white hover:shadow-lg hover:shadow-hash-purple/25 transition-all duration-300 hover:scale-[1.02] font-semibold font-space" 
               disabled={isLoading}
             >
               {isLoading ? "Signing In..." : "Sign In"}

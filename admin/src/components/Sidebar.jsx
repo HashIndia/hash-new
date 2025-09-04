@@ -77,7 +77,7 @@ const Sidebar = ({ mobile = false, onClose }) => {
                 const active = isActive || linkActive;
                 return `relative flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
                   active
-                    ? 'bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 border border-blue-200'
+                    ? 'bg-hash-purple/10 text-hash-purple border border-hash-purple/20'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`;
               }}
@@ -89,7 +89,7 @@ const Sidebar = ({ mobile = false, onClose }) => {
                     {active && (
                       <motion.div
                         layoutId="sidebar-active"
-                        className="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200"
+                        className="absolute inset-0 bg-hash-purple/10 rounded-lg border border-hash-purple/20"
                         initial={false}
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                       />

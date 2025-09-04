@@ -194,7 +194,7 @@ export default function ReviewModal({ isOpen, onClose, product, orderId, onRevie
               <Button
                 type="submit"
                 disabled={isSubmitting || rating === 0 || title.trim().length < 3 || comment.trim().length < 10}
-                className="flex-1 h-10 sm:h-11 text-sm sm:text-base bg-gradient-to-r from-hash-purple to-hash-blue hover:from-hash-blue hover:to-hash-purple"
+                className="flex-1 h-10 sm:h-11 text-sm sm:text-base bg-hash-purple hover:bg-hash-purple/90 text-white"
               >
                 {isSubmitting ? "Submitting..." : "Submit Review"}
               </Button>

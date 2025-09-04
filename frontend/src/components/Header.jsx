@@ -99,7 +99,7 @@ export default function Header() {
             <div className="p-2 rounded-xl hover:bg-hash-purple/10 transition-all duration-200 group-hover:scale-105">
               <ShoppingCart className="w-6 h-6 text-foreground/80 group-hover:text-hash-purple transition-colors" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-hash-pink to-hash-purple text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg">
+                <span className="absolute -top-1 -right-1 bg-hash-pink text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg">
                   {cartCount}
                 </span>
               )}
@@ -123,7 +123,7 @@ export default function Header() {
                 >
                   <Bell className="w-6 h-6 text-foreground/80 group-hover:text-hash-blue transition-colors" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-gradient-to-r from-hash-orange to-hash-pink text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg animate-pulse">
+                    <span className="absolute -top-1 -right-1 bg-hash-orange text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg animate-pulse">
                       {unreadCount}
                     </span>
                   )}
@@ -144,7 +144,7 @@ export default function Header() {
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center space-x-3 p-2 rounded-xl hover:bg-primary/10 transition-all duration-200 hover:scale-105 group"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-br from-hash-purple to-hash-blue rounded-lg flex items-center justify-center shadow-lg">
+                  <div className="w-8 h-8 bg-hash-purple rounded-lg flex items-center justify-center shadow-lg">
                     <span className="text-white text-sm font-bold">
                       {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                     </span>
@@ -161,9 +161,9 @@ export default function Header() {
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
                       className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50"
                     >
-                      <div className="p-4 border-b border-border bg-gradient-to-r from-hash-purple/5 via-hash-blue/5 to-hash-pink/5">
+                      <div className="p-4 border-b border-border bg-hash-purple/5">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-hash-purple to-hash-blue rounded-lg flex items-center justify-center">
+                          <div className="w-10 h-10 bg-hash-purple rounded-lg flex items-center justify-center">
                             <span className="text-white font-bold">
                               {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                             </span>
@@ -215,7 +215,7 @@ export default function Header() {
                   Login
                 </Link>
               </Button>
-              <Button asChild className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink hover:shadow-lg hover:shadow-hash-purple/25 transition-all duration-300 hover:scale-105 font-medium">
+              <Button asChild className="bg-hash-purple hover:bg-hash-purple/90 text-white hover:shadow-lg hover:shadow-hash-purple/25 transition-all duration-300 hover:scale-105 font-medium">
                 <Link to="/register" className="flex items-center gap-2">
                   <UserPlus className="w-4 h-4" />
                   Sign Up
@@ -265,7 +265,7 @@ export default function Header() {
                   >
                     <span>Cart</span>
                     {cartCount > 0 && (
-                      <span className="bg-gradient-to-r from-hash-pink to-hash-purple text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
+                      <span className="bg-hash-pink text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
                         {cartCount}
                       </span>
                     )}
@@ -312,7 +312,7 @@ export default function Header() {
                   </Link>
                   <Link
                     to="/register"
-                    className="block p-3 rounded-xl bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink text-white font-medium transition-all duration-200"
+                    className="block p-3 rounded-xl bg-hash-purple hover:bg-hash-purple/90 text-white font-medium transition-all duration-200"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Sign Up

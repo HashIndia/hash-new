@@ -251,7 +251,7 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-card to-background">
+    <div className="min-h-screen bg-background">
       <motion.div 
         className="container mx-auto py-12 px-6"
         initial={{ opacity: 0, y: 20 }}
@@ -279,7 +279,7 @@ export default function Checkout() {
             <Card className="shadow-lg bg-card/80 backdrop-blur-sm border border-border">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-space">
-                  <span className="bg-gradient-to-r from-hash-purple to-hash-blue text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">1</span>
+                  <span className="bg-hash-purple text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">1</span>
                   Delivery Address
                 </CardTitle>
               </CardHeader>
@@ -344,7 +344,7 @@ export default function Checkout() {
             <Card className="shadow-lg bg-card/80 backdrop-blur-sm border border-border">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-space">
-                  <span className="bg-gradient-to-r from-hash-purple to-hash-blue text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">2</span>
+                  <span className="bg-hash-purple text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">2</span>
                   Payment Method
                 </CardTitle>
               </CardHeader>
@@ -464,7 +464,7 @@ export default function Checkout() {
             <Card className="shadow-lg bg-card/80 backdrop-blur-sm sticky top-6 border border-border">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-space">
-                  <span className="bg-gradient-to-r from-hash-purple to-hash-blue text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">3</span>
+                  <span className="bg-hash-purple text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">3</span>
                   Order Summary
                 </CardTitle>
               </CardHeader>
@@ -527,7 +527,7 @@ export default function Checkout() {
                     <Button
                       onClick={handlePlaceOrder}
                       disabled={isLoading}
-                      className="w-full py-4 text-lg font-semibold bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 shadow-hash-purple/25"
+                      className="w-full py-4 text-lg font-semibold bg-hash-purple hover:bg-hash-purple/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 shadow-hash-purple/25"
                     >
                       {isLoading ? 'Placing Order...' : `Place Order - ₹${total.toFixed(2)}`}
                     </Button>

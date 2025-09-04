@@ -72,7 +72,7 @@ export default function OrderSuccess() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated background effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-hash-purple/10 via-hash-blue/10 to-hash-pink/10" />
+      <div className="absolute inset-0 bg-hash-purple/10" />
       
       {/* Floating particles for success animation */}
       {paymentStatus === 'SUCCESS' && (
@@ -110,7 +110,7 @@ export default function OrderSuccess() {
       >
         <Card className="shadow-2xl bg-card/90 backdrop-blur-sm border border-border overflow-hidden">
           {/* Header with gradient */}
-          <CardHeader className="text-center pb-6 bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple text-white relative">
+          <CardHeader className="text-center pb-6 bg-hash-purple text-white relative">
             <div className="absolute inset-0 bg-black/20" />
             
             {/* Success sparkles */}
@@ -215,7 +215,7 @@ export default function OrderSuccess() {
               {paymentStatus === 'SUCCESS' && (
                 <Button
                   onClick={() => navigate('/orders')}
-                  className="w-full bg-gradient-to-r from-hash-green to-hash-blue hover:from-hash-green/90 hover:to-hash-blue/90 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="w-full bg-hash-green hover:bg-hash-green/90 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   View My Orders
                 </Button>
@@ -224,7 +224,7 @@ export default function OrderSuccess() {
               {paymentStatus === 'FAILED' && (
                 <Button
                   onClick={() => navigate('/cart')}
-                  className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   Try Again
                 </Button>

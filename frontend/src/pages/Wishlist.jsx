@@ -60,7 +60,7 @@ export default function Wishlist() {
           <Heart className="w-16 h-16 mx-auto text-hash-pink/50 mb-4" />
           <h2 className="text-2xl font-bold text-foreground mb-4 font-space">Your Wishlist</h2>
           <p className="text-muted-foreground mb-6">Please log in to view your wishlist</p>
-          <Button asChild className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue text-white shadow-lg shadow-hash-purple/25">
+          <Button asChild className="bg-hash-purple hover:bg-hash-purple/90 text-white shadow-lg shadow-hash-purple/25">
             <Link to="/login">Login</Link>
           </Button>
         </div>
@@ -89,7 +89,7 @@ export default function Wishlist() {
           <Heart className="w-16 h-16 mx-auto text-hash-pink/50 mb-4" />
           <h2 className="text-2xl font-bold text-foreground mb-4 font-space">Your Wishlist is Empty</h2>
           <p className="text-muted-foreground mb-6">Start adding items you love to your wishlist</p>
-          <Button asChild className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue text-white shadow-lg shadow-hash-purple/25">
+          <Button asChild className="bg-hash-purple hover:bg-hash-purple/90 text-white shadow-lg shadow-hash-purple/25">
             <Link to="/shop">Continue Shopping</Link>
           </Button>
         </div>
@@ -162,7 +162,7 @@ export default function Wishlist() {
 
                     <div className="flex gap-2">
                       <Button 
-                        className="flex-1 bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue text-white shadow-lg shadow-hash-purple/25"
+                        className="flex-1 bg-hash-purple hover:bg-hash-purple/90 text-white shadow-lg shadow-hash-purple/25"
                         onClick={() => addToCart(product)}
                       >
                         <ShoppingCart className="w-4 h-4 mr-2" />

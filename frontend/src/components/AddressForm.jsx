@@ -56,7 +56,7 @@ export default function AddressForm({ onSubmit, onCancel, initialData = null, is
       transition={{ duration: 0.3 }}
     >
       <Card className="w-full max-w-2xl mx-auto bg-card/80 backdrop-blur-sm border border-border shadow-lg">
-        <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple text-white rounded-t-lg">
+        <CardHeader className="flex flex-row items-center justify-between bg-hash-purple text-white rounded-t-lg">
           <CardTitle className="font-space">{initialData ? 'Edit Address' : 'Add New Address'}</CardTitle>
           <Button variant="ghost" size="sm" onClick={onCancel} className="text-white hover:bg-white/20">
             <X className="w-4 h-4" />
@@ -177,7 +177,7 @@ export default function AddressForm({ onSubmit, onCancel, initialData = null, is
               <Button 
                 type="submit" 
                 disabled={isLoading} 
-                className="flex-1 bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue text-white shadow-lg shadow-hash-purple/25"
+                className="flex-1 bg-hash-purple hover:bg-hash-purple/90 text-white shadow-lg shadow-hash-purple/25"
               >
                 {isLoading ? 'Saving...' : (initialData ? 'Update Address' : 'Save Address')}
               </Button>

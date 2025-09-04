@@ -73,7 +73,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-gradient-to-br from-hash-dark via-background to-card text-foreground mt-auto relative overflow-hidden border-t border-border">
+    <footer className="bg-background text-foreground mt-auto relative overflow-hidden border-t border-border">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_80%_20%,hsl(var(--hash-blue))_0%,transparent_50%)] opacity-5"></div>
       {/* Background Pattern */}
@@ -199,7 +199,7 @@ export default function Footer() {
       {/* Scroll to Top Button */}
       <motion.button
         onClick={scrollToTop}
-        className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all z-50 group"
+        className="fixed bottom-8 right-8 w-14 h-14 bg-hash-purple rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all z-50 group"
         whileHover={{ scale: 1.1, y: -2 }}
         whileTap={{ scale: 0.9 }}
         initial={{ opacity: 0, y: 100 }}

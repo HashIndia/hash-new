@@ -67,7 +67,7 @@ export default function Returns() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header Section */}
-      <div className="bg-gradient-to-br from-hash-dark via-background to-card text-foreground border-b border-border py-16">
+      <div className="bg-background text-foreground border-b border-border py-16">
         <motion.div 
           className="container mx-auto px-6 max-w-4xl text-center"
           variants={containerVariants}
@@ -90,7 +90,7 @@ export default function Returns() {
       >
         {/* Quick Info */}
         <motion.div variants={itemVariants} className="mb-16">
-          <Card className="border border-border shadow-sm bg-gradient-to-r from-gray-50 to-white">
+          <Card className="border border-border shadow-sm bg-card">
             <CardContent className="p-8">
               <div className="grid md:grid-cols-3 gap-8 text-center">
                 <div>

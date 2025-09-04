@@ -172,7 +172,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-background via-card to-background border-b border-border overflow-hidden">
+      <section className="relative bg-background border-b border-border overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_80%_80%,hsl(var(--hash-blue))_0%,transparent_50%),radial-gradient(circle_at_40%_40%,hsl(var(--hash-pink))_0%,transparent_50%)] opacity-10"></div>
         
@@ -187,7 +187,7 @@ export default function Home() {
               transition={{ duration: 0.8 }}
             >
               <motion.div 
-                className="inline-flex items-center px-3 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-hash-purple/10 via-hash-blue/10 to-hash-pink/10 border border-hash-purple/20 rounded-full text-xs sm:text-sm text-hash-purple mb-6 backdrop-blur-sm"
+                className="inline-flex items-center px-3 sm:px-6 py-2 sm:py-3 bg-hash-purple/10 border border-hash-purple/20 rounded-full text-xs sm:text-sm text-hash-purple mb-6 backdrop-blur-sm"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
@@ -205,7 +205,7 @@ export default function Home() {
               >
                 <span className="text-foreground">Define Your</span>
                 <motion.span 
-                  className="block bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink bg-clip-text text-transparent"
+                  className="block text-hash-purple"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.5, duration: 0.8 }}
@@ -230,7 +230,7 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.8 }}
               >
-                <Button asChild className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink hover:shadow-xl hover:shadow-hash-purple/25 px-6 py-3 rounded-xl font-semibold text-base transition-all duration-300 hover:scale-105 group font-space">
+                <Button asChild className="bg-hash-purple hover:bg-hash-purple/90 text-white hover:shadow-xl hover:shadow-hash-purple/25 px-6 py-3 rounded-xl font-semibold text-base transition-all duration-300 hover:scale-105 group font-space">
                   <a href="/shop">
                     Shop Collection
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -280,7 +280,7 @@ export default function Home() {
               <div className="relative max-w-xs">
                 {/* Main circular design with gradient border */}
                 <motion.div
-                  className="relative w-48 h-48 sm:w-64 sm:h-64 rounded-full bg-gradient-to-br from-hash-purple via-hash-blue to-hash-pink p-1"
+                  className="relative w-48 h-48 sm:w-64 sm:h-64 rounded-full bg-hash-purple p-1"
                   animate={{ 
                     rotate: 360,
                   }}
@@ -303,7 +303,7 @@ export default function Home() {
                         ease: "linear"
                       }}
                     >
-                      <div className="w-24 h-24 sm:w-36 sm:h-36 rounded-2xl bg-gradient-to-br from-hash-purple/10 via-hash-blue/10 to-hash-pink/10 backdrop-blur-sm border border-hash-purple/20 flex items-center justify-center mb-2 sm:mb-4">
+                      <div className="w-24 h-24 sm:w-36 sm:h-36 rounded-2xl bg-hash-purple/10 backdrop-blur-sm border border-hash-purple/20 flex items-center justify-center mb-2 sm:mb-4">
                         <img
                           src="https://placehold.co/180x180/404040/ffffff?text=HASH+Style"
                           alt="HASH Fashion"
@@ -320,7 +320,7 @@ export default function Home() {
                 
                 {/* Floating Elements - Smaller on mobile */}
                 <motion.div 
-                  className="absolute -top-3 -left-3 w-8 h-8 bg-gradient-to-br from-hash-purple to-hash-blue rounded-2xl flex items-center justify-center shadow-lg"
+                  className="absolute -top-3 -left-3 w-8 h-8 bg-hash-purple rounded-2xl flex items-center justify-center shadow-lg"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1, duration: 0.6 }}
@@ -330,7 +330,7 @@ export default function Home() {
                 </motion.div>
 
                 <motion.div 
-                  className="absolute -top-2 -right-4 w-6 h-6 bg-gradient-to-br from-hash-pink to-hash-orange rounded-xl flex items-center justify-center shadow-lg"
+                  className="absolute -top-2 -right-4 w-6 h-6 bg-hash-pink rounded-xl flex items-center justify-center shadow-lg"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.2, duration: 0.6 }}
@@ -340,7 +340,7 @@ export default function Home() {
                 </motion.div>
 
                 <motion.div 
-                  className="absolute -bottom-3 -right-3 w-8 h-8 bg-gradient-to-br from-hash-green to-hash-blue rounded-2xl flex items-center justify-center shadow-lg"
+                  className="absolute -bottom-3 -right-3 w-8 h-8 bg-hash-green rounded-2xl flex items-center justify-center shadow-lg"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.4, duration: 0.6 }}
@@ -350,7 +350,7 @@ export default function Home() {
                 </motion.div>
 
                 <motion.div 
-                  className="absolute -bottom-2 -left-4 w-6 h-6 bg-gradient-to-br from-hash-orange to-hash-pink rounded-xl flex items-center justify-center shadow-lg"
+                  className="absolute -bottom-2 -left-4 w-6 h-6 bg-hash-orange rounded-xl flex items-center justify-center shadow-lg"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.6, duration: 0.6 }}
@@ -372,7 +372,7 @@ export default function Home() {
               transition={{ duration: 0.8 }}
             >
               <motion.div 
-                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-hash-purple/10 via-hash-blue/10 to-hash-pink/10 border border-hash-purple/20 rounded-full text-sm text-hash-purple mb-8 backdrop-blur-sm"
+                className="inline-flex items-center px-6 py-3 bg-hash-purple/10 border border-hash-purple/20 rounded-full text-sm text-hash-purple mb-8 backdrop-blur-sm"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
@@ -390,7 +390,7 @@ export default function Home() {
               >
                 <span className="text-foreground">Define Your</span>
                 <motion.span 
-                  className="block bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink bg-clip-text text-transparent"
+                  className="block text-hash-purple"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.5, duration: 0.8 }}
@@ -414,7 +414,7 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.8 }}
               >
-                <Button asChild className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-pink hover:shadow-xl hover:shadow-hash-purple/25 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:scale-105 group font-space">
+                <Button asChild className="bg-hash-purple hover:bg-hash-purple/90 text-white hover:shadow-xl hover:shadow-hash-purple/25 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:scale-105 group font-space">
                   <a href="/shop">
                     Shop Collection
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -463,7 +463,7 @@ export default function Home() {
               <div className="relative max-w-md">
                 {/* Main circular design with gradient border */}
                 <motion.div
-                  className="relative w-80 h-80 rounded-full bg-gradient-to-br from-hash-purple via-hash-blue to-hash-pink p-1"
+                  className="relative w-80 h-80 rounded-full bg-hash-purple p-1"
                   animate={{ 
                     rotate: 360,
                   }}
@@ -486,7 +486,7 @@ export default function Home() {
                         ease: "linear"
                       }}
                     >
-                      <div className="w-48 h-48 rounded-2xl bg-gradient-to-br from-hash-purple/10 via-hash-blue/10 to-hash-pink/10 backdrop-blur-sm border border-hash-purple/20 flex items-center justify-center mb-4">
+                      <div className="w-48 h-48 rounded-2xl bg-hash-purple/10 backdrop-blur-sm border border-hash-purple/20 flex items-center justify-center mb-4">
                         <img
                           src="https://placehold.co/180x180/404040/ffffff?text=HASH+Style"
                           alt="HASH Fashion"
@@ -503,7 +503,7 @@ export default function Home() {
                 
                 {/* Floating Elements */}
                 <motion.div 
-                  className="absolute -top-8 -left-8 w-16 h-16 bg-gradient-to-br from-hash-purple to-hash-blue rounded-2xl flex items-center justify-center shadow-lg"
+                  className="absolute -top-8 -left-8 w-16 h-16 bg-hash-purple rounded-2xl flex items-center justify-center shadow-lg"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1, duration: 0.6 }}
@@ -513,7 +513,7 @@ export default function Home() {
                 </motion.div>
 
                 <motion.div 
-                  className="absolute -top-4 -right-12 w-12 h-12 bg-gradient-to-br from-hash-pink to-hash-orange rounded-xl flex items-center justify-center shadow-lg"
+                  className="absolute -top-4 -right-12 w-12 h-12 bg-hash-pink rounded-xl flex items-center justify-center shadow-lg"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.2, duration: 0.6 }}
@@ -523,7 +523,7 @@ export default function Home() {
                 </motion.div>
 
                 <motion.div 
-                  className="absolute -bottom-8 -right-8 w-16 h-16 bg-gradient-to-br from-hash-green to-hash-blue rounded-2xl flex items-center justify-center shadow-lg"
+                  className="absolute -bottom-8 -right-8 w-16 h-16 bg-hash-green rounded-2xl flex items-center justify-center shadow-lg"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.4, duration: 0.6 }}
@@ -533,7 +533,7 @@ export default function Home() {
                 </motion.div>
 
                 <motion.div 
-                  className="absolute -bottom-4 -left-12 w-12 h-12 bg-gradient-to-br from-hash-orange to-hash-pink rounded-xl flex items-center justify-center shadow-lg"
+                  className="absolute -bottom-4 -left-12 w-12 h-12 bg-hash-orange rounded-xl flex items-center justify-center shadow-lg"
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.6, duration: 0.6 }}
@@ -613,18 +613,18 @@ export default function Home() {
                 whileHover={{ y: -4, scale: 1.01 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card className="bg-gradient-to-br from-card to-background border border-border rounded-2xl hover:border-hash-purple/30 transition-all duration-300 hover:shadow-lg hover:shadow-hash-purple/10 flex flex-col justify-between items-stretch min-h-[220px] h-full">
+                <Card className="bg-card border border-border rounded-2xl hover:border-hash-purple/30 transition-all duration-300 hover:shadow-lg hover:shadow-hash-purple/10 flex flex-col justify-between items-stretch min-h-[220px] h-full">
                   <CardContent className="flex flex-col h-full p-8 md:p-10">
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex flex-col gap-2">
                         <span className="text-sm font-medium text-muted-foreground">{stat.description}</span>
                         <span className="text-3xl md:text-4xl font-extrabold text-foreground font-space">{stat.value}</span>
                       </div>
-                      <div className={`w-12 h-12 bg-gradient-to-br ${
-                        index === 0 ? 'from-hash-purple to-hash-blue' :
-                        index === 1 ? 'from-hash-blue to-hash-green' :
-                        index === 2 ? 'from-hash-pink to-hash-purple' :
-                        'from-hash-orange to-hash-pink'
+                      <div className={`w-12 h-12 ${
+                        index === 0 ? 'bg-hash-purple' :
+                        index === 1 ? 'bg-hash-blue' :
+                        index === 2 ? 'bg-hash-pink' :
+                        'bg-hash-orange'
                       } rounded-xl flex items-center justify-center shadow-lg`}>
                         <stat.icon className="w-7 h-7 text-white" />
                       </div>
@@ -679,11 +679,11 @@ export default function Home() {
                 whileHover={{ y: -8, scale: 1.03 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card className={`overflow-hidden rounded-2xl border border-border hover:border-hash-purple/50 group flex flex-col justify-end min-h-[260px] aspect-[1.1/1] relative transition-all duration-300 bg-gradient-to-br ${
-                  index === 0 ? 'from-hash-purple/20 to-hash-blue/20' :
-                  index === 1 ? 'from-hash-blue/20 to-hash-green/20' :
-                  index === 2 ? 'from-hash-pink/20 to-hash-purple/20' :
-                  'from-hash-orange/20 to-hash-pink/20'
+                <Card className={`overflow-hidden rounded-2xl border border-border hover:border-hash-purple/50 group flex flex-col justify-end min-h-[260px] aspect-[1.1/1] relative transition-all duration-300 ${
+                  index === 0 ? 'bg-hash-purple/20' :
+                  index === 1 ? 'bg-hash-blue/20' :
+                  index === 2 ? 'bg-hash-pink/20' :
+                  'bg-hash-orange/20'
                 } hover:shadow-2xl hover:shadow-hash-purple/20`}>
                   {/* Background Pattern */}
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,hsl(var(--hash-purple))_0%,transparent_70%)] opacity-10 group-hover:opacity-20 transition-opacity"></div>
@@ -692,7 +692,7 @@ export default function Home() {
                   <div className="relative z-20 flex flex-col h-full justify-between p-8">
                     <div className="flex justify-between items-start">
                       {category.trending && (
-                        <span className="bg-gradient-to-r from-hash-orange to-hash-pink text-white text-xs font-bold px-3 py-1 rounded-full shadow-md tracking-wide animate-pulse">
+                        <span className="bg-hash-orange text-white text-xs font-bold px-3 py-1 rounded-full shadow-md tracking-wide animate-pulse">
                           🔥 Trending
                         </span>
                       )}
@@ -712,7 +712,7 @@ export default function Home() {
                   </div>
                   
                   {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-hash-purple/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="absolute inset-0 bg-hash-purple/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </Card>
               </motion.div>
             ))}
@@ -754,12 +754,12 @@ export default function Home() {
                 whileHover={{ y: -5, scale: 1.02 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card className="text-center px-6 py-8 border border-border hover:border-hash-purple/50 rounded-2xl bg-gradient-to-br from-card to-background h-full flex flex-col items-center justify-center min-h-0 hover:shadow-lg hover:shadow-hash-purple/10 transition-all duration-300 group" style={{ minHeight: '180px', height: '100%' }}>
+                <Card className="text-center px-6 py-8 border border-border hover:border-hash-purple/50 rounded-2xl bg-card h-full flex flex-col items-center justify-center min-h-0 hover:shadow-lg hover:shadow-hash-purple/10 transition-all duration-300 group" style={{ minHeight: '180px', height: '100%' }}>
                   <CardContent className="p-0 flex flex-col items-center">
-                    <div className={`w-16 h-16 bg-gradient-to-br ${
-                      index === 0 ? 'from-hash-purple to-hash-blue' :
-                      index === 1 ? 'from-hash-green to-hash-blue' :
-                      'from-hash-pink to-hash-purple'
+                    <div className={`w-16 h-16 ${
+                      index === 0 ? 'bg-hash-purple' :
+                      index === 1 ? 'bg-hash-green' :
+                      'bg-hash-pink'
                     } rounded-2xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
                       <feature.icon className="w-8 h-8 text-white" />
                     </div>
@@ -929,7 +929,7 @@ export default function Home() {
                 whileHover={{ y: -5, scale: 1.02 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card className="p-8 bg-gradient-to-br from-card to-background border border-border hover:border-hash-purple/50 rounded-2xl h-full hover:shadow-lg hover:shadow-hash-purple/10 transition-all duration-300 group">
+                <Card className="p-8 bg-card border border-border hover:border-hash-purple/50 rounded-2xl h-full hover:shadow-lg hover:shadow-hash-purple/10 transition-all duration-300 group">
                   <CardContent className="p-0 flex flex-col h-full">
                     <div className="flex text-hash-orange mb-6">
                       {[...Array(testimonial.rating)].map((_, i) => (
@@ -940,7 +940,7 @@ export default function Home() {
                       "{testimonial.comment}"
                     </blockquote>
                     <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-hash-purple to-hash-blue flex items-center justify-center shadow-lg">
+                      <div className="w-16 h-16 rounded-full bg-hash-purple flex items-center justify-center shadow-lg">
                         <span className="text-white font-bold text-lg">
                           {testimonial.name.charAt(0)}
                         </span>
@@ -960,54 +960,6 @@ export default function Home() {
                 </Card>
               </motion.div>
             ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Newsletter Section */}
-      <section className="py-20 bg-gradient-to-br from-hash-purple via-hash-blue to-hash-pink text-white relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(255,255,255,0.1)_0%,transparent_50%),radial-gradient(circle_at_75%_75%,rgba(255,255,255,0.05)_0%,transparent_50%)]"></div>
-        <div className="absolute inset-0 backdrop-blur-sm"></div>
-        
-        <div className="container mx-auto px-6 text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <motion.div
-              className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm rounded-full text-sm text-white/90 mb-8 border border-white/20"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              <Globe className="w-4 h-4 mr-2" />
-              Join 50,000+ #HASH Enthusiasts
-            </motion.div>
-            
-            <h2 className="text-4xl md:text-6xl font-bold mb-6 font-space">
-              Stay in <span className="text-white/90">#Style</span>
-            </h2>
-            <p className="text-xl text-white/80 mb-12 max-w-3xl mx-auto leading-relaxed">
-              Subscribe to our newsletter and be the first to know about new collections, 
-              exclusive offers, and style tips from our fashion experts.
-            </p>
-            
-            <div className="max-w-md mx-auto flex gap-4 mb-8">
-              <Input 
-                type="email" 
-                placeholder="Enter your email" 
-                className="bg-white/10 border-white/30 text-white placeholder:text-white/70 focus:border-white/50 focus:ring-white/30 rounded-xl px-6 py-4 text-lg backdrop-blur-md h-14"
-              />
-              <Button className="bg-white text-hash-purple hover:bg-white/90 font-bold px-8 rounded-xl shadow-lg whitespace-nowrap transition-all hover:scale-105 font-space h-14">
-                Subscribe
-              </Button>
-            </div>
-            
-            <p className="text-sm text-white/70">
-              Join 50,000+ subscribers. Unsubscribe anytime. No spam, we promise!
-            </p>
           </motion.div>
         </div>
       </section>

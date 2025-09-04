@@ -93,7 +93,7 @@ export default function Shipping() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header Section */}
-      <div className="bg-gradient-to-br from-hash-dark via-background to-card text-foreground border-b border-border py-16">
+      <div className="bg-background text-foreground border-b border-border py-16">
         <motion.div 
           className="container mx-auto px-6 max-w-4xl text-center"
           variants={containerVariants}

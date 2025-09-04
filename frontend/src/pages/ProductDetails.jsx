@@ -130,7 +130,7 @@ export default function ProductDetails() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-foreground mb-4">Product Not Found</h2>
-          <Button onClick={() => navigate('/')} className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue text-white">
+          <Button onClick={() => navigate('/')} className="bg-hash-purple hover:bg-hash-purple/90 text-white">
             Back to Home
           </Button>
         </div>
@@ -523,7 +523,7 @@ export default function ProductDetails() {
               <Button
                 onClick={handleAddToCart}
                 disabled={safeProduct.stock === 0}
-                className="flex-1 bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple hover:from-hash-blue hover:via-hash-purple hover:to-hash-blue text-white py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-hash-purple/25"
+                className="flex-1 bg-hash-purple hover:bg-hash-purple/90 text-white py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-hash-purple/25"
               >
                 <ShoppingBag className="mr-2 h-5 w-5" />
                 {safeProduct.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
