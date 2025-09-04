@@ -29,8 +29,12 @@ const useProductStore = create((set, get) => ({
     if (get().isInitialized) return;
     
     set({ isInitialized: true });
-    await get().loadProducts();
-    await get().loadCategories();
+    
+    // Load products lazily - don't block initialization
+    setTimeout(() => {
+      get().loadProducts();
+      get().loadCategories();
+    }, 100);
   },
 
   // Product Actions
