@@ -107,7 +107,7 @@ export default function Contact() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header Section */}
-      <div className="bg-black text-white py-16">
+      <div className="bg-gradient-to-br from-hash-dark via-background to-card text-foreground py-16 border-b border-border">
         <motion.div 
           className="container mx-auto px-6 max-w-4xl text-center"
           variants={containerVariants}
@@ -116,9 +116,9 @@ export default function Contact() {
         >
           <motion.div variants={itemVariants}>
             <h1 className="text-5xl md:text-6xl font-light tracking-[0.2em] mb-4">HASH</h1>
-            <p className="text-gray-300 text-sm tracking-[0.15em] uppercase mb-8">Get In Touch</p>
+            <p className="text-muted-foreground text-sm tracking-[0.15em] uppercase mb-8">Get In Touch</p>
             <h2 className="text-3xl md:text-4xl font-light mb-4">Contact Us</h2>
-            <p className="text-gray-400">We're here to help you with any questions or concerns</p>
+                        <p className="text-muted-foreground">We're here to help! Reach out to us anytime</p>
           </motion.div>
         </motion.div>
       </div>
@@ -134,12 +134,12 @@ export default function Contact() {
         <motion.div variants={itemVariants} className="mb-16">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {contactInfo.map((info, index) => (
-              <Card key={index} className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+              <Card key={index} className="border border-border shadow-sm hover:shadow-md transition-shadow bg-card">
                 <CardContent className="p-6 text-center">
-                  <info.icon className="w-12 h-12 text-black mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-black mb-2">{info.title}</h3>
-                  <p className="text-gray-900 font-medium mb-1">{info.info}</p>
-                  <p className="text-gray-600 text-sm">{info.description}</p>
+                  <info.icon className="w-12 h-12 text-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-foreground mb-2">{info.title}</h3>
+                  <p className="text-foreground font-medium mb-1">{info.info}</p>
+                  <p className="text-muted-foreground text-sm">{info.description}</p>
                   {info.action !== "#" && (
                     <Button 
                       variant="outline" 
@@ -160,16 +160,16 @@ export default function Contact() {
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Contact Form */}
           <motion.div variants={itemVariants}>
-            <Card className="border border-gray-200 shadow-sm">
+            <Card className="border border-border shadow-sm bg-card">
               <CardContent className="p-8">
                 <div className="flex items-center mb-6">
-                  <MessageCircle className="w-6 h-6 text-black mr-3" />
-                  <h2 className="text-2xl font-semibold text-black">Send us a Message</h2>
+                  <MessageCircle className="w-6 h-6 text-foreground mr-3" />
+                  <h2 className="text-2xl font-semibold text-foreground">Send us a Message</h2>
                 </div>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Full Name *
                       </label>
                       <Input
@@ -183,7 +183,7 @@ export default function Contact() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-foreground mb-2">
                         Email Address *
                       </label>
                       <Input
@@ -198,7 +198,7 @@ export default function Contact() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       Subject *
                     </label>
                     <Input
@@ -212,7 +212,7 @@ export default function Contact() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       Message *
                     </label>
                     <Textarea
@@ -227,7 +227,7 @@ export default function Contact() {
                   </div>
                   <Button 
                     type="submit" 
-                    className="w-full bg-black hover:bg-gray-800"
+                    className="w-full bg-hash-purple hover:bg-hash-purple/90 text-white font-semibold"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -249,41 +249,41 @@ export default function Contact() {
 
           {/* FAQ Section */}
           <motion.div variants={itemVariants}>
-            <Card className="border border-gray-200 shadow-sm">
+            <Card className="border border-border shadow-sm bg-card">
               <CardContent className="p-8">
-                <h2 className="text-2xl font-semibold text-black mb-6">Frequently Asked Questions</h2>
+                <h2 className="text-2xl font-semibold text-foreground mb-6">Frequently Asked Questions</h2>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-medium text-black mb-2">How can I place an order?</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-lg font-medium text-foreground mb-2">How can I place an order?</h3>
+                    <p className="text-muted-foreground">
                       Browse our collection, add items to cart, and checkout. We primarily serve NITK students 
                       but also deliver across India via postal services.
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-black mb-2">Do you make custom club merchandise?</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-lg font-medium text-foreground mb-2">Do you make custom club merchandise?</h3>
+                    <p className="text-muted-foreground">
                       Yes! We partner with college clubs and events for custom t-shirts and merchandise. 
                       Contact Ankit for club partnership inquiries.
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-black mb-2">How long does delivery take?</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-lg font-medium text-foreground mb-2">How long does delivery take?</h3>
+                    <p className="text-muted-foreground">
                       For NITK campus: 1-2 days. For other locations in India: 5-7 business days via post. 
                       Delivery times may vary based on location.
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-black mb-2">What payment methods do you accept?</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-lg font-medium text-foreground mb-2">What payment methods do you accept?</h3>
+                    <p className="text-muted-foreground">
                       We accept online payments through our website, UPI, and other digital payment methods. 
                       Cash on delivery available for campus orders.
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-black mb-2">Can I return/exchange items?</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-lg font-medium text-foreground mb-2">Can I return/exchange items?</h3>
+                    <p className="text-muted-foreground">
                       Yes, we have a student-friendly return policy. Items can be returned within 7 days 
                       if unworn and in original condition. Campus returns are especially easy.
                     </p>
@@ -296,10 +296,10 @@ export default function Contact() {
 
         {/* Additional Support */}
         <motion.div variants={itemVariants} className="mt-16">
-          <Card className="border border-gray-200 shadow-sm bg-gray-50">
+          <Card className="border border-border shadow-sm bg-card">
             <CardContent className="p-8 text-center">
-              <h2 className="text-2xl font-semibold text-black mb-4">Need Immediate Help?</h2>
-              <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+              <h2 className="text-2xl font-semibold text-foreground mb-4">Need Immediate Help?</h2>
+              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
                 Our customer support team is available 24/7 to assist you with any questions or concerns. 
                 We're committed to providing you with the best possible shopping experience.
               </p>
@@ -307,7 +307,7 @@ export default function Contact() {
                 <Button 
                   variant="outline" 
                   onClick={() => window.open('tel:+919876543210')}
-                  className="border-black text-black hover:bg-black hover:text-white"
+                  className="border border-border text-foreground hover:bg-card"
                 >
                   <Phone className="w-4 h-4 mr-2" />
                   Call Now
@@ -315,7 +315,7 @@ export default function Contact() {
                 <Button 
                   variant="outline"
                   onClick={() => window.open('mailto:support@hash.com')}
-                  className="border-black text-black hover:bg-black hover:text-white"
+                  className="border border-border text-foreground hover:bg-card"
                 >
                   <Mail className="w-4 h-4 mr-2" />
                   Email Support
@@ -327,10 +327,10 @@ export default function Contact() {
 
         {/* Footer Section */}
         <motion.div 
-          className="mt-16 text-center py-8 border-t border-gray-200"
+          className="mt-16 text-center py-8 border-t border-border"
           variants={itemVariants}
         >
-          <p className="text-gray-500 text-sm">
+          <p className="text-muted-foreground text-sm">
             © 2024 Hash - Premium E-commerce Platform. All rights reserved.
           </p>
         </motion.div>
