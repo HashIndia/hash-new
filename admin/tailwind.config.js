@@ -46,6 +46,11 @@ export default {
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
+  			// Hash brand colors
+  			'hash-purple': '#8B5CF6',
+  			'hash-blue': '#3B82F6',
+  			'hash-green': '#10B981',
+  			'hash-orange': '#F59E0B',
   			chart: {
   				'1': 'hsl(var(--chart-1))',
   				'2': 'hsl(var(--chart-2))',
