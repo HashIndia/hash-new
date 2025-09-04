@@ -105,7 +105,7 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Header Section */}
       <div className="bg-black text-white py-16">
         <motion.div 
