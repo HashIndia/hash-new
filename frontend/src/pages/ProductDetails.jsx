@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ShoppingBag, Heart, Star, Share, Truck, ShieldCheck, RotateCcw, Ruler, ZoomIn, X } from 'lucide-react';
@@ -223,25 +223,25 @@ export default function ProductDetails() {
   };
 
   // Zoom functionality
-  const handleImageClick = () => {
+  const handleImageClick = useCallback(() => {
     setShowZoomModal(true);
     setZoomPosition({ x: 0, y: 0 });
-  };
+  }, []);
 
-  const handleZoomClose = () => {
+  const handleZoomClose = useCallback(() => {
     setShowZoomModal(false);
     setZoomPosition({ x: 0, y: 0 });
-  };
+  }, []);
 
-  const handleMouseDown = (e) => {
+  const handleMouseDown = useCallback((e) => {
     setIsDragging(true);
     setDragStart({
       x: e.clientX - zoomPosition.x,
       y: e.clientY - zoomPosition.y
     });
-  };
+  }, [zoomPosition]);
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = useCallback((e) => {
     if (!isDragging) return;
     
     const newX = e.clientX - dragStart.x;
@@ -255,22 +255,28 @@ export default function ProductDetails() {
       x: Math.max(-maxX, Math.min(maxX, newX)),
       y: Math.max(-maxY, Math.min(maxY, newY))
     });
-  };
+  }, [isDragging, dragStart]);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-  };
+  }, []);
 
   // Add escape key handler for zoom modal
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape' && showZoomModal) {
-        handleZoomClose();
+      if (e.key === 'Escape') {
+        setShowZoomModal(false);
+        setZoomPosition({ x: 0, y: 0 });
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    if (showZoomModal) {
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, [showZoomModal]);
 
   const currentPrice = safeProduct.salePrice || safeProduct.price;
