@@ -77,8 +77,8 @@ export default function Returns() {
           <motion.div variants={itemVariants}>
             <h1 className="text-5xl md:text-6xl font-light tracking-[0.2em] mb-4">HASH</h1>
             <p className="text-gray-300 text-sm tracking-[0.15em] uppercase mb-8">Customer Care</p>
-            <h2 className="text-3xl md:text-4xl font-light mb-4">Returns & Refunds</h2>
-            <p className="text-gray-400">Easy returns, hassle-free refunds</p>
+            <h2 className="text-3xl md:text-4xl font-light mb-4">Returns, Refunds & Cancellations</h2>
+            <p className="text-gray-400">Easy returns, hassle-free refunds, and order cancellations</p>
           </motion.div>
         </motion.div>
       </div>
@@ -259,6 +259,55 @@ export default function Returns() {
                     Special return terms may apply for bulk orders. Please contact our 
                     customer service team for specific bulk return policies.
                   </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Cancellation Policy */}
+        <motion.div variants={itemVariants} className="mb-16">
+          <Card className="border border-border bg-card">
+            <CardContent className="p-8 md:p-12">
+              <h2 className="text-3xl font-semibold text-foreground mb-8">Order Cancellation Policy</h2>
+              
+              <div className="prose prose-gray max-w-none">
+                <div className="grid lg:grid-cols-2 gap-12">
+                  <div>
+                    <h3 className="text-xl font-semibold text-foreground mb-4">Cancellation Window</h3>
+                    <ul className="space-y-2 text-muted-foreground">
+                      <li>• Orders can be cancelled within 2 hours of placement</li>
+                      <li>• Once order is in processing, cancellation may not be possible</li>
+                      <li>• For urgent cancellations, contact us immediately on WhatsApp</li>
+                      <li>• Campus orders have flexible cancellation before pickup</li>
+                    </ul>
+
+                    <h3 className="text-xl font-semibold text-foreground mb-4 mt-8">Cancellation Process</h3>
+                    <ul className="space-y-2 text-muted-foreground">
+                      <li>• Log into your account and go to order history</li>
+                      <li>• Click "Cancel Order" if available</li>
+                      <li>• Alternatively, contact us via WhatsApp with order number</li>
+                      <li>• Cancellation confirmation will be sent via email</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-semibold text-foreground mb-4">Refund for Cancellations</h3>
+                    <ul className="space-y-2 text-muted-foreground">
+                      <li>• Full refund for orders cancelled within window</li>
+                      <li>• Refund processed within 2-5 business days</li>
+                      <li>• Amount credited to original payment method</li>
+                      <li>• No cancellation charges for student orders</li>
+                    </ul>
+
+                    <h3 className="text-xl font-semibold text-foreground mb-4 mt-8">Non-Cancellable Orders</h3>
+                    <ul className="space-y-2 text-muted-foreground">
+                      <li>• Custom club merchandise orders</li>
+                      <li>• Personalized or custom-designed items</li>
+                      <li>• Orders already shipped or out for delivery</li>
+                      <li>• Bulk orders placed for events (case-by-case basis)</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </CardContent>
