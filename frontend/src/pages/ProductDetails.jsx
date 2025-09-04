@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ShoppingBag, Heart, Star, Share, Truck, ShieldCheck, RotateCcw, Ruler, ZoomIn, X } from 'lucide-react';
@@ -28,9 +28,6 @@ export default function ProductDetails() {
   const [showSizeChart, setShowSizeChart] = useState(false);
   const [totalReviews, setTotalReviews] = useState(0);
   const [showZoomModal, setShowZoomModal] = useState(false);
-  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   // Load product on mount
   useEffect(() => {
@@ -223,50 +220,19 @@ export default function ProductDetails() {
   };
 
   // Zoom functionality
-  const handleImageClick = useCallback(() => {
+  const handleImageClick = () => {
     setShowZoomModal(true);
-    setZoomPosition({ x: 0, y: 0 });
-  }, []);
+  };
 
-  const handleZoomClose = useCallback(() => {
+  const handleZoomClose = () => {
     setShowZoomModal(false);
-    setZoomPosition({ x: 0, y: 0 });
-  }, []);
-
-  const handleMouseDown = useCallback((e) => {
-    setIsDragging(true);
-    setDragStart({
-      x: e.clientX - zoomPosition.x,
-      y: e.clientY - zoomPosition.y
-    });
-  }, [zoomPosition]);
-
-  const handleMouseMove = useCallback((e) => {
-    if (!isDragging) return;
-    
-    const newX = e.clientX - dragStart.x;
-    const newY = e.clientY - dragStart.y;
-    
-    // Limit the drag bounds
-    const maxX = 200;
-    const maxY = 200;
-    
-    setZoomPosition({
-      x: Math.max(-maxX, Math.min(maxX, newX)),
-      y: Math.max(-maxY, Math.min(maxY, newY))
-    });
-  }, [isDragging, dragStart]);
-
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
+  };
 
   // Add escape key handler for zoom modal
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
         setShowZoomModal(false);
-        setZoomPosition({ x: 0, y: 0 });
       }
     };
 
@@ -707,13 +673,6 @@ export default function ProductDetails() {
               {/* Zoomable image */}
               <motion.div
                 className="relative cursor-grab active:cursor-grabbing"
-                style={{
-                  transform: `translate(${zoomPosition.x}px, ${zoomPosition.y}px)`,
-                }}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
                 onClick={(e) => e.stopPropagation()}
                 drag
                 dragConstraints={{
@@ -723,12 +682,7 @@ export default function ProductDetails() {
                   bottom: 200,
                 }}
                 dragElastic={0.1}
-                onDrag={(event, info) => {
-                  setZoomPosition({
-                    x: info.offset.x,
-                    y: info.offset.y
-                  });
-                }}
+                initial={{ x: 0, y: 0 }}
               >
                 <img
                   src={safeProduct.images[activeImage]?.url || '/placeholder-image.jpg'}
