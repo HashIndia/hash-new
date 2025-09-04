@@ -16,46 +16,45 @@ export default function AuthInitializer() {
         // Initialize products first (doesn't require auth)
         await initializeProducts();
 
-        // Only check auth if we have stored authentication state AND user data
+        // Only check auth if we have stored authentication state
         if (!isAuthenticated || !user) {
           setIsInitialized(true);
           return;
         }
 
-        // Only make auth calls if we believe user is authenticated
-        try {
-          const response = await authAPI.getCurrentUser();
+        const response = await authAPI.getCurrentUser();
 
-          if (isMounted && response.data.user) {
-            setUser(response.data.user);
-            
-            // Load user data in parallel but don't block initialization
-            Promise.all([
-              authAPI.getWishlist().then(wishlistResponse => {
-                if (wishlistResponse.data.wishlist) {
-                  setWishlist(wishlistResponse.data.wishlist);
-                }
-              }).catch(() => {}), // Silent fail
-              
-              authAPI.getAddresses().then(addressResponse => {
-                if (addressResponse.data.addresses) {
-                  setAddresses(addressResponse.data.addresses);
-                }
-              }).catch(() => {}) // Silent fail
-            ]);
-          } else if (isMounted) {
-            logout();
+        if (isMounted && response.data.user) {
+          setUser(response.data.user);
+          
+          // Load user's wishlist
+          try {
+            const wishlistResponse = await authAPI.getWishlist();
+            if (wishlistResponse.data.wishlist) {
+              setWishlist(wishlistResponse.data.wishlist);
+            }
+          } catch (wishlistError) {
+            // Wishlist loading failed
           }
-        } catch (authError) {
-          // If auth fails, logout silently
-          if (isMounted) {
-            logout();
+
+          // Load user's addresses
+          try {
+            const addressResponse = await authAPI.getAddresses();
+            if (addressResponse.data.addresses) {
+              setAddresses(addressResponse.data.addresses);
+            }
+          } catch (addressError) {
+            // Address loading failed
           }
+        } else if (isMounted) {
+          logout();
         }
       } catch (error) {
-        // Only logout if this was an auth-related error, not product loading
-        if (isMounted && isAuthenticated) {
-          logout();
+        if (isMounted) {
+          // Don't logout on product loading failure, only on auth failure
+          if (isAuthenticated) {
+            logout();
+          }
         }
       } finally {
         if (isMounted) {
@@ -73,10 +72,10 @@ export default function AuthInitializer() {
 
   if (!isInitialized) {
     return (
-      <div className="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-black mx-auto"></div>
-          <p className="mt-2 text-gray-600 text-sm">Loading...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
         </div>
       </div>
     );

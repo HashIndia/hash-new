@@ -78,12 +78,9 @@ api.interceptors.response.use(
         authToken = null;
         localStorage.removeItem('safari_auth_token');
         useUserStore.getState().logout();
-        return Promise.reject(error.response?.data || error);
-      }
-
-      // Don't refresh if user isn't authenticated in store
-      const userStore = useUserStore.getState();
-      if (!userStore.isAuthenticated) {
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
         return Promise.reject(error.response?.data || error);
       }
 
@@ -115,7 +112,9 @@ api.interceptors.response.use(
         localStorage.removeItem('safari_auth_token');
         processQueue(refreshError, null);
         useUserStore.getState().logout();
-        // Don't force redirect - let app handle it naturally
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -128,6 +127,9 @@ api.interceptors.response.use(
       authToken = null;
       localStorage.removeItem('safari_auth_token');
       useUserStore.getState().logout();
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
     }
 
     return Promise.reject(error.response?.data || error);
