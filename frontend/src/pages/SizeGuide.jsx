@@ -1,7 +1,7 @@
 import { Card, CardContent } from "../components/ui/card";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Ruler, User, Shirt, PenTool, AlertCircle, CheckCircle } from "lucide-react";
+import { Ruler, User, Shirt, PenTool, AlertCircle, CheckCircle, MessageCircle } from "lucide-react";
 
 export default function SizeGuide() {
   const [selectedCategory, setSelectedCategory] = useState('men');
@@ -127,9 +127,9 @@ export default function SizeGuide() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Header Section */}
-      <div className="bg-black text-white py-16">
+      <div className="bg-gradient-to-br from-hash-dark via-background to-card text-foreground py-16 border-b border-border">
         <motion.div 
           className="container mx-auto px-6 max-w-4xl text-center"
           variants={containerVariants}
@@ -138,9 +138,9 @@ export default function SizeGuide() {
         >
           <motion.div variants={itemVariants}>
             <h1 className="text-5xl md:text-6xl font-light tracking-[0.2em] mb-4">HASH</h1>
-            <p className="text-gray-300 text-sm tracking-[0.15em] uppercase mb-8">Fit Guide</p>
+            <p className="text-muted-foreground text-sm tracking-[0.15em] uppercase mb-8">Fit Guide</p>
             <h2 className="text-3xl md:text-4xl font-light mb-4">Size Guide</h2>
-            <p className="text-gray-400">Find your perfect fit with our detailed sizing charts</p>
+            <p className="text-muted-foreground">Find your perfect fit with our detailed sizing charts</p>
           </motion.div>
         </motion.div>
       </div>
@@ -154,14 +154,14 @@ export default function SizeGuide() {
       >
         {/* How to Measure */}
         <motion.div variants={itemVariants} className="mb-16">
-          <h2 className="text-3xl font-semibold text-black mb-8 text-center">How to Measure</h2>
+          <h2 className="text-3xl font-semibold text-foreground mb-8 text-center">How to Measure</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {measurementTips.map((tip, index) => (
-              <Card key={index} className="border border-gray-200 shadow-sm text-center">
+              <Card key={index} className="border border-border shadow-sm text-center">
                 <CardContent className="p-6">
-                  <tip.icon className="w-12 h-12 text-black mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-black mb-3">{tip.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{tip.description}</p>
+                  <tip.icon className="w-12 h-12 text-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-foreground mb-3">{tip.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{tip.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -170,7 +170,7 @@ export default function SizeGuide() {
 
         {/* Category Selection */}
         <motion.div variants={itemVariants} className="mb-12">
-          <Card className="border border-gray-200 shadow-sm">
+          <Card className="border border-border shadow-sm">
             <CardContent className="p-6">
               <div className="flex justify-center">
                 <div className="flex bg-gray-100 rounded-lg p-1">
@@ -181,7 +181,7 @@ export default function SizeGuide() {
                       className={`flex items-center px-6 py-3 rounded-md transition-colors ${
                         selectedCategory === category.id
                           ? 'bg-black text-white'
-                          : 'text-gray-600 hover:text-black'
+                          : 'text-muted-foreground hover:text-foreground'
                       }`}
                     >
                       <category.icon className="w-5 h-5 mr-2" />
@@ -198,18 +198,18 @@ export default function SizeGuide() {
         <motion.div variants={itemVariants} className="mb-16">
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Tops Size Chart */}
-            <Card className="border border-gray-200 shadow-sm">
+            <Card className="border border-border shadow-sm">
               <CardContent className="p-8">
-                <h3 className="text-2xl font-semibold text-black mb-6 text-center">
+                <h3 className="text-2xl font-semibold text-foreground mb-6 text-center">
                   {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Tops
                 </h3>
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-2 text-black font-semibold">Size</th>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-3 px-2 text-foreground font-semibold">Size</th>
                         {Object.keys(sizeCharts[selectedCategory].tops[0]).slice(1).map(key => (
-                          <th key={key} className="text-center py-3 px-2 text-black font-semibold capitalize">
+                          <th key={key} className="text-center py-3 px-2 text-foreground font-semibold capitalize">
                             {key}
                           </th>
                         ))}
@@ -218,9 +218,9 @@ export default function SizeGuide() {
                     <tbody>
                       {sizeCharts[selectedCategory].tops.map((size, index) => (
                         <tr key={index} className="border-b border-gray-100">
-                          <td className="py-3 px-2 font-medium text-black">{size.size}</td>
+                          <td className="py-3 px-2 font-medium text-foreground">{size.size}</td>
                           {Object.values(size).slice(1).map((value, i) => (
-                            <td key={i} className="py-3 px-2 text-center text-gray-700">{value}"</td>
+                            <td key={i} className="py-3 px-2 text-center text-foreground">{value}"</td>
                           ))}
                         </tr>
                       ))}
@@ -231,18 +231,18 @@ export default function SizeGuide() {
             </Card>
 
             {/* Bottoms Size Chart */}
-            <Card className="border border-gray-200 shadow-sm">
+            <Card className="border border-border shadow-sm">
               <CardContent className="p-8">
-                <h3 className="text-2xl font-semibold text-black mb-6 text-center">
+                <h3 className="text-2xl font-semibold text-foreground mb-6 text-center">
                   {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Bottoms
                 </h3>
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-2 text-black font-semibold">Size</th>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-3 px-2 text-foreground font-semibold">Size</th>
                         {Object.keys(sizeCharts[selectedCategory].bottoms[0]).slice(1).map(key => (
-                          <th key={key} className="text-center py-3 px-2 text-black font-semibold capitalize">
+                          <th key={key} className="text-center py-3 px-2 text-foreground font-semibold capitalize">
                             {key}
                           </th>
                         ))}
@@ -251,9 +251,9 @@ export default function SizeGuide() {
                     <tbody>
                       {sizeCharts[selectedCategory].bottoms.map((size, index) => (
                         <tr key={index} className="border-b border-gray-100">
-                          <td className="py-3 px-2 font-medium text-black">{size.size}</td>
+                          <td className="py-3 px-2 font-medium text-foreground">{size.size}</td>
                           {Object.values(size).slice(1).map((value, i) => (
-                            <td key={i} className="py-3 px-2 text-center text-gray-700">{value}"</td>
+                            <td key={i} className="py-3 px-2 text-center text-foreground">{value}"</td>
                           ))}
                         </tr>
                       ))}
@@ -267,27 +267,27 @@ export default function SizeGuide() {
 
         {/* Fit Tips */}
         <motion.div variants={itemVariants} className="mb-16">
-          <Card className="border border-gray-200 shadow-sm bg-gray-50">
+          <Card className="border border-border shadow-sm bg-card">
             <CardContent className="p-8">
-              <h3 className="text-2xl font-semibold text-black mb-6 text-center flex items-center justify-center">
+              <h3 className="text-2xl font-semibold text-foreground mb-6 text-center flex items-center justify-center">
                 <AlertCircle className="w-6 h-6 mr-2" />
                 Fit Tips & Guidelines
               </h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="text-lg font-semibold text-black mb-4">Sizing Guidelines</h4>
+                  <h4 className="text-lg font-semibold text-foreground mb-4">Sizing Guidelines</h4>
                   <ul className="space-y-3">
                     {fitTips.map((tip, index) => (
                       <li key={index} className="flex items-start">
                         <CheckCircle className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-700">{tip}</span>
+                        <span className="text-foreground">{tip}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-lg font-semibold text-black mb-4">Measurement Points</h4>
-                  <div className="space-y-3 text-gray-700">
+                  <h4 className="text-lg font-semibold text-foreground mb-4">Measurement Points</h4>
+                  <div className="space-y-3 text-foreground">
                     <p><strong>Chest/Bust:</strong> Measure around the fullest part</p>
                     <p><strong>Waist:</strong> Measure around the narrowest part</p>
                     <p><strong>Hip:</strong> Measure around the fullest part of hips</p>
@@ -302,49 +302,49 @@ export default function SizeGuide() {
 
         {/* Size Conversion Chart */}
         <motion.div variants={itemVariants} className="mb-16">
-          <Card className="border border-gray-200 shadow-sm">
+          <Card className="border border-border shadow-sm">
             <CardContent className="p-8">
-              <h3 className="text-2xl font-semibold text-black mb-6 text-center">International Size Conversion</h3>
+              <h3 className="text-2xl font-semibold text-foreground mb-6 text-center">International Size Conversion</h3>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 text-black font-semibold">India</th>
-                      <th className="text-center py-3 px-4 text-black font-semibold">US</th>
-                      <th className="text-center py-3 px-4 text-black font-semibold">UK</th>
-                      <th className="text-center py-3 px-4 text-black font-semibold">EU</th>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-3 px-4 text-foreground font-semibold">India</th>
+                      <th className="text-center py-3 px-4 text-foreground font-semibold">US</th>
+                      <th className="text-center py-3 px-4 text-foreground font-semibold">UK</th>
+                      <th className="text-center py-3 px-4 text-foreground font-semibold">EU</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr className="border-b border-gray-100">
-                      <td className="py-3 px-4 font-medium text-black">XS</td>
-                      <td className="py-3 px-4 text-center text-gray-700">XS</td>
-                      <td className="py-3 px-4 text-center text-gray-700">6</td>
-                      <td className="py-3 px-4 text-center text-gray-700">32</td>
+                      <td className="py-3 px-4 font-medium text-foreground">XS</td>
+                      <td className="py-3 px-4 text-center text-foreground">XS</td>
+                      <td className="py-3 px-4 text-center text-foreground">6</td>
+                      <td className="py-3 px-4 text-center text-foreground">32</td>
                     </tr>
                     <tr className="border-b border-gray-100">
-                      <td className="py-3 px-4 font-medium text-black">S</td>
-                      <td className="py-3 px-4 text-center text-gray-700">S</td>
-                      <td className="py-3 px-4 text-center text-gray-700">8</td>
-                      <td className="py-3 px-4 text-center text-gray-700">34</td>
+                      <td className="py-3 px-4 font-medium text-foreground">S</td>
+                      <td className="py-3 px-4 text-center text-foreground">S</td>
+                      <td className="py-3 px-4 text-center text-foreground">8</td>
+                      <td className="py-3 px-4 text-center text-foreground">34</td>
                     </tr>
                     <tr className="border-b border-gray-100">
-                      <td className="py-3 px-4 font-medium text-black">M</td>
-                      <td className="py-3 px-4 text-center text-gray-700">M</td>
-                      <td className="py-3 px-4 text-center text-gray-700">10</td>
-                      <td className="py-3 px-4 text-center text-gray-700">36</td>
+                      <td className="py-3 px-4 font-medium text-foreground">M</td>
+                      <td className="py-3 px-4 text-center text-foreground">M</td>
+                      <td className="py-3 px-4 text-center text-foreground">10</td>
+                      <td className="py-3 px-4 text-center text-foreground">36</td>
                     </tr>
                     <tr className="border-b border-gray-100">
-                      <td className="py-3 px-4 font-medium text-black">L</td>
-                      <td className="py-3 px-4 text-center text-gray-700">L</td>
-                      <td className="py-3 px-4 text-center text-gray-700">12</td>
-                      <td className="py-3 px-4 text-center text-gray-700">38</td>
+                      <td className="py-3 px-4 font-medium text-foreground">L</td>
+                      <td className="py-3 px-4 text-center text-foreground">L</td>
+                      <td className="py-3 px-4 text-center text-foreground">12</td>
+                      <td className="py-3 px-4 text-center text-foreground">38</td>
                     </tr>
                     <tr className="border-b border-gray-100">
-                      <td className="py-3 px-4 font-medium text-black">XL</td>
-                      <td className="py-3 px-4 text-center text-gray-700">XL</td>
-                      <td className="py-3 px-4 text-center text-gray-700">14</td>
-                      <td className="py-3 px-4 text-center text-gray-700">40</td>
+                      <td className="py-3 px-4 font-medium text-foreground">XL</td>
+                      <td className="py-3 px-4 text-center text-foreground">XL</td>
+                      <td className="py-3 px-4 text-center text-foreground">14</td>
+                      <td className="py-3 px-4 text-center text-foreground">40</td>
                     </tr>
                   </tbody>
                 </table>
@@ -355,10 +355,10 @@ export default function SizeGuide() {
 
         {/* Contact Support */}
         <motion.div variants={itemVariants}>
-          <Card className="border border-gray-200 shadow-sm">
+          <Card className="border border-border shadow-sm">
             <CardContent className="p-8 text-center">
-              <h3 className="text-2xl font-semibold text-black mb-4">Need Help with Sizing?</h3>
-              <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+              <h3 className="text-2xl font-semibold text-foreground mb-4">Need Help with Sizing?</h3>
+              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
                 Our customer support team is here to help you find the perfect fit. 
                 Contact us for personalized sizing recommendations.
               </p>
@@ -372,7 +372,7 @@ export default function SizeGuide() {
                 </button>
                 <button 
                   onClick={() => window.open('mailto:support@hash.com')}
-                  className="border border-black text-black hover:bg-black hover:text-white px-6 py-3 rounded-lg flex items-center transition-colors"
+                  className="border border-border text-foreground hover:bg-card px-6 py-3 rounded-lg flex items-center transition-colors"
                 >
                   Email Support
                 </button>
@@ -383,10 +383,10 @@ export default function SizeGuide() {
 
         {/* Footer Section */}
         <motion.div 
-          className="mt-16 text-center py-8 border-t border-gray-200"
+          className="mt-16 text-center py-8 border-t border-border"
           variants={itemVariants}
         >
-          <p className="text-gray-500 text-sm">
+          <p className="text-muted-foreground text-sm">
             © 2024 Hash - Premium E-commerce Platform. All rights reserved.
           </p>
         </motion.div>
