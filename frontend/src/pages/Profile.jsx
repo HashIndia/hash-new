@@ -140,7 +140,7 @@ export default function Profile() {
             transition={{ duration: 0.6, delay: 0.1 }}
           >
             <Card className="bg-card/80 backdrop-blur-sm border border-border shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple text-white rounded-t-lg">
+              <CardHeader className="bg-hash-purple text-white rounded-t-lg">
                 <CardTitle className="font-space">My Details</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
@@ -169,7 +169,7 @@ export default function Profile() {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <Card className="bg-card/80 backdrop-blur-sm border border-border shadow-lg">
-              <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple text-white rounded-t-lg">
+              <CardHeader className="flex flex-row items-center justify-between bg-hash-blue text-white rounded-t-lg">
                 <CardTitle className="font-space">My Addresses</CardTitle>
                 <Button 
                   onClick={() => setShowAddressForm(true)}
@@ -230,24 +230,97 @@ export default function Profile() {
             transition={{ duration: 0.6, delay: 0.3 }}
           >
             <Card className="bg-card/80 backdrop-blur-sm border border-border shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-hash-purple via-hash-blue to-hash-purple text-white rounded-t-lg">
+              <CardHeader className="bg-hash-purple text-white rounded-t-lg">
                 <CardTitle className="font-space">Recent Orders</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 {orders.length > 0 ? (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {orders.slice(0, 5).map((order) => (
-                      <div key={order._id} className="border-b border-border pb-3 last:border-b-0 p-3 bg-accent/20 rounded-lg">
-                        <p className="text-foreground">
-                          Order #{order.orderNumber} -{" "}
-                          <strong className="text-hash-purple">{order.status}</strong> - 
-                          <span className="text-hash-blue font-semibold ml-1">₹{order.total}</span>
-                        </p>
+                      <div key={order._id} className="border border-border rounded-lg p-4 bg-accent/20 hover:bg-accent/30 transition-colors">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h4 className="font-semibold text-foreground text-lg">
+                              Order #{order.orderNumber}
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              {new Date(order.createdAt).toLocaleDateString('en-IN', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                              order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                              order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                              order.status === 'confirmed' ? 'bg-yellow-100 text-yellow-800' :
+                              order.status === 'pending' ? 'bg-orange-100 text-orange-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                            </span>
+                            <p className="text-lg font-bold text-hash-purple mt-1">
+                              ₹{(order.totalAmount || order.total || 0).toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Order Items */}
+                        {order.items && order.items.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-border">
+                            <p className="text-sm font-medium text-foreground mb-2">Items:</p>
+                            <div className="space-y-2">
+                              {order.items.slice(0, 3).map((item, index) => (
+                                <div key={index} className="flex justify-between items-center text-sm">
+                                  <div className="flex-1">
+                                    <span className="text-foreground">{item.name || 'Product'}</span>
+                                    {item.size && item.color && (
+                                      <span className="text-muted-foreground ml-2">
+                                        ({item.size}, {item.color})
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span className="text-muted-foreground">
+                                    Qty: {item.quantity} × ₹{item.price}
+                                  </span>
+                                </div>
+                              ))}
+                              {order.items.length > 3 && (
+                                <p className="text-xs text-muted-foreground">
+                                  +{order.items.length - 3} more items
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Shipping Address */}
+                        {order.shippingAddress && (
+                          <div className="mt-3 pt-3 border-t border-border">
+                            <p className="text-sm font-medium text-foreground mb-1">Shipping Address:</p>
+                            <p className="text-sm text-muted-foreground">
+                              {order.shippingAddress.name}, {order.shippingAddress.line1}
+                              {order.shippingAddress.city && `, ${order.shippingAddress.city}`}
+                              {order.shippingAddress.state && ` - ${order.shippingAddress.state}`}
+                              {order.shippingAddress.pincode && ` ${order.shippingAddress.pincode}`}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground">No orders found.</p>
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground mb-4">No orders found.</p>
+                    <Button 
+                      onClick={() => window.location.href = '/shop'}
+                      className="bg-hash-purple hover:bg-hash-purple/90 text-white"
+                    >
+                      Start Shopping
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </Card>
