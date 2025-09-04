@@ -4,53 +4,172 @@ import { ordersAPI, handleAPIError } from '../services/api.js';
 // Mock data for development
 const mockOrders = [
   {
+    _id: 'ORD-1756873879613-JGSH',
     id: 'ORD001',
     customerName: 'John Doe',
     customerEmail: 'john@example.com',
     customerPhone: '+1 234 567 8900',
     customerAddress: '123 Main St, New York, NY 10001',
-    total: 140.36,
+    total: 1399,
+    totalAmount: 1399,
     status: 'pending',
     orderDate: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
     trackingNumber: null,
     otpVerified: false,
     items: [
-      { name: 'Cotton T-Shirt', quantity: 2, price: 29.99 },
-      { name: 'Denim Jeans', quantity: 1, price: 79.99 }
+      { 
+        name: 'Cotton T-Shirt', 
+        quantity: 2, 
+        price: 299, 
+        size: 'M', 
+        color: 'Black',
+        image: '/api/placeholder/100/100'
+      },
+      { 
+        name: 'Denim Jeans', 
+        quantity: 1, 
+        price: 799, 
+        size: 'L', 
+        color: 'Blue',
+        image: '/api/placeholder/100/100'
+      }
     ],
     notes: null
   },
   {
+    _id: 'ORD-1756846208365-ECIJ',
     id: 'ORD002',
     customerName: 'Jane Smith',
     customerEmail: 'jane@example.com',
     customerPhone: '+1 234 567 8901',
     customerAddress: '456 Oak Ave, Los Angeles, CA 90210',
-    total: 97.18,
+    total: 1199,
+    totalAmount: 1199,
     status: 'shipped',
     orderDate: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+    createdAt: new Date(Date.now() - 86400000).toISOString(),
     trackingNumber: 'TRK123456789',
     otpVerified: false,
     items: [
-      { name: 'Summer Dress', quantity: 1, price: 59.99 },
-      { name: 'Leather Belt', quantity: 1, price: 39.99 }
+      { 
+        name: 'Summer Dress', 
+        quantity: 1, 
+        price: 599, 
+        size: 'S', 
+        color: 'Red',
+        image: '/api/placeholder/100/100'
+      },
+      { 
+        name: 'Cotton T-Shirt', 
+        quantity: 2, 
+        price: 299, 
+        size: 'L', 
+        color: 'White',
+        image: '/api/placeholder/100/100'
+      }
     ],
     notes: 'Customer requested express shipping'
   },
   {
+    _id: 'ORD-1756753684925-TED3',
     id: 'ORD003',
     customerName: 'Bob Johnson',
     customerEmail: 'bob@example.com',
     customerPhone: '+1 234 567 8902',
     customerAddress: '789 Pine St, Chicago, IL 60601',
-    total: 107.96,
+    total: 897,
+    totalAmount: 897,
     status: 'delivered',
     orderDate: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+    createdAt: new Date(Date.now() - 172800000).toISOString(),
     trackingNumber: 'TRK987654321',
     otpVerified: true,
     items: [
-      { name: 'Cotton T-Shirt', quantity: 1, price: 29.99 },
-      { name: 'Denim Jeans', quantity: 1, price: 79.99 }
+      { 
+        name: 'Cotton T-Shirt', 
+        quantity: 1, 
+        price: 299, 
+        size: 'M', 
+        color: 'Black',
+        image: '/api/placeholder/100/100'
+      },
+      { 
+        name: 'Denim Jeans', 
+        quantity: 1, 
+        price: 799, 
+        size: 'M', 
+        color: 'Blue',
+        image: '/api/placeholder/100/100'
+      }
+    ],
+    notes: null
+  },
+  {
+    _id: 'ORD-1756747252098-7TGR',
+    id: 'ORD004',
+    customerName: 'Alice Brown',
+    customerEmail: 'alice@example.com',
+    customerPhone: '+1 234 567 8903',
+    customerAddress: '321 Elm St, Miami, FL 33101',
+    total: 1497,
+    totalAmount: 1497,
+    status: 'shipped',
+    orderDate: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
+    createdAt: new Date(Date.now() - 259200000).toISOString(),
+    trackingNumber: 'TRK555444333',
+    otpVerified: false,
+    items: [
+      { 
+        name: 'Summer Dress', 
+        quantity: 2, 
+        price: 599, 
+        size: 'M', 
+        color: 'Green',
+        image: '/api/placeholder/100/100'
+      },
+      { 
+        name: 'Cotton T-Shirt', 
+        quantity: 1, 
+        price: 299, 
+        size: 'S', 
+        color: 'White',
+        image: '/api/placeholder/100/100'
+      }
+    ],
+    notes: 'Gift wrapping requested'
+  },
+  {
+    _id: 'ORD-1756745953196-CCIR',
+    id: 'ORD005',
+    customerName: 'Charlie Wilson',
+    customerEmail: 'charlie@example.com',
+    customerPhone: '+1 234 567 8904',
+    customerAddress: '654 Maple Ave, Seattle, WA 98101',
+    total: 2095,
+    totalAmount: 2095,
+    status: 'confirmed',
+    orderDate: new Date(Date.now() - 345600000).toISOString(), // 4 days ago
+    createdAt: new Date(Date.now() - 345600000).toISOString(),
+    trackingNumber: null,
+    otpVerified: true,
+    items: [
+      { 
+        name: 'Denim Jeans', 
+        quantity: 2, 
+        price: 799, 
+        size: 'L', 
+        color: 'Black',
+        image: '/api/placeholder/100/100'
+      },
+      { 
+        name: 'Cotton T-Shirt', 
+        quantity: 2, 
+        price: 299, 
+        size: 'L', 
+        color: 'Black',
+        image: '/api/placeholder/100/100'
+      }
     ],
     notes: null
   }
