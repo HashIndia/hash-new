@@ -1,10 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import useCartStore from "../stores/useCartStore";
+import useUserStore from "../stores/useUserStore";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 export default function Cart() {
+  const { isAuthenticated, user } = useUserStore();
   const { 
     items, 
     removeFromCart, 
@@ -15,6 +19,18 @@ export default function Cart() {
     getTax,
     getGrandTotal
   } = useCartStore();
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      toast.error('Please login to view your cart');
+    }
+  }, [isAuthenticated]);
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
   const subtotal = getCartTotal();
   const shipping = getShippingCost();

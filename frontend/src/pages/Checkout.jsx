@@ -9,17 +9,34 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { authAPI, ordersAPI, paymentsAPI } from "../services/api";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 
 export default function Checkout() {
   const { items, clearCart, getCartTotal, getShippingCost, getTax, getGrandTotal } = useCartStore();
-  const { user, addresses, setAddresses } = useUserStore();
+  const { user, addresses, setAddresses, isAuthenticated } = useUserStore();
   const { createOrderNotification } = useNotificationStore();
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('online');
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      toast.error('Please login to access checkout');
+    }
+  }, [isAuthenticated]);
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Redirect to cart if no items
+  if (!items || items.length === 0) {
+    return <Navigate to="/cart" replace />;
+  }
 
   // Load addresses when component mounts
   useEffect(() => {

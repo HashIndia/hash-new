@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ordersAPI, handleAPIError } from '../services/api.js';
+import useUserStore from './useUserStore.js';
+import toast from 'react-hot-toast';
 
 const useCartStore = create(
   persist(
@@ -12,6 +14,16 @@ const useCartStore = create(
 
       // Cart Actions
       addToCart: (product, quantity = 1, options = {}) => {
+        // Check if user is authenticated before adding to cart
+        const { isAuthenticated } = useUserStore.getState();
+        
+        if (!isAuthenticated) {
+          toast.error('Please login to add items to cart');
+          // Redirect to login page
+          window.location.href = '/login';
+          return;
+        }
+
         const { items } = get();
         const { size, color } = options;
         

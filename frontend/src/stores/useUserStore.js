@@ -21,6 +21,13 @@ const useUserStore = create(
         if (typeof window !== 'undefined') {
           localStorage.removeItem('safari_auth_token');
         }
+        
+        // Clear cart when logging out for security
+        const cartStore = localStorage.getItem('cart-store');
+        if (cartStore) {
+          localStorage.removeItem('cart-store');
+        }
+        
         set({ 
           user: null, 
           isAuthenticated: false, 
