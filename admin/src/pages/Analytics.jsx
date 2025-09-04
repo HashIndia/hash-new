@@ -149,30 +149,15 @@ TopProductsChart.displayName = 'TopProductsChart';
 
 // Variant Analytics Component for Manufacturing Intelligence
 const VariantAnalyticsSection = memo(() => {
-  const { orders, loadOrders } = useOrderStore(state => ({ 
-    orders: state.orders, 
-    loadOrders: state.loadOrders 
-  }));
-  
-  // Load orders on component mount
-  useEffect(() => {
-    // For development with mock data, orders are already available
-    // In production, this would call loadOrders()
-    if (orders.length === 0) {
-      // loadOrders(); // Uncomment this line when connecting to real API
-    }
-  }, []);
+  const orders = useOrderStore(state => state.orders);
   
   // Process variant sales data
   const variantData = useMemo(() => {
-    console.log('Processing variant data for orders:', orders.length, orders);
     const variants = {};
     
     orders.forEach(order => {
-      console.log('Processing order:', order._id, 'status:', order.status, 'items:', order.items);
       if (order.status !== 'cancelled' && order.items) {
         order.items.forEach(item => {
-          console.log('Processing item:', item.name, 'size:', item.size, 'color:', item.color);
           if (item.size && item.color) {
             const key = `${item.name || 'Unknown Product'}-${item.size}-${item.color}`;
             if (!variants[key]) {
@@ -192,8 +177,6 @@ const VariantAnalyticsSection = memo(() => {
         });
       }
     });
-    
-    console.log('Processed variants:', variants);
     
     // Convert to array and sort by quantity sold
     return Object.values(variants)
