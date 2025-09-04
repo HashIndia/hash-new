@@ -147,6 +147,221 @@ const TopProductsChart = memo(({ data }) => (
 
 TopProductsChart.displayName = 'TopProductsChart';
 
+// Variant Analytics Component for Manufacturing Intelligence
+const VariantAnalyticsSection = memo(() => {
+  const orders = useOrderStore(state => state.orders);
+  
+  // Process variant sales data
+  const variantData = useMemo(() => {
+    const variants = {};
+    
+    orders.forEach(order => {
+      if (order.status !== 'cancelled' && order.items) {
+        order.items.forEach(item => {
+          if (item.size && item.color) {
+            const key = `${item.name || 'Unknown Product'}-${item.size}-${item.color}`;
+            if (!variants[key]) {
+              variants[key] = {
+                productName: item.name || 'Unknown Product',
+                size: item.size,
+                color: item.color,
+                quantity: 0,
+                revenue: 0,
+                orders: new Set()
+              };
+            }
+            variants[key].quantity += item.quantity;
+            variants[key].revenue += (item.price * item.quantity);
+            variants[key].orders.add(order._id);
+          }
+        });
+      }
+    });
+    
+    // Convert to array and sort by quantity sold
+    return Object.values(variants)
+      .map(variant => ({
+        ...variant,
+        orderCount: variant.orders.size
+      }))
+      .sort((a, b) => b.quantity - a.quantity);
+  }, [orders]);
+
+  // Group by product for better overview
+  const productGroups = useMemo(() => {
+    const groups = {};
+    variantData.forEach(variant => {
+      if (!groups[variant.productName]) {
+        groups[variant.productName] = [];
+      }
+      groups[variant.productName].push(variant);
+    });
+    return groups;
+  }, [variantData]);
+
+  // Top performing variants for quick insights
+  const topVariants = variantData.slice(0, 10);
+
+  return (
+    <div className="space-y-6">
+      {/* Quick Insights */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="bg-blue-50 p-4 rounded-lg">
+          <h4 className="text-sm font-semibold text-blue-900 mb-1">Total Variants Sold</h4>
+          <p className="text-2xl font-bold text-blue-600">{variantData.length}</p>
+        </div>
+        <div className="bg-green-50 p-4 rounded-lg">
+          <h4 className="text-sm font-semibold text-green-900 mb-1">Best Selling Variant</h4>
+          <p className="text-sm font-bold text-green-600">
+            {topVariants[0] ? `${topVariants[0].productName} - ${topVariants[0].size} - ${topVariants[0].color}` : 'No data'}
+          </p>
+          <p className="text-xs text-green-700">
+            {topVariants[0] ? `${topVariants[0].quantity} units` : ''}
+          </p>
+        </div>
+        <div className="bg-purple-50 p-4 rounded-lg">
+          <h4 className="text-sm font-semibold text-purple-900 mb-1">Total Units Sold</h4>
+          <p className="text-2xl font-bold text-purple-600">
+            {variantData.reduce((sum, variant) => sum + variant.quantity, 0)}
+          </p>
+        </div>
+      </div>
+
+      {/* Top 10 Variants Chart */}
+      <div className="mb-6">
+        <h4 className="text-lg font-semibold text-gray-900 mb-4">Top 10 Best Selling Variants</h4>
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={topVariants}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis 
+                dataKey="productName" 
+                angle={-45}
+                textAnchor="end"
+                height={100}
+                interval={0}
+                fontSize={10}
+              />
+              <YAxis />
+              <Tooltip 
+                formatter={(value, name) => [value, name === 'quantity' ? 'Units Sold' : 'Revenue']}
+                labelFormatter={(label) => {
+                  const variant = topVariants.find(v => v.productName === label);
+                  return variant ? `${variant.productName} (${variant.size} - ${variant.color})` : label;
+                }}
+              />
+              <Bar dataKey="quantity" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Detailed Variant Table */}
+      <div>
+        <h4 className="text-lg font-semibold text-gray-900 mb-4">Detailed Variant Analysis</h4>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse border border-gray-200 rounded-lg">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-900">Product</th>
+                <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-900">Size</th>
+                <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-900">Color</th>
+                <th className="border border-gray-200 px-4 py-3 text-right text-sm font-semibold text-gray-900">Units Sold</th>
+                <th className="border border-gray-200 px-4 py-3 text-right text-sm font-semibold text-gray-900">Revenue</th>
+                <th className="border border-gray-200 px-4 py-3 text-right text-sm font-semibold text-gray-900">Orders</th>
+                <th className="border border-gray-200 px-4 py-3 text-right text-sm font-semibold text-gray-900">Avg/Order</th>
+              </tr>
+            </thead>
+            <tbody>
+              {variantData.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="border border-gray-200 px-4 py-8 text-center text-gray-500">
+                    No variant data available. Sales data will appear here once orders are placed.
+                  </td>
+                </tr>
+              ) : (
+                variantData.map((variant, index) => (
+                  <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    <td className="border border-gray-200 px-4 py-3 text-sm font-medium text-gray-900">
+                      {variant.productName}
+                    </td>
+                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-700">
+                      {variant.size}
+                    </td>
+                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-700">
+                      <div className="flex items-center">
+                        <div 
+                          className="w-4 h-4 rounded-full mr-2 border border-gray-300"
+                          style={{ backgroundColor: variant.color.toLowerCase() === 'white' ? '#f3f4f6' : variant.color.toLowerCase() }}
+                          title={variant.color}
+                        />
+                        {variant.color}
+                      </div>
+                    </td>
+                    <td className="border border-gray-200 px-4 py-3 text-sm text-right font-semibold text-gray-900">
+                      {variant.quantity}
+                    </td>
+                    <td className="border border-gray-200 px-4 py-3 text-sm text-right text-gray-700">
+                      ₹{variant.revenue.toLocaleString()}
+                    </td>
+                    <td className="border border-gray-200 px-4 py-3 text-sm text-right text-gray-700">
+                      {variant.orderCount}
+                    </td>
+                    <td className="border border-gray-200 px-4 py-3 text-sm text-right text-gray-700">
+                      {(variant.quantity / variant.orderCount).toFixed(1)}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Manufacturing Recommendations */}
+      {variantData.length > 0 && (
+        <div className="mt-6">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">Manufacturing Recommendations</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+              <h5 className="font-semibold text-green-900 mb-2">🏆 High Demand Variants</h5>
+              <p className="text-sm text-green-800 mb-2">Focus production on these top performers:</p>
+              <ul className="text-sm text-green-700 space-y-1">
+                {topVariants.slice(0, 3).map((variant, index) => (
+                  <li key={index}>
+                    • {variant.productName} - {variant.size} - {variant.color} ({variant.quantity} units)
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+              <h5 className="font-semibold text-yellow-900 mb-2">📊 Size Analysis</h5>
+              <p className="text-sm text-yellow-800 mb-2">Most popular sizes:</p>
+              <div className="text-sm text-yellow-700">
+                {(() => {
+                  const sizeStats = {};
+                  variantData.forEach(variant => {
+                    sizeStats[variant.size] = (sizeStats[variant.size] || 0) + variant.quantity;
+                  });
+                  return Object.entries(sizeStats)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 3)
+                    .map(([size, quantity]) => (
+                      <div key={size}>• {size}: {quantity} units</div>
+                    ));
+                })()}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
+VariantAnalyticsSection.displayName = 'VariantAnalyticsSection';
+
 const Analytics = () => {
   const [dateRange, setDateRange] = useState('7d');
   const [recentActivities, setRecentActivities] = useState([]);
@@ -450,6 +665,28 @@ const Analytics = () => {
           </Card>
         </motion.div>
       </div>
+
+      {/* Sales Analytics by Variants - Manufacturing Intelligence */}
+      <motion.div
+        key="variant-analytics"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+      >
+        <Card className="p-6 mb-6">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Manufacturing Intelligence</h3>
+              <p className="text-sm text-gray-600">Sales data by product variants to optimize production</p>
+            </div>
+            <Button variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-2" />
+              Export Manufacturing Report
+            </Button>
+          </div>
+          <VariantAnalyticsSection />
+        </Card>
+      </motion.div>
 
       {/* Charts Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
