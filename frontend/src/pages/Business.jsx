@@ -31,6 +31,7 @@ export default function Business() {
       title: "Business Information",
       details: [
         { label: "Business Name", value: "Hash Clothing" },
+        { label: "Manufacturer", value: "Orca Whale Inc" },
         { label: "Business Type", value: "Student-Run Enterprise" },
         { label: "Industry", value: "Custom Apparel & Merchandise" },
         { label: "Founded", value: "2023" },
@@ -151,6 +152,38 @@ export default function Business() {
               </Card>
             ))}
           </div>
+        </motion.div>
+
+        {/* Manufacturer Information */}
+        <motion.div variants={itemVariants} className="mb-16">
+          <Card className="border border-border shadow-sm bg-card">
+            <CardContent className="p-8">
+              <div className="text-center mb-8">
+                <Building className="w-12 h-12 text-foreground mx-auto mb-4" />
+                <h3 className="text-2xl font-semibold text-foreground mb-4">Manufacturing Partner</h3>
+                <p className="text-muted-foreground max-w-3xl mx-auto">
+                  Hash Clothing products are manufactured by Orca Whale Inc, ensuring quality production and reliable delivery for all our customers.
+                </p>
+              </div>
+              <div className="grid md:grid-cols-3 gap-6 text-center">
+                <div className="p-6 border border-border rounded-lg">
+                  <Shield className="w-8 h-8 text-foreground mx-auto mb-3" />
+                  <h4 className="font-semibold text-foreground mb-2">Quality Assurance</h4>
+                  <p className="text-muted-foreground text-sm">All products manufactured under strict quality control standards</p>
+                </div>
+                <div className="p-6 border border-border rounded-lg">
+                  <Award className="w-8 h-8 text-foreground mx-auto mb-3" />
+                  <h4 className="font-semibold text-foreground mb-2">Certified Production</h4>
+                  <p className="text-muted-foreground text-sm">Manufactured by Orca Whale Inc with industry compliance</p>
+                </div>
+                <div className="p-6 border border-border rounded-lg">
+                  <Globe className="w-8 h-8 text-foreground mx-auto mb-3" />
+                  <h4 className="font-semibold text-foreground mb-2">Reliable Partner</h4>
+                  <p className="text-muted-foreground text-sm">Trusted manufacturing partnership for consistent delivery</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
 
         {/* Licenses and Certifications */}

@@ -41,7 +41,7 @@ const RazorpayPayment = ({ order, onPaymentSuccess, onPaymentFailure }) => {
         amount: amount, // Amount in paise
         currency: currency,
         name: 'Hash Store',
-        description: `Order #${order.orderNumber}`,
+        description: `Order #${order.orderNumber} - Manufactured by Orca Whale Inc`,
         order_id: razorpayOrderId,
         handler: async function (response) {
           try {
@@ -156,6 +156,9 @@ const RazorpayPayment = ({ order, onPaymentSuccess, onPaymentFailure }) => {
             <span className="text-xs text-gray-500">Accepted:</span>
             <span className="text-xs text-gray-500">Cards • UPI • Wallets • Net Banking</span>
           </div>
+          <p className="text-xs text-gray-400 mt-2">
+            Products manufactured by Orca Whale Inc
+          </p>
         </div>
       </div>
     </div>

@@ -86,7 +86,24 @@ export default function Terms() {
                 </motion.section>
 
                 <motion.section className="mb-12" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">4. Orders and Payment</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">4. Manufacturing and Production</h2>
+                  <p className="text-muted-foreground mb-4 leading-relaxed">
+                    All Hash Clothing products are manufactured by Orca Whale Inc, our trusted manufacturing partner. This ensures:
+                  </p>
+                  <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                    <li>Consistent quality standards across all products</li>
+                    <li>Compliance with industry manufacturing regulations</li>
+                    <li>Ethical production practices and worker safety standards</li>
+                    <li>Quality control and assurance processes</li>
+                    <li>Reliable supply chain management</li>
+                  </ul>
+                  <p className="text-muted-foreground mt-4 leading-relaxed">
+                    By purchasing from Hash, you acknowledge that Orca Whale Inc is the manufacturer of the products you receive.
+                  </p>
+                </motion.section>
+
+                <motion.section className="mb-12" variants={itemVariants}>
+                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">5. Orders and Payment</h2>
                   <p className="text-muted-foreground mb-4 leading-relaxed">
                     When you place an order with us:
                   </p>
@@ -100,7 +117,7 @@ export default function Terms() {
                 </motion.section>
 
                 <motion.section className="mb-12" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">5. Shipping and Delivery</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">6. Shipping and Delivery</h2>
                   <p className="text-muted-foreground mb-4 leading-relaxed">
                     Our shipping and delivery terms:
                   </p>
@@ -113,7 +130,7 @@ export default function Terms() {
                 </motion.section>
 
                 <motion.section className="mb-12" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">6. Returns and Exchanges</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">7. Returns and Exchanges</h2>
                   <p className="text-muted-foreground mb-4 leading-relaxed">
                     Our return policy includes:
                   </p>
@@ -127,7 +144,7 @@ export default function Terms() {
                 </motion.section>
 
                 <motion.section className="mb-12" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">7. User Accounts</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">8. User Accounts</h2>
                   <p className="text-muted-foreground mb-4 leading-relaxed">
                     When creating an account:
                   </p>
@@ -140,7 +157,7 @@ export default function Terms() {
                 </motion.section>
 
                 <motion.section className="mb-12" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">8. Prohibited Uses</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">9. Prohibited Uses</h2>
                   <p className="text-muted-foreground mb-4 leading-relaxed">
                     You may not use our service:
                   </p>
@@ -154,20 +171,21 @@ export default function Terms() {
                 </motion.section>
 
                 <motion.section className="mb-12" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">9. Limitation of Liability</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">10. Limitation of Liability</h2>
                   <p className="text-muted-foreground mb-4 leading-relaxed">
                     In no event shall Hash or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on Hash's website.
                   </p>
                 </motion.section>
 
                 <motion.section className="mb-8" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">10. Contact Information</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">11. Contact Information</h2>
                   <p className="text-muted-foreground mb-6 leading-relaxed">
                     If you have any questions about these Terms of Service, please contact us:
                   </p>
                   <div className="bg-card border border-border p-6 rounded-lg">
                     <h3 className="text-lg font-semibold text-foreground mb-4 tracking-wide">HASH</h3>
                     <div className="space-y-2">
+                      <p className="text-muted-foreground"><strong>Manufacturer:</strong> Orca Whale Inc</p>
                       <p className="text-muted-foreground">Email: legal@hash.com</p>
                       <p className="text-muted-foreground">Phone: +91 9876543210</p>
                       <p className="text-muted-foreground">Address: 123 Fashion Street, Mumbai, India</p>

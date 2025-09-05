@@ -95,7 +95,20 @@ export default function Privacy() {
                 </motion.section>
 
                 <motion.section className="mb-12" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">4. Data Security</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">4. Manufacturing Partner</h2>
+                  <p className="text-muted-foreground mb-4 leading-relaxed">
+                    All Hash Clothing products are manufactured by Orca Whale Inc. In the process of fulfilling your orders:
+                  </p>
+                  <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                    <li>We may share necessary order details with Orca Whale Inc for production and quality control</li>
+                    <li>No personal information beyond what's required for order fulfillment is shared</li>
+                    <li>Orca Whale Inc is bound by strict confidentiality agreements</li>
+                    <li>Your data is protected under the same privacy standards we maintain</li>
+                  </ul>
+                </motion.section>
+
+                <motion.section className="mb-12" variants={itemVariants}>
+                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">5. Data Security</h2>
                   <p className="text-muted-foreground mb-4 leading-relaxed">
                     We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. This includes:
                   </p>
@@ -108,7 +121,7 @@ export default function Privacy() {
                 </motion.section>
 
                 <motion.section className="mb-12" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">5. Your Rights</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">6. Your Rights</h2>
                   <p className="text-muted-foreground mb-4 leading-relaxed">
                     You have the following rights regarding your personal information:
                   </p>
@@ -122,27 +135,28 @@ export default function Privacy() {
                 </motion.section>
 
                 <motion.section className="mb-12" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">6. Cookies and Tracking</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">7. Cookies and Tracking</h2>
                   <p className="text-muted-foreground mb-4 leading-relaxed">
                     We use cookies and similar technologies to enhance your browsing experience, analyze site traffic, and personalize content. You can control cookie settings through your browser preferences.
                   </p>
                 </motion.section>
 
                 <motion.section className="mb-12" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">7. Children's Privacy</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">8. Children's Privacy</h2>
                   <p className="text-muted-foreground mb-4 leading-relaxed">
                     Our services are not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13.
                   </p>
                 </motion.section>
 
                 <motion.section className="mb-8" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">8. Contact Us</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">9. Contact Us</h2>
                   <p className="text-muted-foreground mb-6 leading-relaxed">
                     If you have any questions about this Privacy Policy or our data practices, please contact us:
                   </p>
                   <div className="bg-card border border-border p-6 rounded-lg">
                     <h3 className="text-lg font-semibold text-foreground mb-4 tracking-wide">HASH</h3>
                     <div className="space-y-2">
+                      <p className="text-muted-foreground"><strong>Manufacturer:</strong> Orca Whale Inc</p>
                       <p className="text-muted-foreground">Email: privacy@hash.com</p>
                       <p className="text-muted-foreground">Phone: +91 9876543210</p>
                       <p className="text-muted-foreground">Address: 123 Fashion Street, Mumbai, India</p>

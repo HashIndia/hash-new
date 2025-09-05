@@ -322,6 +322,35 @@ export default function Contact() {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Business Information */}
+        <motion.div variants={itemVariants} className="mt-16">
+          <Card className="border border-border shadow-sm bg-card">
+            <CardContent className="p-8">
+              <h2 className="text-2xl font-semibold text-foreground mb-6 text-center">Business Information</h2>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-foreground mb-4">Company Details</h3>
+                  <div className="space-y-2 text-muted-foreground">
+                    <p><strong className="text-foreground">Business Name:</strong> Hash Clothing</p>
+                    <p><strong className="text-foreground">Manufacturer:</strong> Orca Whale Inc</p>
+                    <p><strong className="text-foreground">Type:</strong> Student-Run Enterprise</p>
+                    <p><strong className="text-foreground">Founded:</strong> 2023</p>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-foreground mb-4">Location</h3>
+                  <div className="space-y-2 text-muted-foreground">
+                    <p><strong className="text-foreground">Base:</strong> NITK Surathkal Campus</p>
+                    <p><strong className="text-foreground">City:</strong> Surathkal, Karnataka</p>
+                    <p><strong className="text-foreground">Postal Code:</strong> 575025</p>
+                    <p><strong className="text-foreground">Country:</strong> India</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </motion.div>
     </div>
   );

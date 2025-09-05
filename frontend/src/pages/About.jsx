@@ -98,11 +98,19 @@ export default function About() {
                 <div className="text-center">
                   <div className="bg-card border border-border rounded-lg p-8">
                     <h3 className="text-2xl font-bold text-foreground mb-4">Our Mission</h3>
-                    <p className="text-muted-foreground leading-relaxed">
+                    <p className="text-muted-foreground leading-relaxed mb-4">
                       To provide high-quality, affordable clothing and merchandise that celebrates student life, 
                       creativity, and college spirit while building a sustainable student-run business that 
                       inspires other young entrepreneurs.
                     </p>
+                    <div className="border-t border-border pt-4">
+                      <p className="text-sm text-muted-foreground">
+                        <strong className="text-foreground">Manufactured by:</strong> Orca Whale Inc
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Quality assured manufacturing partner
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
