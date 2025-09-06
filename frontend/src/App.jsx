@@ -26,12 +26,14 @@ import NotFound from './pages/NotFound';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import AuthInitializer from './components/AuthInitializer';
+import BackgroundLoadingIndicator from './components/BackgroundLoadingIndicator';
 import Wishlist from './pages/Wishlist';
 
 export default function App() {
   return (
     <div className="min-h-screen flex flex-col font-inter bg-background text-foreground dark">
       <AuthInitializer />
+      <BackgroundLoadingIndicator />
       <Toaster 
         position="top-center"
         reverseOrder={false}

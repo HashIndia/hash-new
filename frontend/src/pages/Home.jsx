@@ -2,8 +2,9 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import useProductStore from "../stores/useProductStore";
+import HomePageSkeleton from "../components/HomePageSkeleton";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { 
   TrendingUp, 
@@ -28,11 +29,34 @@ import {
 
 export default function Home() {
   const { products, initialize, isLoading } = useProductStore();
+  const [showSkeleton, setShowSkeleton] = useState(true);
   const featured = products.slice(0, 6);
 
   useEffect(() => {
-    initialize();
-  }, [initialize]);
+    // Initialize only if not already initialized - background loading handles this
+    if (products.length === 0 && !isLoading) {
+      initialize();
+    }
+    
+    // Show skeleton for a short time, then show content regardless of loading state
+    const timer = setTimeout(() => {
+      setShowSkeleton(false);
+    }, 1500); // Show skeleton for 1.5 seconds max
+    
+    return () => clearTimeout(timer);
+  }, [initialize, products.length, isLoading]);
+
+  useEffect(() => {
+    // Hide skeleton once we have products
+    if (products.length > 0) {
+      setShowSkeleton(false);
+    }
+  }, [products]);
+
+  // Show skeleton initially for better perceived performance
+  if (showSkeleton && products.length === 0) {
+    return <HomePageSkeleton />;
+  }
 
   const stats = [
     {

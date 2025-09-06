@@ -18,6 +18,10 @@ export const getAllProducts = catchAsync(async (req, res, next) => {
     status = 'active'
   } = req.query;
 
+  // Limit the number of products per page to prevent long loading times
+  const maxLimit = 50;
+  const actualLimit = Math.min(parseInt(limit), maxLimit);
+
   // Build filter object
   const filter = { status };
 
@@ -35,13 +39,18 @@ export const getAllProducts = catchAsync(async (req, res, next) => {
     filter.$text = { $search: search };
   }
 
-  // Execute query with pagination
-  const skip = (page - 1) * limit;
+  // Execute query with pagination and optimized field selection
+  const skip = (page - 1) * actualLimit;
+  
+  // Only select essential fields for list view to reduce data transfer
+  const productFields = 'name price category images stock rating numReviews createdAt status brand';
+  
   const products = await Product.find(filter)
+    .select(productFields)
     .sort(sort)
     .skip(skip)
-    .limit(parseInt(limit))
-    .select('-__v');
+    .limit(actualLimit)
+    .lean(); // Use lean() for better performance
 
   const total = await Product.countDocuments(filter);
 
@@ -50,7 +59,7 @@ export const getAllProducts = catchAsync(async (req, res, next) => {
     results: products.length,
     total,
     page: parseInt(page),
-    totalPages: Math.ceil(total / limit),
+    totalPages: Math.ceil(total / actualLimit),
     data: {
       products
     }

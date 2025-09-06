@@ -2,84 +2,109 @@ import { useEffect, useState } from 'react';
 import { authAPI } from '../services/api';
 import useUserStore from '../stores/useUserStore';
 import useProductStore from '../stores/useProductStore';
+import performanceMonitor from '../utils/performanceMonitor';
+import { startBackgroundLoading, endBackgroundLoading } from './BackgroundLoadingIndicator';
 
 export default function AuthInitializer() {
-  const [isInitialized, setIsInitialized] = useState(false);
   const { user, isAuthenticated, setUser, setWishlist, setAddresses, logout } = useUserStore();
   const { initialize: initializeProducts } = useProductStore();
 
   useEffect(() => {
     let isMounted = true;
 
-    const initialize = async () => {
+    // Background initialization - doesn't block UI
+    const initializeInBackground = async () => {
+      performanceMonitor.startInitialization();
+      startBackgroundLoading('initialization');
+      
       try {
-        // Initialize products first (doesn't require auth)
-        await initializeProducts();
+        console.log('🔄 Starting background initialization...');
+        
+        // Initialize products in background
+        startBackgroundLoading('products');
+        performanceMonitor.startAPICall('products-init');
+        initializeProducts().then(() => {
+          performanceMonitor.endAPICall('products-init');
+          endBackgroundLoading('products');
+          console.log('✅ Products loaded in background');
+        }).catch(error => {
+          performanceMonitor.endAPICall('products-init');
+          endBackgroundLoading('products');
+          console.warn('⚠️ Products initialization failed:', error);
+        });
 
         // Only check auth if we have stored authentication state
         if (!isAuthenticated || !user) {
-          setIsInitialized(true);
+          console.log('👤 No stored auth state, skipping auth check');
+          performanceMonitor.endInitialization();
+          endBackgroundLoading('initialization');
           return;
         }
 
-        const response = await authAPI.getCurrentUser();
+        console.log('🔐 Checking authentication in background...');
+        startBackgroundLoading('authentication');
+        performanceMonitor.startAPICall('auth-check');
+        
+        try {
+          const response = await authAPI.getCurrentUser();
+          performanceMonitor.endAPICall('auth-check');
+          endBackgroundLoading('authentication');
 
-        if (isMounted && response.data.user) {
-          setUser(response.data.user);
-          
-          // Load user's wishlist
-          try {
-            const wishlistResponse = await authAPI.getWishlist();
-            if (wishlistResponse.data.wishlist) {
-              setWishlist(wishlistResponse.data.wishlist);
-            }
-          } catch (wishlistError) {
-            // Wishlist loading failed
+          if (isMounted && response.data.user) {
+            console.log('✅ Authentication successful');
+            setUser(response.data.user);
+            
+            // Load user data in parallel in background
+            startBackgroundLoading('user-data');
+            Promise.allSettled([
+              authAPI.getWishlist().then(wishlistResponse => {
+                if (wishlistResponse.data.wishlist) {
+                  setWishlist(wishlistResponse.data.wishlist);
+                  console.log('✅ Wishlist loaded in background');
+                }
+              }),
+              authAPI.getAddresses().then(addressResponse => {
+                if (addressResponse.data.addresses) {
+                  setAddresses(addressResponse.data.addresses);
+                  console.log('✅ Addresses loaded in background');
+                }
+              })
+            ]).then(() => {
+              endBackgroundLoading('user-data');
+            }).catch(error => {
+              endBackgroundLoading('user-data');
+              console.warn('⚠️ Secondary data loading failed:', error);
+            });
+          } else if (isMounted) {
+            console.log('❌ Authentication failed, logging out');
+            logout();
           }
-
-          // Load user's addresses
-          try {
-            const addressResponse = await authAPI.getAddresses();
-            if (addressResponse.data.addresses) {
-              setAddresses(addressResponse.data.addresses);
-            }
-          } catch (addressError) {
-            // Address loading failed
-          }
-        } else if (isMounted) {
-          logout();
-        }
-      } catch (error) {
-        if (isMounted) {
-          // Don't logout on product loading failure, only on auth failure
-          if (isAuthenticated) {
+        } catch (authError) {
+          performanceMonitor.endAPICall('auth-check');
+          endBackgroundLoading('authentication');
+          if (isMounted && isAuthenticated) {
+            console.log('❌ Auth check failed, logging out');
             logout();
           }
         }
+        
+      } catch (error) {
+        console.warn('⚠️ Background initialization error:', error);
       } finally {
-        if (isMounted) {
-          setIsInitialized(true);
-        }
+        performanceMonitor.endInitialization();
+        endBackgroundLoading('initialization');
+        console.log('🏁 Background initialization complete');
       }
     };
 
-    initialize();
+    // Start background initialization without blocking
+    initializeInBackground();
 
     return () => {
       isMounted = false;
     };
   }, []); // Empty dependency array - only run once on mount
 
-  if (!isInitialized) {
-    return (
-      <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // No blocking UI - always return null since we initialize in background
   return null;
 }
