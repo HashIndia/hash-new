@@ -15,6 +15,7 @@ import { Badge } from '../components/ui/badge';
 import { Grid, List, Search, SlidersHorizontal } from 'lucide-react';
 import { productsAPI } from '../services/api';
 import ShopPageSkeleton from '../components/ShopPageSkeleton';
+import SEO from '../components/SEO';
 import toast from 'react-hot-toast';
 
 export default function Shop() {
@@ -94,6 +95,38 @@ export default function Shop() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="Shop Premium Fashion - HASH India | Latest Collection"
+        description="Shop the latest collection at HASH India. Discover premium t-shirts, jeans, dresses, and accessories. Free shipping, easy returns, and best quality guaranteed. Find your style today!"
+        keywords="shop fashion India, buy clothes online, HASH India shop, t-shirts online, jeans online, dresses online, accessories, fashion shopping, trendy clothes India, online clothing store"
+        url="https://hashindia.com/shop"
+        canonicalUrl="https://hashindia.com/shop"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "HASH India Shop",
+          "description": "Shop premium fashion collection at HASH India",
+          "url": "https://hashindia.com/shop",
+          "mainEntity": {
+            "@type": "ItemList",
+            "name": "Fashion Products",
+            "numberOfItems": products.length,
+            "itemListElement": products.slice(0, 10).map((product, index) => ({
+              "@type": "Product",
+              "position": index + 1,
+              "name": product.name,
+              "description": product.description,
+              "image": product.images?.[0]?.url || product.images?.[0],
+              "offers": {
+                "@type": "Offer",
+                "price": product.price,
+                "priceCurrency": "INR",
+                "availability": "https://schema.org/InStock"
+              }
+            }))
+          }
+        }}
+      />
       {/* Hero Section */}
       <section className="bg-hash-purple text-white py-16 relative overflow-hidden">
         {/* Background Pattern */}

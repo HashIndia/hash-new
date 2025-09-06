@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Input } from "../components/ui/input";
 import useProductStore from "../stores/useProductStore";
 import HomePageSkeleton from "../components/HomePageSkeleton";
+import SEO from "../components/SEO";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -195,6 +196,53 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="HASH India - Premium Fashion Store | Shop Latest Trends Online"
+        description="HASH India - Discover premium fashion and clothing. Shop the latest trends in men's and women's fashion, t-shirts, jeans, dresses, and accessories with fast delivery across India. Best quality guaranteed."
+        keywords="HASH India, hashindia, premium fashion, online clothing store, men's fashion, women's fashion, t-shirts, jeans, dresses, accessories, fashion trends, Indian fashion brand, online shopping India, latest fashion, trendy clothes"
+        url="https://hashindia.com/"
+        canonicalUrl="https://hashindia.com/"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "HASH India",
+          "alternateName": "hashindia",
+          "url": "https://hashindia.com",
+          "logo": "https://hashindia.com/hash-logo-text.jpg",
+          "description": "HASH India - Premium fashion store offering latest trends in men's and women's clothing with fast delivery across India.",
+          "areaServed": "India",
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "HASH India Fashion Collection",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Product",
+                  "name": "Premium T-Shirts",
+                  "category": "Men's & Women's Fashion"
+                }
+              },
+              {
+                "@type": "Offer", 
+                "itemOffered": {
+                  "@type": "Product",
+                  "name": "Designer Jeans",
+                  "category": "Men's & Women's Fashion"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Product", 
+                  "name": "Trendy Dresses",
+                  "category": "Women's Fashion"
+                }
+              }
+            ]
+          }
+        }}
+      />
       {/* Hero Section */}
       <section className="relative bg-background border-b border-border overflow-hidden">
         

@@ -1,5 +1,6 @@
 import { Card, CardContent } from "../components/ui/card";
 import { motion } from "framer-motion";
+import SEO from "../components/SEO";
 import { Users, Award, Globe, Heart } from "lucide-react";
 
 export default function About() {
@@ -50,6 +51,27 @@ export default function About() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="About HASH India - Premium Fashion Brand Story"
+        description="Learn about HASH India's journey in premium fashion. Discover our commitment to quality, style, and innovation in men's and women's clothing. Founded with passion for fashion excellence."
+        keywords="HASH India about, fashion brand story, premium clothing brand, fashion company India, HASH India history, quality fashion, brand values"
+        url="https://hashindia.com/about"
+        canonicalUrl="https://hashindia.com/about"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "AboutPage",
+          "name": "About HASH India",
+          "description": "Learn about HASH India's journey in premium fashion and our commitment to quality.",
+          "url": "https://hashindia.com/about",
+          "mainEntity": {
+            "@type": "Organization",
+            "name": "HASH India",
+            "description": "Premium fashion brand committed to quality, style, and innovation",
+            "foundingDate": "2020",
+            "areaServed": "India"
+          }
+        }}
+      />
       {/* Header Section */}
       <div className="bg-black text-white py-16">
         <motion.div 

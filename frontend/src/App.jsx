@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { HelmetProvider } from 'react-helmet-async';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
 import ProductDetails from './pages/ProductDetails';
@@ -31,23 +32,24 @@ import Wishlist from './pages/Wishlist';
 
 export default function App() {
   return (
-    <div className="min-h-screen flex flex-col font-inter bg-background text-foreground dark">
-      <AuthInitializer />
-      <BackgroundLoadingIndicator />
-      <Toaster 
-        position="top-center"
-        reverseOrder={false}
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: 'hsl(var(--card))',
-            color: 'hsl(var(--foreground))',
-            border: '1px solid hsl(var(--border))',
-          },
-        }}
-      />
-      <Header />
-      <main className="flex-1">
+    <HelmetProvider>
+      <div className="min-h-screen flex flex-col font-inter bg-background text-foreground dark">
+        <AuthInitializer />
+        <BackgroundLoadingIndicator />
+        <Toaster 
+          position="top-center"
+          reverseOrder={false}
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: 'hsl(var(--card))',
+              color: 'hsl(var(--foreground))',
+              border: '1px solid hsl(var(--border))',
+            },
+          }}
+        />
+        <Header />
+        <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
@@ -77,5 +79,6 @@ export default function App() {
       </main>
       <Footer />
     </div>
+    </HelmetProvider>
   );
 }

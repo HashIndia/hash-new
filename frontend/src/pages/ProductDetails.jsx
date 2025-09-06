@@ -9,6 +9,7 @@ import { Badge } from '../components/ui/badge';
 import ReviewsList from '../components/ReviewsList';
 import SizeChart from '../components/SizeChart';
 import ProductDetailSkeleton from '../components/ProductDetailSkeleton';
+import SEO from '../components/SEO';
 import useProductStore from '../stores/useProductStore';
 import useCartStore from '../stores/useCartStore';
 import useUserStore from '../stores/useUserStore';
@@ -218,6 +219,41 @@ export default function ProductDetails() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title={`${safeProduct.name} - Premium ${safeProduct.category} | HASH India`}
+        description={`Buy ${safeProduct.name} online at HASH India. ${safeProduct.description || 'Premium quality fashion item'} ₹${safeProduct.price}. Fast delivery, easy returns, best quality guaranteed.`}
+        keywords={`${safeProduct.name}, ${safeProduct.category}, HASH India, buy ${safeProduct.category} online, premium fashion, trendy ${safeProduct.category}, fashion shopping`}
+        url={`https://hashindia.com/product/${safeProduct._id}`}
+        canonicalUrl={`https://hashindia.com/product/${safeProduct._id}`}
+        image={safeProduct.images?.[0]?.url || safeProduct.images?.[0] || 'https://hashindia.com/hash-logo-text.jpg'}
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": safeProduct.name,
+          "description": safeProduct.description,
+          "image": safeProduct.images?.map(img => img.url || img) || ['https://hashindia.com/hash-logo-text.jpg'],
+          "brand": {
+            "@type": "Brand",
+            "name": "HASH India"
+          },
+          "category": safeProduct.category,
+          "offers": {
+            "@type": "Offer",
+            "price": safeProduct.price,
+            "priceCurrency": "INR",
+            "availability": safeProduct.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            "seller": {
+              "@type": "Organization",
+              "name": "HASH India"
+            }
+          },
+          "aggregateRating": safeProduct.reviewStats?.totalReviews > 0 ? {
+            "@type": "AggregateRating",
+            "ratingValue": safeProduct.reviewStats.averageRating || 5,
+            "reviewCount": safeProduct.reviewStats.totalReviews || 1
+          } : undefined
+        }}
+      />
       <div className="container mx-auto px-4 py-8">
         {/* Back Button */}
         <Button

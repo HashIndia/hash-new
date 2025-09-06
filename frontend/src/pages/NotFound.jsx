@@ -1,10 +1,18 @@
 import { Button } from "../components/ui/button";
 import { motion } from "framer-motion";
+import SEO from "../components/SEO";
 import { Home, Search, ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden">
+      <SEO 
+        title="Page Not Found - HASH India"
+        description="The page you're looking for doesn't exist. Browse our premium fashion collection or return to HASH India homepage."
+        url="https://hashindia.com/404"
+        noIndex={true}
+        noFollow={true}
+      />
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_75%_75%,hsl(var(--hash-blue))_0%,transparent_50%)] opacity-5"></div>
       
