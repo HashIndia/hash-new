@@ -272,12 +272,35 @@ export default function ProductDetails() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
-              className="relative overflow-hidden rounded-2xl bg-gray-50 border border-border shadow-xl"
+              className="relative overflow-hidden rounded-2xl border border-border shadow-xl"
             >
+              {/* Blurred background version of the image */}
+              <div 
+                className="absolute inset-0 opacity-20 blur-xl scale-110"
+                style={{
+                  backgroundImage: `url(${safeProduct.images[activeImage]?.url || '/placeholder-image.jpg'})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat'
+                }}
+              />
+              
+              {/* Gradient overlay for better contrast */}
+              <div 
+                className="absolute inset-0"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(248,250,252,0.8) 0%, rgba(241,245,249,0.6) 50%, rgba(226,232,240,0.8) 100%)'
+                }}
+              />
+              
+              {/* Main product image */}
               <img
                 src={safeProduct.images[activeImage]?.url || '/placeholder-image.jpg'}
                 alt={safeProduct.name}
-                className="w-full h-96 lg:h-[500px] object-contain"
+                className="relative w-full h-96 lg:h-[500px] object-contain z-10"
+                style={{
+                  filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15))'
+                }}
               />
               {discount > 0 && (
                 <Badge className="absolute top-4 left-4 bg-destructive text-destructive-foreground">
@@ -301,14 +324,33 @@ export default function ProductDetails() {
                   <button
                     key={index}
                     onClick={() => setActiveImage(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all bg-gray-50 ${
+                    className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
                       activeImage === index ? 'border-hash-purple' : 'border-border'
                     }`}
                   >
+                    {/* Blurred background for thumbnail */}
+                    <div 
+                      className="absolute inset-0 opacity-30 blur-sm scale-110"
+                      style={{
+                        backgroundImage: `url(${image.url})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                      }}
+                    />
+                    
+                    {/* Gradient overlay */}
+                    <div 
+                      className="absolute inset-0"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(248,250,252,0.7) 0%, rgba(241,245,249,0.5) 100%)'
+                      }}
+                    />
+                    
+                    {/* Thumbnail image */}
                     <img
                       src={image.url}
                       alt={`${safeProduct.name} ${index + 1}`}
-                      className="w-full h-full object-contain"
+                      className="relative w-full h-full object-contain z-10"
                     />
                   </button>
                 ))}
