@@ -492,7 +492,7 @@ export default function Orders() {
                               <img
                                 src={item.image || item.product?.images?.[0]?.url || item.product?.images?.[0] || `https://placehold.co/60x60/64748b/fff?text=Item`}
                                 alt={item.name}
-                                className="w-full h-full object-contain"
+                                className="w-full h-full object-cover"
                                 onError={(e) => {
                                   e.target.src = `https://placehold.co/60x60/64748b/fff?text=Item`;
                                 }}

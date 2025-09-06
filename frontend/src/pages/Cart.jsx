@@ -143,7 +143,7 @@ export default function Cart() {
                         <img
                           src={item.product.images?.[0]?.url || item.product.images?.[0] || "https://placehold.co/150x150/64748b/fff?text=Product"}
                           alt={item.product.name}
-                          className="w-full h-full object-contain"
+                          className="w-full h-full object-cover"
                           onError={(e) => {
                             e.target.src = "https://placehold.co/150x150/64748b/fff?text=Product";
                           }}

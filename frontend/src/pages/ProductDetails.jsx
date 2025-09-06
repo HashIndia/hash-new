@@ -311,9 +311,9 @@ export default function ProductDetails() {
                 onClick={handleWishlist}
                 variant="ghost"
                 size="sm"
-                className="absolute top-4 right-4 bg-card/80 backdrop-blur-sm hover:bg-card border border-border"
+                className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm hover:bg-white border-2 border-border hover:border-hash-purple shadow-lg transition-all duration-200 hover:scale-105"
               >
-                <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-hash-pink text-hash-pink' : 'text-muted-foreground'}`} />
+                <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-600 hover:text-red-500'} transition-colors`} />
               </Button>
             </motion.div>
 

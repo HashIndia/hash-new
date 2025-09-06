@@ -172,7 +172,7 @@ const MyReviews = () => {
                           <img
                             src={item.product.images?.[0]?.url || '/placeholder-product.jpg'}
                             alt={item.product.name}
-                            className="w-full h-full object-contain"
+                            className="w-full h-full object-cover"
                           />
                         </div>
                         <div>
@@ -226,7 +226,7 @@ const MyReviews = () => {
                         <img
                           src={review.product?.images?.[0]?.url || '/placeholder-product.jpg'}
                           alt={review.product?.name}
-                          className="w-full h-full object-contain"
+                          className="w-full h-full object-cover"
                         />
                       </div>
                       <div className="flex-1">

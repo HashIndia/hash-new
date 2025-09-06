@@ -847,7 +847,7 @@ export default function Home() {
                     <img
                       src={product.images[0] || "https://placehold.co/400x500/404040/ffffff?text=HASH+Product"}
                       alt={product.name}
-                      className="w-full h-80 object-contain transition-transform duration-500 group-hover:scale-110"
+                      className="w-full h-80 object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300" />
                     
