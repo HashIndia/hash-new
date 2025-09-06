@@ -248,7 +248,7 @@ export default function Cart() {
                   <Button 
                     variant="outline" 
                     size="lg" 
-                    className="w-full border-2 border-border hover:bg-accent rounded-xl py-3"
+                    className="w-full border-2 border-border hover:bg-border/50 rounded-xl py-3"
                     onClick={clearCart}
                   >
                     Clear Cart

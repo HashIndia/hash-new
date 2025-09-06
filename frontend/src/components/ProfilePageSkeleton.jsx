@@ -114,72 +114,128 @@ export default function ProfilePageSkeleton() {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-background"
+      className="min-h-screen bg-background py-8"
     >
-      {/* Header */}
-      <section className="bg-background border-b border-border py-8">
-        <div className="container mx-auto px-6">
-          <div className="bg-gray-200 h-10 rounded w-32 animate-pulse mb-6"></div>
-          <ProfileHeaderSkeleton />
+      <div className="container mx-auto px-4">
+        {/* Page Title */}
+        <div className="text-center mb-8">
+          <div className="bg-gray-200 h-10 rounded w-48 mx-auto animate-pulse"></div>
         </div>
-      </section>
 
-      {/* Main Content */}
-      <section className="py-8">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Sidebar */}
-            <div className="lg:col-span-1">
-              <SidebarSkeleton />
-            </div>
-
-            {/* Content Area */}
-            <div className="lg:col-span-3 space-y-8">
-              {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <StatsCardSkeleton />
-                <StatsCardSkeleton />
-                <StatsCardSkeleton />
-              </div>
-
-              {/* Tab Navigation */}
-              <div className="flex space-x-6 border-b border-border">
-                {['Overview', 'Orders', 'Wishlist', 'Addresses'].map((tab, i) => (
-                  <div key={i} className="bg-gray-200 h-6 w-20 rounded animate-pulse mb-4"></div>
-                ))}
-              </div>
-
-              {/* Recent Orders */}
-              <div className="space-y-6">
-                <div className="bg-gray-200 h-8 rounded w-40 animate-pulse"></div>
-                <div className="space-y-4">
-                  <OrderCardSkeleton />
-                  <OrderCardSkeleton />
-                  <OrderCardSkeleton />
-                </div>
-              </div>
-
-              {/* Addresses Section */}
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="bg-gray-200 h-8 rounded w-32 animate-pulse"></div>
-                  <div className="bg-gray-200 h-10 w-28 rounded-lg animate-pulse"></div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <AddressCardSkeleton />
-                  <AddressCardSkeleton />
-                </div>
-              </div>
-
-              {/* Wishlist Section */}
-              <div className="space-y-6">
-                <div className="bg-gray-200 h-8 rounded w-36 animate-pulse"></div>
-                <WishlistGridSkeleton />
+        {/* Profile Form (if shown) - placeholder */}
+        <div className="mb-6">
+          <div className="bg-card rounded-xl border border-border p-6 animate-pulse">
+            <div className="bg-gray-200 h-8 rounded w-32 mb-4"></div>
+            <div className="space-y-4">
+              <div className="bg-gray-200 h-12 rounded"></div>
+              <div className="bg-gray-200 h-12 rounded"></div>
+              <div className="flex space-x-4">
+                <div className="bg-gray-200 h-10 w-24 rounded-lg"></div>
+                <div className="bg-gray-200 h-10 w-24 rounded-lg"></div>
               </div>
             </div>
           </div>
         </div>
-      </section>
+
+        {/* 3-Column Grid Layout matching actual Profile page */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {/* My Details Column */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            <div className="bg-card border border-border shadow-sm rounded-xl animate-pulse">
+              <div className="bg-card border-b border-border p-4">
+                <div className="bg-gray-200 h-6 rounded w-24"></div>
+              </div>
+              <div className="p-6 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-gray-200 h-4 w-12 rounded"></div>
+                  <div className="bg-gray-200 h-4 w-32 rounded"></div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="bg-gray-200 h-4 w-12 rounded"></div>
+                  <div className="bg-gray-200 h-4 w-40 rounded"></div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="bg-gray-200 h-4 w-12 rounded"></div>
+                  <div className="bg-gray-200 h-4 w-28 rounded"></div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* My Addresses Column - spans 2 columns */}
+          <motion.div
+            className="md:col-span-2"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <div className="bg-card border border-border shadow-sm rounded-xl animate-pulse">
+              <div className="flex flex-row items-center justify-between bg-card border-b border-border p-4">
+                <div className="bg-gray-200 h-6 rounded w-28"></div>
+                <div className="bg-gray-200 h-10 w-24 rounded-lg"></div>
+              </div>
+              <div className="p-6">
+                {/* Address Cards */}
+                <div className="space-y-4">
+                  {[1, 2].map((_, i) => (
+                    <div key={i} className="border border-border rounded-lg p-4 bg-muted/30">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-2">
+                          <div className="bg-gray-200 h-5 w-24 rounded"></div>
+                          <div className="bg-gray-200 h-4 w-full rounded"></div>
+                          <div className="bg-gray-200 h-4 w-3/4 rounded"></div>
+                          <div className="bg-gray-200 h-4 w-1/2 rounded"></div>
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="bg-gray-200 h-8 w-12 rounded"></div>
+                          <div className="bg-gray-200 h-8 w-16 rounded"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Recent Orders Section */}
+        <motion.div 
+          className="mt-8 max-w-6xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <div className="bg-card border border-border shadow-sm rounded-xl animate-pulse">
+            <div className="bg-card border-b border-border p-4">
+              <div className="bg-gray-200 h-6 rounded w-32"></div>
+            </div>
+            <div className="p-6">
+              <div className="space-y-4">
+                {[1, 2].map((_, i) => (
+                  <div key={i} className="border border-border rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="space-y-2">
+                        <div className="bg-gray-200 h-5 w-32 rounded"></div>
+                        <div className="bg-gray-200 h-4 w-24 rounded"></div>
+                      </div>
+                      <div className="bg-gray-200 h-6 w-20 rounded-full"></div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="bg-gray-200 h-4 w-full rounded"></div>
+                      <div className="bg-gray-200 h-4 w-3/4 rounded"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
     </motion.div>
   );
 }

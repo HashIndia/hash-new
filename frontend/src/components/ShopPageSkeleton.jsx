@@ -62,43 +62,61 @@ export default function ShopPageSkeleton() {
       animate={{ opacity: 1 }}
       className="min-h-screen bg-background"
     >
-      {/* Header Section */}
-      <section className="bg-background border-b border-border py-8">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-8 animate-pulse">
-            <div className="bg-gray-200 h-10 rounded w-48 mx-auto mb-4"></div>
-            <div className="bg-gray-200 h-6 rounded w-96 mx-auto"></div>
-          </div>
-          <SearchBarSkeleton />
+      {/* Hero Section Skeleton */}
+      <section className="bg-hash-purple text-white py-16 relative overflow-hidden">
+        <div className="container mx-auto px-6 text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="bg-white/20 h-12 md:h-16 rounded w-64 md:w-80 mx-auto mb-4 animate-pulse"></div>
+            <div className="bg-white/10 h-6 rounded w-96 mx-auto animate-pulse"></div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Main Content */}
+      {/* Search & Filters Section - Top Layout */}
+      <section className="bg-card border-b border-border md:sticky md:top-16 md:z-40 md:backdrop-blur-sm">
+        <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
+          <div className="flex flex-col gap-4">
+            {/* Search Bar */}
+            <div className="relative w-full">
+              <div className="bg-gray-200 h-12 md:h-14 rounded-lg animate-pulse"></div>
+            </div>
+            
+            {/* Quick Filters - Horizontal Layout */}
+            <div className="flex flex-wrap gap-2 md:gap-3">
+              <div className="bg-gray-200 h-10 w-40 rounded-lg animate-pulse"></div>
+              <div className="bg-gray-200 h-10 w-40 rounded-lg animate-pulse"></div>
+              <div className="bg-gray-200 h-10 w-40 rounded-lg animate-pulse"></div>
+              <div className="bg-gray-200 h-10 w-32 rounded-lg animate-pulse"></div>
+              <div className="bg-gray-200 h-10 w-24 rounded-lg animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Products Section */}
       <section className="py-8">
         <div className="container mx-auto px-6">
-          <div className="lg:grid lg:grid-cols-4 lg:gap-8">
-            {/* Sidebar Filters */}
-            <div className="lg:col-span-1 mb-8 lg:mb-0">
-              <div className="space-y-6">
-                <FilterSkeleton />
-                <FilterSkeleton />
-                <FilterSkeleton />
-              </div>
+          {/* Results and View Controls */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="bg-gray-200 h-6 rounded w-32 animate-pulse"></div>
+            <div className="flex items-center space-x-4">
+              <div className="bg-gray-200 h-10 w-32 rounded-lg animate-pulse"></div>
+              <div className="bg-gray-200 h-10 w-16 rounded-lg animate-pulse"></div>
             </div>
-
-            {/* Products Section */}
-            <div className="lg:col-span-3">
-              <SortingSkeleton />
-              <ProductGridSkeleton />
-              
-              {/* Pagination Skeleton */}
-              <div className="flex justify-center mt-12">
-                <div className="flex items-center space-x-2 animate-pulse">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="bg-gray-200 w-10 h-10 rounded-lg"></div>
-                  ))}
-                </div>
-              </div>
+          </div>
+          
+          <ProductGridSkeleton />
+          
+          {/* Pagination Skeleton */}
+          <div className="flex justify-center mt-12">
+            <div className="flex items-center space-x-2 animate-pulse">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="bg-gray-200 w-10 h-10 rounded-lg"></div>
+              ))}
             </div>
           </div>
         </div>
