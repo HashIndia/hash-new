@@ -495,14 +495,16 @@ export default function Checkout() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3 }}
                       >
-                        <img
-                          src={item.product.images?.[0]?.url || item.product.images?.[0] || 'https://placehold.co/60x60/64748b/fff?text=Item'}
-                          alt={item.product.name}
-                          className="w-12 h-12 object-cover rounded"
-                          onError={(e) => {
-                            e.target.src = 'https://placehold.co/60x60/64748b/fff?text=Item';
-                          }}
-                        />
+                        <div className="w-12 h-12 rounded overflow-hidden bg-gray-50">
+                          <img
+                            src={item.product.images?.[0]?.url || item.product.images?.[0] || 'https://placehold.co/60x60/64748b/fff?text=Item'}
+                            alt={item.product.name}
+                            className="w-full h-full object-contain"
+                            onError={(e) => {
+                              e.target.src = 'https://placehold.co/60x60/64748b/fff?text=Item';
+                            }}
+                          />
+                        </div>
                         <div className="flex-1">
                           <div className="font-medium text-sm text-foreground">{item.product.name}</div>
                           <div className="text-xs text-muted-foreground">Qty: {item.quantity}</div>

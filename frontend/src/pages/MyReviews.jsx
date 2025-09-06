@@ -168,11 +168,13 @@ const MyReviews = () => {
                   <Card key={`${item.product._id}-${item.orderId}`} className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        <img
-                          src={item.product.images?.[0]?.url || '/placeholder-product.jpg'}
-                          alt={item.product.name}
-                          className="w-20 h-20 object-cover rounded-lg"
-                        />
+                        <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-50">
+                          <img
+                            src={item.product.images?.[0]?.url || '/placeholder-product.jpg'}
+                            alt={item.product.name}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
                         <div>
                           <h3 className="font-semibold text-foreground mb-1">
                             {item.product.name}
@@ -220,11 +222,13 @@ const MyReviews = () => {
                 myReviews.map((review) => (
                   <Card key={review._id} className="p-6">
                     <div className="flex items-start space-x-4">
-                      <img
-                        src={review.product?.images?.[0]?.url || '/placeholder-product.jpg'}
-                        alt={review.product?.name}
-                        className="w-20 h-20 object-cover rounded-lg"
-                      />
+                      <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-50">
+                        <img
+                          src={review.product?.images?.[0]?.url || '/placeholder-product.jpg'}
+                          alt={review.product?.name}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
                           <h3 className="font-semibold text-foreground">

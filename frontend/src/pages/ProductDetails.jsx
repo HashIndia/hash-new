@@ -272,12 +272,12 @@ export default function ProductDetails() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
-              className="relative overflow-hidden rounded-2xl bg-card border border-border shadow-xl"
+              className="relative overflow-hidden rounded-2xl bg-gray-50 border border-border shadow-xl"
             >
               <img
                 src={safeProduct.images[activeImage]?.url || '/placeholder-image.jpg'}
                 alt={safeProduct.name}
-                className="w-full h-96 lg:h-[500px] object-cover"
+                className="w-full h-96 lg:h-[500px] object-contain"
               />
               {discount > 0 && (
                 <Badge className="absolute top-4 left-4 bg-destructive text-destructive-foreground">
@@ -301,14 +301,14 @@ export default function ProductDetails() {
                   <button
                     key={index}
                     onClick={() => setActiveImage(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all bg-gray-50 ${
                       activeImage === index ? 'border-hash-purple' : 'border-border'
                     }`}
                   >
                     <img
                       src={image.url}
                       alt={`${safeProduct.name} ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   </button>
                 ))}

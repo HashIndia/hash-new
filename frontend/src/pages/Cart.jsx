@@ -139,14 +139,16 @@ export default function Cart() {
                   <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
                     {/* Product Image */}
                     <div className="flex-shrink-0 mx-auto sm:mx-0">
-                      <img
-                        src={item.product.images?.[0]?.url || item.product.images?.[0] || "https://placehold.co/150x150/64748b/fff?text=Product"}
-                        alt={item.product.name}
-                        className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover"
-                        onError={(e) => {
-                          e.target.src = "https://placehold.co/150x150/64748b/fff?text=Product";
-                        }}
-                      />
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-gray-50">
+                        <img
+                          src={item.product.images?.[0]?.url || item.product.images?.[0] || "https://placehold.co/150x150/64748b/fff?text=Product"}
+                          alt={item.product.name}
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            e.target.src = "https://placehold.co/150x150/64748b/fff?text=Product";
+                          }}
+                        />
+                      </div>
                     </div>
 
                     {/* Product Details */}

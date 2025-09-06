@@ -108,11 +108,11 @@ export default function Wishlist() {
               <Card className="group bg-card/80 backdrop-blur-sm border border-border hover:shadow-lg transition-shadow duration-300 shadow-lg">
                 <CardContent className="p-0">
                   <div className="relative">
-                    <div className="aspect-square overflow-hidden rounded-t-lg">
+                    <div className="aspect-square overflow-hidden rounded-t-lg bg-gray-50">
                       <img
                         src={product.images?.[0]?.url || product.images?.[0] || '/placeholder-product.jpg'}
                         alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
                           e.target.src = '/placeholder-product.jpg';
                         }}

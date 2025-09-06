@@ -488,14 +488,16 @@ export default function Orders() {
                       <div className="space-y-3 sm:space-y-4">
                         {(order.items || []).map((item, index) => (
                           <div key={index} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-muted/30 rounded-xl border border-border">
-                            <img
-                              src={item.image || item.product?.images?.[0]?.url || item.product?.images?.[0] || `https://placehold.co/60x60/64748b/fff?text=Item`}
-                              alt={item.name}
-                              className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-lg flex-shrink-0"
-                              onError={(e) => {
-                                e.target.src = `https://placehold.co/60x60/64748b/fff?text=Item`;
-                              }}
-                            />
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden bg-gray-50 flex-shrink-0">
+                              <img
+                                src={item.image || item.product?.images?.[0]?.url || item.product?.images?.[0] || `https://placehold.co/60x60/64748b/fff?text=Item`}
+                                alt={item.name}
+                                className="w-full h-full object-contain"
+                                onError={(e) => {
+                                  e.target.src = `https://placehold.co/60x60/64748b/fff?text=Item`;
+                                }}
+                              />
+                            </div>
                             <div className="flex-1 min-w-0">
                               <h5 className="font-medium text-foreground text-sm sm:text-base truncate">{item.name}</h5>
                               <p className="text-xs sm:text-sm text-muted-foreground">Qty: {item.quantity}</p>

@@ -265,11 +265,11 @@ export default function Shop() {
                   <Link to={`/product/${product._id}`}>
                     <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-border bg-card h-full">
                       <CardContent className="p-0">
-                        <div className="aspect-square overflow-hidden rounded-t-xl relative">
+                        <div className="aspect-square overflow-hidden rounded-t-xl relative bg-gray-50">
                           <img
                             src={product.images?.[0]?.url || product.images?.[0] || '/placeholder-product.jpg'}
                             alt={product.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => {
                               e.target.src = '/placeholder-product.jpg';
                             }}

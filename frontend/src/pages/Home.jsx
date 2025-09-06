@@ -843,11 +843,11 @@ export default function Home() {
                 transition={{ duration: 0.3 }}
               >
                 <Card className="group overflow-hidden hover:shadow-2xl hover:shadow-hash-purple/20 transition-all duration-300 bg-card border border-border hover:border-hash-purple/50 rounded-2xl">
-                  <div className="relative overflow-hidden">
+                  <div className="relative overflow-hidden bg-gray-50">
                     <img
                       src={product.images[0] || "https://placehold.co/400x500/404040/ffffff?text=HASH+Product"}
                       alt={product.name}
-                      className="w-full h-80 object-cover transition-transform duration-500 group-hover:scale-110"
+                      className="w-full h-80 object-contain transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300" />
                     
