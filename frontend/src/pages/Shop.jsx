@@ -149,7 +149,7 @@ export default function Shop() {
       </section>
 
       {/* Search & Filters Section */}
-      <section className="bg-card border-b border-border md:sticky md:top-16 md:z-40 md:backdrop-blur-sm">
+      <section className="bg-card border-b border-border md:sticky md:top-16 md:z-40 md:backdrop-blur-sm shadow-sm">
         <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
           <div className="flex flex-col gap-4">
             {/* Search */}
@@ -160,17 +160,17 @@ export default function Shop() {
                 placeholder="Search products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 md:pl-12 pr-4 py-2 md:py-3 text-base md:text-lg bg-background border-border focus:ring-hash-purple"
+                className="pl-10 md:pl-12 pr-4 py-2 md:py-3 text-base md:text-lg bg-background border-border focus:ring-hash-purple shadow-sm"
               />
             </div>
             
             {/* Quick Filters */}
-            <div className="flex flex-wrap gap-2 md:gap-3">
+            <div className="flex flex-wrap gap-2 md:gap-3 relative z-50">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-full sm:w-40 bg-background border-border text-foreground text-sm md:text-base">
+                <SelectTrigger className="w-full sm:w-40 bg-background border-border text-foreground text-sm md:text-base shadow-sm">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
-                <SelectContent className="bg-card border-border">
+                <SelectContent className="bg-card border-border shadow-lg z-50">
                   <SelectItem value="all" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">All Categories</SelectItem>
                   <SelectItem value="t-shirts" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">T-Shirts</SelectItem>
                   <SelectItem value="jeans" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">Jeans</SelectItem>
@@ -180,10 +180,10 @@ export default function Shop() {
               </Select>
               
               <Select value={priceRange} onValueChange={setPriceRange}>
-                <SelectTrigger className="w-full sm:w-40 bg-background border-border text-foreground text-sm md:text-base">
+                <SelectTrigger className="w-full sm:w-40 bg-background border-border text-foreground text-sm md:text-base shadow-sm">
                   <SelectValue placeholder="Price Range" />
                 </SelectTrigger>
-                <SelectContent className="bg-card border-border">
+                <SelectContent className="bg-card border-border shadow-lg z-50">
                   <SelectItem value="all" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">All Prices</SelectItem>
                   <SelectItem value="under-500" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">Under ₹500</SelectItem>
                   <SelectItem value="500-1000" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">₹500 - ₹1,000</SelectItem>
@@ -194,10 +194,10 @@ export default function Shop() {
               </Select>
               
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full sm:w-40 bg-background border-border text-foreground text-sm md:text-base">
+                <SelectTrigger className="w-full sm:w-40 bg-background border-border text-foreground text-sm md:text-base shadow-sm">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
-                <SelectContent className="bg-card border-border">
+                <SelectContent className="bg-card border-border shadow-lg z-50">
                   <SelectItem value="createdAt-desc" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">Newest</SelectItem>
                   <SelectItem value="price-asc" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">Price: Low to High</SelectItem>
                   <SelectItem value="price-desc" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">Price: High to Low</SelectItem>

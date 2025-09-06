@@ -259,7 +259,7 @@ export default function ProductDetails() {
         <Button
           onClick={() => navigate(-1)}
           variant="ghost"
-          className="mb-6 hover:bg-accent text-foreground"
+          className="mb-6 hover:bg-hash-purple/10 hover:text-hash-purple text-foreground border border-transparent hover:border-hash-purple/20 transition-all duration-200 rounded-lg px-4 py-2"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
@@ -303,7 +303,7 @@ export default function ProductDetails() {
                 }}
               />
               {discount > 0 && (
-                <Badge className="absolute top-4 left-4 bg-destructive text-destructive-foreground">
+                <Badge className="absolute top-4 left-4 bg-destructive text-destructive-foreground z-20">
                   -{discount}%
                 </Badge>
               )}
@@ -311,7 +311,7 @@ export default function ProductDetails() {
                 onClick={handleWishlist}
                 variant="ghost"
                 size="sm"
-                className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm hover:bg-white border-2 border-border hover:border-hash-purple shadow-lg transition-all duration-200 hover:scale-105"
+                className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm hover:bg-white border-2 border-border hover:border-hash-purple shadow-lg transition-all duration-200 hover:scale-105 z-20"
               >
                 <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-600 hover:text-red-500'} transition-colors`} />
               </Button>
