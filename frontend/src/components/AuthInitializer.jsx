@@ -18,7 +18,6 @@ export default function AuthInitializer() {
       startBackgroundLoading('initialization');
       
       try {
-        console.log('🔄 Starting background initialization...');
         
         // Initialize products in background
         startBackgroundLoading('products');
@@ -26,7 +25,6 @@ export default function AuthInitializer() {
         initializeProducts().then(() => {
           performanceMonitor.endAPICall('products-init');
           endBackgroundLoading('products');
-          console.log('✅ Products loaded in background');
         }).catch(error => {
           performanceMonitor.endAPICall('products-init');
           endBackgroundLoading('products');
@@ -35,13 +33,11 @@ export default function AuthInitializer() {
 
         // Only check auth if we have stored authentication state
         if (!isAuthenticated || !user) {
-          console.log('👤 No stored auth state, skipping auth check');
           performanceMonitor.endInitialization();
           endBackgroundLoading('initialization');
           return;
         }
 
-        console.log('🔐 Checking authentication in background...');
         startBackgroundLoading('authentication');
         performanceMonitor.startAPICall('auth-check');
         
@@ -51,7 +47,6 @@ export default function AuthInitializer() {
           endBackgroundLoading('authentication');
 
           if (isMounted && response.data.user) {
-            console.log('✅ Authentication successful');
             setUser(response.data.user);
             
             // Load user data in parallel in background
@@ -60,13 +55,11 @@ export default function AuthInitializer() {
               authAPI.getWishlist().then(wishlistResponse => {
                 if (wishlistResponse.data.wishlist) {
                   setWishlist(wishlistResponse.data.wishlist);
-                  console.log('✅ Wishlist loaded in background');
                 }
               }),
               authAPI.getAddresses().then(addressResponse => {
                 if (addressResponse.data.addresses) {
                   setAddresses(addressResponse.data.addresses);
-                  console.log('✅ Addresses loaded in background');
                 }
               })
             ]).then(() => {
@@ -76,14 +69,12 @@ export default function AuthInitializer() {
               console.warn('⚠️ Secondary data loading failed:', error);
             });
           } else if (isMounted) {
-            console.log('❌ Authentication failed, logging out');
             logout();
           }
         } catch (authError) {
           performanceMonitor.endAPICall('auth-check');
           endBackgroundLoading('authentication');
           if (isMounted && isAuthenticated) {
-            console.log('❌ Auth check failed, logging out');
             logout();
           }
         }
@@ -93,7 +84,6 @@ export default function AuthInitializer() {
       } finally {
         performanceMonitor.endInitialization();
         endBackgroundLoading('initialization');
-        console.log('🏁 Background initialization complete');
       }
     };
 

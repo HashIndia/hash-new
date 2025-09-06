@@ -20,7 +20,6 @@ class PerformanceMonitor {
     if (!this.isSupported) return;
     if (this.metrics.pageLoadStart) {
       const loadTime = performance.now() - this.metrics.pageLoadStart;
-      console.log(`⏱️ Page load time: ${loadTime.toFixed(2)}ms`);
       this.metrics.pageLoadStart = null;
       return loadTime;
     }
@@ -38,7 +37,6 @@ class PerformanceMonitor {
     const startTime = this.metrics.apiCalls.get(endpoint);
     if (startTime) {
       const duration = performance.now() - startTime;
-      console.log(`🌐 API call ${endpoint}: ${duration.toFixed(2)}ms`);
       this.metrics.apiCalls.delete(endpoint);
       
       // Warn if API call is slow
@@ -60,7 +58,6 @@ class PerformanceMonitor {
     if (!this.isSupported) return;
     if (this.metrics.initializationTime) {
       const duration = performance.now() - this.metrics.initializationTime;
-      console.log(`🚀 App initialization: ${duration.toFixed(2)}ms`);
       
       if (duration > 3000) {
         console.warn(`⚠️ Slow initialization detected: ${duration.toFixed(2)}ms`);
@@ -87,30 +84,7 @@ class PerformanceMonitor {
 
   // Log performance summary
   logSummary() {
-    console.group('📊 Performance Summary');
-    
-    // Network info
-    const network = this.getNetworkInfo();
-    if (network) {
-      console.log('Network:', network);
-    }
-
-    // Navigation timing
-    if (performance.navigation) {
-      console.log('Navigation type:', performance.navigation.type);
-      console.log('Redirect count:', performance.navigation.redirectCount);
-    }
-
-    // Memory info (if available)
-    if (performance.memory) {
-      console.log('Memory usage:', {
-        used: `${(performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2)} MB`,
-        total: `${(performance.memory.totalJSHeapSize / 1024 / 1024).toFixed(2)} MB`,
-        limit: `${(performance.memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2)} MB`
-      });
-    }
-
-    console.groupEnd();
+    // Performance summary logging removed for production
   }
 }
 
