@@ -34,7 +34,7 @@ export default function OrdersPageSkeleton() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <div className="h-8 md:h-12 bg-gradient-to-r from-foreground/10 to-foreground/5 rounded-lg w-48 mx-auto animate-pulse"></div>
+          <div className="h-8 md:h-12 bg-gray-300 rounded-lg w-48 mx-auto animate-pulse shadow-md"></div>
         </motion.div>
 
         <motion.div 
@@ -51,24 +51,24 @@ export default function OrdersPageSkeleton() {
                   <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
                     <div className="space-y-2">
                       {/* Order ID */}
-                      <div className="h-6 bg-gradient-to-r from-foreground/15 to-foreground/10 rounded w-32 animate-pulse"></div>
+                      <div className="h-6 bg-purple-300 rounded w-32 animate-pulse shadow-sm"></div>
                       {/* Order Date */}
-                      <div className="h-4 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded w-24 animate-pulse"></div>
+                      <div className="h-4 bg-blue-200 rounded w-24 animate-pulse shadow-sm"></div>
                     </div>
                     
                     <div className="flex flex-wrap gap-2">
                       {/* Status Badge */}
-                      <div className="h-6 bg-gradient-to-r from-hash-purple/20 to-hash-purple/10 rounded-full w-20 animate-pulse"></div>
+                      <div className="h-6 bg-green-300 rounded-full w-20 animate-pulse shadow-sm"></div>
                       {/* Payment Status Badge */}
-                      <div className="h-6 bg-gradient-to-r from-hash-green/20 to-hash-green/10 rounded-full w-16 animate-pulse"></div>
+                      <div className="h-6 bg-yellow-300 rounded-full w-16 animate-pulse shadow-sm"></div>
                     </div>
                   </div>
                   
                   {/* Order Actions */}
                   <div className="flex flex-wrap gap-3 pt-4">
-                    <div className="h-8 bg-gradient-to-r from-hash-purple/20 to-hash-purple/10 rounded w-24 animate-pulse"></div>
-                    <div className="h-8 bg-gradient-to-r from-border to-accent/50 rounded w-28 animate-pulse"></div>
-                    <div className="h-8 bg-gradient-to-r from-hash-green/20 to-hash-green/10 rounded w-32 animate-pulse"></div>
+                    <div className="h-8 bg-purple-400 rounded w-24 animate-pulse shadow-sm"></div>
+                    <div className="h-8 bg-gray-300 rounded w-28 animate-pulse shadow-sm"></div>
+                    <div className="h-8 bg-green-400 rounded w-32 animate-pulse shadow-sm"></div>
                   </div>
                 </CardHeader>
                 
@@ -78,28 +78,28 @@ export default function OrdersPageSkeleton() {
                     {[1, 2].map((itemIndex) => (
                       <div key={itemIndex} className="flex gap-4 p-4 bg-accent/30 rounded-xl">
                         {/* Product Image */}
-                        <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-foreground/10 to-foreground/5 rounded-lg animate-pulse flex-shrink-0"></div>
+                        <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-400 rounded-lg animate-pulse flex-shrink-0 shadow-md"></div>
                         
                         <div className="flex-1 space-y-2">
                           {/* Product Name */}
-                          <div className="h-5 bg-gradient-to-r from-foreground/15 to-foreground/10 rounded w-3/4 animate-pulse"></div>
+                          <div className="h-5 bg-blue-300 rounded w-3/4 animate-pulse shadow-sm"></div>
                           
                           {/* Product Details */}
                           <div className="flex flex-wrap gap-2">
-                            <div className="h-4 bg-gradient-to-r from-hash-blue/20 to-hash-blue/10 rounded w-12 animate-pulse"></div>
-                            <div className="h-4 bg-gradient-to-r from-hash-green/20 to-hash-green/10 rounded w-16 animate-pulse"></div>
+                            <div className="h-4 bg-pink-300 rounded w-12 animate-pulse shadow-sm"></div>
+                            <div className="h-4 bg-orange-300 rounded w-16 animate-pulse shadow-sm"></div>
                           </div>
                           
                           {/* Price and Quantity */}
                           <div className="flex justify-between items-center">
-                            <div className="h-4 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded w-20 animate-pulse"></div>
-                            <div className="h-5 bg-gradient-to-r from-hash-purple/30 to-hash-purple/20 rounded w-16 animate-pulse"></div>
+                            <div className="h-4 bg-teal-300 rounded w-20 animate-pulse shadow-sm"></div>
+                            <div className="h-5 bg-purple-400 rounded w-16 animate-pulse shadow-sm"></div>
                           </div>
                         </div>
                         
                         {/* Review Button */}
                         <div className="flex flex-col justify-center">
-                          <div className="h-8 bg-gradient-to-r from-hash-yellow/20 to-hash-yellow/10 rounded w-20 animate-pulse"></div>
+                          <div className="h-8 bg-yellow-400 rounded w-20 animate-pulse shadow-sm"></div>
                         </div>
                       </div>
                     ))}
@@ -109,44 +109,44 @@ export default function OrdersPageSkeleton() {
                   <div className="border-t border-border pt-4">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="space-y-1">
-                        <div className="h-3 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded w-12 animate-pulse"></div>
-                        <div className="h-5 bg-gradient-to-r from-foreground/15 to-foreground/10 rounded w-16 animate-pulse"></div>
+                        <div className="h-3 bg-slate-400 rounded w-12 animate-pulse shadow-sm"></div>
+                        <div className="h-5 bg-indigo-300 rounded w-16 animate-pulse shadow-sm"></div>
                       </div>
                       <div className="space-y-1">
-                        <div className="h-3 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded w-16 animate-pulse"></div>
-                        <div className="h-5 bg-gradient-to-r from-foreground/15 to-foreground/10 rounded w-12 animate-pulse"></div>
+                        <div className="h-3 bg-slate-400 rounded w-16 animate-pulse shadow-sm"></div>
+                        <div className="h-5 bg-indigo-300 rounded w-12 animate-pulse shadow-sm"></div>
                       </div>
                       <div className="space-y-1">
-                        <div className="h-3 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded w-10 animate-pulse"></div>
-                        <div className="h-5 bg-gradient-to-r from-foreground/15 to-foreground/10 rounded w-14 animate-pulse"></div>
+                        <div className="h-3 bg-slate-400 rounded w-10 animate-pulse shadow-sm"></div>
+                        <div className="h-5 bg-indigo-300 rounded w-14 animate-pulse shadow-sm"></div>
                       </div>
                       <div className="space-y-1">
-                        <div className="h-3 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded w-8 animate-pulse"></div>
-                        <div className="h-6 bg-gradient-to-r from-hash-purple/30 to-hash-purple/20 rounded w-20 animate-pulse"></div>
+                        <div className="h-3 bg-slate-400 rounded w-8 animate-pulse shadow-sm"></div>
+                        <div className="h-6 bg-purple-400 rounded w-20 animate-pulse shadow-sm"></div>
                       </div>
                     </div>
                   </div>
                   
                   {/* Shipping Address */}
                   <div className="mt-6 p-4 bg-accent/20 rounded-xl">
-                    <div className="h-5 bg-gradient-to-r from-foreground/15 to-foreground/10 rounded w-32 animate-pulse mb-3"></div>
+                    <div className="h-5 bg-emerald-400 rounded w-32 animate-pulse mb-3 shadow-sm"></div>
                     <div className="space-y-2">
-                      <div className="h-4 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded w-full animate-pulse"></div>
-                      <div className="h-4 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded w-3/4 animate-pulse"></div>
-                      <div className="h-4 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded w-1/2 animate-pulse"></div>
+                      <div className="h-4 bg-stone-300 rounded w-full animate-pulse shadow-sm"></div>
+                      <div className="h-4 bg-stone-300 rounded w-3/4 animate-pulse shadow-sm"></div>
+                      <div className="h-4 bg-stone-300 rounded w-1/2 animate-pulse shadow-sm"></div>
                     </div>
                   </div>
                   
                   {/* Order Timeline */}
                   <div className="mt-6">
-                    <div className="h-5 bg-gradient-to-r from-foreground/15 to-foreground/10 rounded w-28 animate-pulse mb-4"></div>
+                    <div className="h-5 bg-rose-400 rounded w-28 animate-pulse mb-4 shadow-sm"></div>
                     <div className="space-y-3">
                       {[1, 2, 3, 4].map((timelineIndex) => (
                         <div key={timelineIndex} className="flex items-center gap-3">
-                          <div className="w-3 h-3 bg-gradient-to-r from-hash-purple/30 to-hash-purple/20 rounded-full animate-pulse"></div>
+                          <div className="w-3 h-3 bg-purple-500 rounded-full animate-pulse shadow-sm"></div>
                           <div className="flex-1 flex justify-between items-center">
-                            <div className="h-4 bg-gradient-to-r from-foreground/15 to-foreground/10 rounded w-32 animate-pulse"></div>
-                            <div className="h-3 bg-gradient-to-r from-muted-foreground/20 to-muted-foreground/10 rounded w-24 animate-pulse"></div>
+                            <div className="h-4 bg-cyan-300 rounded w-32 animate-pulse shadow-sm"></div>
+                            <div className="h-3 bg-amber-300 rounded w-24 animate-pulse shadow-sm"></div>
                           </div>
                         </div>
                       ))}
