@@ -14,6 +14,7 @@ import {
 import { Badge } from '../components/ui/badge';
 import { Grid, List, Search, SlidersHorizontal } from 'lucide-react';
 import { productsAPI } from '../services/api';
+import ShopPageSkeleton from '../components/ShopPageSkeleton';
 import toast from 'react-hot-toast';
 
 export default function Shop() {
@@ -88,11 +89,7 @@ export default function Shop() {
   }, []);
 
   if (loading && products.length === 0) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-hash-purple/20 border-t-hash-purple rounded-full animate-spin"></div>
-      </div>
-    );
+    return <ShopPageSkeleton />;
   }
 
   return (

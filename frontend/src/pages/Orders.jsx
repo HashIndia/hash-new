@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import useUserStore from "../stores/useUserStore";
 import ReviewModal from "../components/ReviewModal";
+import OrdersPageSkeleton from "../components/OrdersPageSkeleton";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ordersAPI } from "../services/api";
@@ -348,14 +349,7 @@ export default function Orders() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hash-purple mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading your orders...</p>
-        </div>
-      </div>
-    );
+    return <OrdersPageSkeleton />;
   }
 
   if (orders.length === 0) {

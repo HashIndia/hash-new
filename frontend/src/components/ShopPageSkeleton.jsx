@@ -1,0 +1,108 @@
+import { motion } from 'framer-motion';
+
+const FilterSkeleton = () => (
+  <div className="bg-card rounded-xl border border-border p-6 animate-pulse">
+    <div className="bg-gray-200 h-6 rounded w-24 mb-4"></div>
+    <div className="space-y-3">
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="flex items-center space-x-3">
+          <div className="bg-gray-200 w-4 h-4 rounded"></div>
+          <div className="bg-gray-200 h-4 rounded w-20"></div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const ProductGridSkeleton = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {[...Array(12)].map((_, index) => (
+      <motion.div
+        key={index}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.05 }}
+        className="bg-card rounded-2xl shadow-sm border border-border p-4 animate-pulse overflow-hidden"
+      >
+        <div className="bg-gray-200 h-48 rounded-xl mb-4"></div>
+        <div className="space-y-3">
+          <div className="bg-gray-200 h-5 rounded w-3/4"></div>
+          <div className="bg-gray-200 h-4 rounded w-1/2"></div>
+          <div className="bg-gray-200 h-6 rounded w-1/3"></div>
+          <div className="bg-gray-200 h-10 rounded-xl w-full"></div>
+        </div>
+      </motion.div>
+    ))}
+  </div>
+);
+
+const SearchBarSkeleton = () => (
+  <div className="bg-card rounded-xl border border-border p-4 animate-pulse">
+    <div className="flex items-center space-x-4">
+      <div className="bg-gray-200 h-10 rounded-lg flex-1"></div>
+      <div className="bg-gray-200 h-10 w-24 rounded-lg"></div>
+    </div>
+  </div>
+);
+
+const SortingSkeleton = () => (
+  <div className="flex items-center justify-between mb-6">
+    <div className="bg-gray-200 h-6 rounded w-32 animate-pulse"></div>
+    <div className="flex items-center space-x-4">
+      <div className="bg-gray-200 h-10 w-32 rounded-lg animate-pulse"></div>
+      <div className="bg-gray-200 h-10 w-16 rounded-lg animate-pulse"></div>
+    </div>
+  </div>
+);
+
+export default function ShopPageSkeleton() {
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="min-h-screen bg-background"
+    >
+      {/* Header Section */}
+      <section className="bg-background border-b border-border py-8">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-8 animate-pulse">
+            <div className="bg-gray-200 h-10 rounded w-48 mx-auto mb-4"></div>
+            <div className="bg-gray-200 h-6 rounded w-96 mx-auto"></div>
+          </div>
+          <SearchBarSkeleton />
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <section className="py-8">
+        <div className="container mx-auto px-6">
+          <div className="lg:grid lg:grid-cols-4 lg:gap-8">
+            {/* Sidebar Filters */}
+            <div className="lg:col-span-1 mb-8 lg:mb-0">
+              <div className="space-y-6">
+                <FilterSkeleton />
+                <FilterSkeleton />
+                <FilterSkeleton />
+              </div>
+            </div>
+
+            {/* Products Section */}
+            <div className="lg:col-span-3">
+              <SortingSkeleton />
+              <ProductGridSkeleton />
+              
+              {/* Pagination Skeleton */}
+              <div className="flex justify-center mt-12">
+                <div className="flex items-center space-x-2 animate-pulse">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="bg-gray-200 w-10 h-10 rounded-lg"></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </motion.div>
+  );
+}

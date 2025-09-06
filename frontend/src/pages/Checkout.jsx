@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import AddressForm from "../components/AddressForm";
+import CheckoutPageSkeleton from "../components/CheckoutPageSkeleton";
 import useCartStore from "../stores/useCartStore";
 import useUserStore from "../stores/useUserStore";
 import useNotificationStore from "../stores/useNotificationStore";
@@ -19,14 +20,15 @@ export default function Checkout() {
   const [paymentMethod, setPaymentMethod] = useState('online');
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [paymentDetails, setPaymentDetails] = useState({
+    cardNumber: '',
+    nameOnCard: '',
+    expiryDate: '',
+    cvv: '',
+    upiId: ''
+  });
   const navigate = useNavigate();
-
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!isAuthenticated) {
-      toast.error('Please login to access checkout');
-    }
-  }, [isAuthenticated]);
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
@@ -37,6 +39,13 @@ export default function Checkout() {
   if (!items || items.length === 0) {
     return <Navigate to="/cart" replace />;
   }
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      toast.error('Please login to access checkout');
+    }
+  }, [isAuthenticated]);
 
   // Load addresses when component mounts
   useEffect(() => {
@@ -49,6 +58,7 @@ export default function Checkout() {
           console.error('Failed to load addresses:', error);
         }
       }
+      setInitialLoading(false);
     };
     
     loadAddresses();
@@ -238,6 +248,11 @@ export default function Checkout() {
   const handlePaymentDetailsChange = (field, value) => {
     setPaymentDetails(prev => ({ ...prev, [field]: value }));
   };
+
+  // Show initial loading skeleton
+  if (initialLoading) {
+    return <CheckoutPageSkeleton />;
+  }
 
   if (isLoading && !showAddressForm) {
     return (

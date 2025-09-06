@@ -2,13 +2,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import useCartStore from "../stores/useCartStore";
 import useUserStore from "../stores/useUserStore";
+import CartPageSkeleton from "../components/CartPageSkeleton";
 import { motion } from "framer-motion";
 import { Link, Navigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function Cart() {
-  const { isAuthenticated, user } = useUserStore();
+  const { isAuthenticated } = useUserStore();
   const { 
     items, 
     removeFromCart, 
@@ -19,6 +20,7 @@ export default function Cart() {
     getTax,
     getGrandTotal
   } = useCartStore();
+  const [isLoading, setIsLoading] = useState(true);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -27,9 +29,26 @@ export default function Cart() {
     }
   }, [isAuthenticated]);
 
+  // Simulate loading for cart data
+  useEffect(() => {
+    if (isAuthenticated) {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 800);
+      return () => clearTimeout(timer);
+    } else {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated]);
+
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Show skeleton while loading
+  if (isLoading) {
+    return <CartPageSkeleton />;
   }
 
   const subtotal = getCartTotal();

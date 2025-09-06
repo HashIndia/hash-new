@@ -6,6 +6,7 @@ import { authAPI } from '../services/api';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
+import WishlistPageSkeleton from '../components/WishlistPageSkeleton';
 import { Heart, ShoppingCart, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -69,17 +70,7 @@ export default function Wishlist() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background py-12">
-        <div className="container mx-auto">
-          <div className="animate-pulse space-y-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="bg-card/50 h-32 rounded-lg border border-border"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <WishlistPageSkeleton />;
   }
 
   if (wishlist.length === 0) {

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge';
 import ReviewsList from '../components/ReviewsList';
 import SizeChart from '../components/SizeChart';
+import ProductDetailSkeleton from '../components/ProductDetailSkeleton';
 import useProductStore from '../stores/useProductStore';
 import useCartStore from '../stores/useCartStore';
 import useUserStore from '../stores/useUserStore';
@@ -115,14 +116,7 @@ export default function ProductDetails() {
   } : null;
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-hash-purple mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading product...</p>
-        </div>
-      </div>
-    );
+    return <ProductDetailSkeleton />;
   }
 
   if (!safeProduct) {
