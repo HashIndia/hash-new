@@ -31,8 +31,8 @@ export default function Business() {
       title: "Business Information",
       details: [
         { label: "Business Name", value: "Hash Clothing" },
-        { label: "Manufacturer", value: "Orca Whale Inc" },
-        { label: "Business Type", value: "Student-Run Enterprise" },
+        { label: "Business Owner", value: "Orca Whale INC" },
+        { label: "Business Type", value: "Registered Enterprise" },
         { label: "Industry", value: "Custom Apparel & Merchandise" },
         { label: "Founded", value: "2023" },
         { label: "Founders", value: "4 NITK Students" }
@@ -42,7 +42,7 @@ export default function Business() {
       icon: FileText,
       title: "Business Details",
       details: [
-        { label: "Current Status", value: "Unregistered Student Business" },
+        { label: "Current Status", value: "Registered under Orca Whale INC" },
         { label: "Primary Market", value: "NITK Surathkal Campus" },
         { label: "Secondary Market", value: "India (via Post)" },
         { label: "Specialization", value: "Club Merchandise & Custom Apparel" },
@@ -76,10 +76,10 @@ export default function Business() {
   const licenses = [
     {
       icon: Shield,
-      title: "Student Enterprise",
-      number: "Unregistered",
-      authority: "NITK Surathkal Campus",
-      validity: "Active since 2023"
+      title: "Business Registration",
+      number: "Orca Whale INC",
+      authority: "Registered Business Entity",
+     
     },
     {
       icon: FileText,
@@ -160,9 +160,9 @@ export default function Business() {
             <CardContent className="p-8">
               <div className="text-center mb-8">
                 <Building className="w-12 h-12 text-foreground mx-auto mb-4" />
-                <h3 className="text-2xl font-semibold text-foreground mb-4">Manufacturing Partner</h3>
+                <h3 className="text-2xl font-semibold text-foreground mb-4">Business Operations</h3>
                 <p className="text-muted-foreground max-w-3xl mx-auto">
-                  Hash Clothing products are manufactured by Orca Whale Inc, ensuring quality production and reliable delivery for all our customers.
+                  Hash Clothing is owned and operated by Orca Whale INC, ensuring quality operations and reliable delivery for all our customers.
                 </p>
               </div>
               <div className="grid md:grid-cols-3 gap-6 text-center">
@@ -173,13 +173,13 @@ export default function Business() {
                 </div>
                 <div className="p-6 border border-border rounded-lg">
                   <Award className="w-8 h-8 text-foreground mx-auto mb-3" />
-                  <h4 className="font-semibold text-foreground mb-2">Certified Production</h4>
-                  <p className="text-muted-foreground text-sm">Manufactured by Orca Whale Inc with industry compliance</p>
+                  <h4 className="font-semibold text-foreground mb-2">Business Operations</h4>
+                  <p className="text-muted-foreground text-sm">All operations managed by Orca Whale INC with industry compliance</p>
                 </div>
                 <div className="p-6 border border-border rounded-lg">
                   <Globe className="w-8 h-8 text-foreground mx-auto mb-3" />
-                  <h4 className="font-semibold text-foreground mb-2">Reliable Partner</h4>
-                  <p className="text-muted-foreground text-sm">Trusted manufacturing partnership for consistent delivery</p>
+                  <h4 className="font-semibold text-foreground mb-2">Business Reliability</h4>
+                  <p className="text-muted-foreground text-sm">Trusted business operations by Orca Whale INC for consistent delivery</p>
                 </div>
               </div>
             </CardContent>
@@ -249,7 +249,7 @@ export default function Business() {
                 <div>
                   <h4 className="text-lg font-semibold text-foreground mb-4">Operational Details</h4>
                   <ul className="space-y-2 text-foreground">
-                    <li>• Student-run operations with quality focus</li>
+                    <li>• Professional business operations with quality focus</li>
                     <li>• Campus delivery within 1-2 days</li>
                     <li>• India-wide delivery via postal services</li>
                     <li>• Direct student feedback and quality assurance</li>

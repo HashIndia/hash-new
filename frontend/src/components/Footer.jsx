@@ -167,7 +167,7 @@ export default function Footer() {
         >
           <div className="text-muted-foreground text-center lg:text-left">
             <p className="mb-1">© 2024 Hash. All rights reserved.</p>
-            <p className="mb-2 text-sm">Manufactured by Orca Whale Inc</p>
+            <p className="mb-2 text-sm">Owned & Operated by Orca Whale INC</p>
             <p className="flex items-center justify-center lg:justify-start gap-2">
               Made with <Heart className="w-4 h-4 text-hash-pink animate-pulse" /> by{' '}
               <a 

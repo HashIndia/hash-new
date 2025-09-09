@@ -333,8 +333,8 @@ export default function Contact() {
                   <h3 className="text-lg font-semibold text-foreground mb-4">Company Details</h3>
                   <div className="space-y-2 text-muted-foreground">
                     <p><strong className="text-foreground">Business Name:</strong> Hash Clothing</p>
-                    <p><strong className="text-foreground">Manufacturer:</strong> Orca Whale Inc</p>
-                    <p><strong className="text-foreground">Type:</strong> Student-Run Enterprise</p>
+                    <p><strong className="text-foreground">Business Owner:</strong> Orca Whale INC</p>
+                    <p><strong className="text-foreground">Type:</strong> Registered Enterprise</p>
                     <p><strong className="text-foreground">Founded:</strong> 2023</p>
                   </div>
                 </div>

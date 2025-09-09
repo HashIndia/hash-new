@@ -127,10 +127,10 @@ export default function About() {
                     </p>
                     <div className="border-t border-border pt-4">
                       <p className="text-sm text-muted-foreground">
-                        <strong className="text-foreground">Manufactured by:</strong> Orca Whale Inc
+                        <strong className="text-foreground">Owned & Operated by:</strong> Orca Whale INC
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Quality assured manufacturing partner
+                        Registered business entity for Hash brand operations
                       </p>
                     </div>
                   </div>
@@ -234,7 +234,8 @@ export default function About() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-foreground mb-4">Business</h3>
-                  <p className="text-muted-foreground">Student-Run Enterprise</p>
+                  <p className="text-muted-foreground">Orca Whale INC</p>
+                  <p className="text-muted-foreground">Registered Enterprise</p>
                   <p className="text-muted-foreground">Founded: 2023</p>
                   <p className="text-muted-foreground">Delivery: All India via Post</p>
                 </div>

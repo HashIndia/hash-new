@@ -95,15 +95,15 @@ export default function Privacy() {
                 </motion.section>
 
                 <motion.section className="mb-12" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">4. Manufacturing Partner</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">4. Business Operations</h2>
                   <p className="text-muted-foreground mb-4 leading-relaxed">
-                    All Hash Clothing products are manufactured by Orca Whale Inc. In the process of fulfilling your orders:
+                    All Hash Clothing operations are managed by Orca Whale INC. In the process of fulfilling your orders:
                   </p>
                   <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                    <li>We may share necessary order details with Orca Whale Inc for production and quality control</li>
-                    <li>No personal information beyond what's required for order fulfillment is shared</li>
-                    <li>Orca Whale Inc is bound by strict confidentiality agreements</li>
-                    <li>Your data is protected under the same privacy standards we maintain</li>
+                    <li>We maintain full control over order processing and customer data</li>
+                    <li>No personal information is shared with external third parties unnecessarily</li>
+                    <li>All business operations are governed by our privacy standards</li>
+                    <li>Your data is protected under our comprehensive privacy framework</li>
                   </ul>
                 </motion.section>
 
@@ -156,7 +156,7 @@ export default function Privacy() {
                   <div className="bg-card border border-border p-6 rounded-lg">
                     <h3 className="text-lg font-semibold text-foreground mb-4 tracking-wide">HASH</h3>
                     <div className="space-y-2">
-                      <p className="text-muted-foreground"><strong>Manufacturer:</strong> Orca Whale Inc</p>
+                      <p className="text-muted-foreground"><strong>Business Owner:</strong> Orca Whale INC</p>
                       <p className="text-muted-foreground">Email: privacy@hash.com</p>
                       <p className="text-muted-foreground">Phone: +91 9876543210</p>
                       <p className="text-muted-foreground">Address: 123 Fashion Street, Mumbai, India</p>

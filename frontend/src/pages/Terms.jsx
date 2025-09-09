@@ -86,19 +86,19 @@ export default function Terms() {
                 </motion.section>
 
                 <motion.section className="mb-12" variants={itemVariants}>
-                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">4. Manufacturing and Production</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-6 pb-2 border-b border-border">4. Business Ownership and Operations</h2>
                   <p className="text-muted-foreground mb-4 leading-relaxed">
-                    All Hash Clothing products are manufactured by Orca Whale Inc, our trusted manufacturing partner. This ensures:
+                    All Hash Clothing products are owned and operated by Orca Whale INC. This ensures:
                   </p>
                   <ul className="list-disc pl-6 text-muted-foreground space-y-2">
                     <li>Consistent quality standards across all products</li>
-                    <li>Compliance with industry manufacturing regulations</li>
-                    <li>Ethical production practices and worker safety standards</li>
+                    <li>Compliance with industry regulations and standards</li>
+                    <li>Ethical business practices and operational transparency</li>
                     <li>Quality control and assurance processes</li>
-                    <li>Reliable supply chain management</li>
+                    <li>Reliable business operations and customer service</li>
                   </ul>
                   <p className="text-muted-foreground mt-4 leading-relaxed">
-                    By purchasing from Hash, you acknowledge that Orca Whale Inc is the manufacturer of the products you receive.
+                    By purchasing from Hash, you acknowledge that Orca Whale INC is the business entity responsible for all operations and services.
                   </p>
                 </motion.section>
 
@@ -185,7 +185,7 @@ export default function Terms() {
                   <div className="bg-card border border-border p-6 rounded-lg">
                     <h3 className="text-lg font-semibold text-foreground mb-4 tracking-wide">HASH</h3>
                     <div className="space-y-2">
-                      <p className="text-muted-foreground"><strong>Manufacturer:</strong> Orca Whale Inc</p>
+                      <p className="text-muted-foreground"><strong>Business Owner:</strong> Orca Whale INC</p>
                       <p className="text-muted-foreground">Email: legal@hash.com</p>
                       <p className="text-muted-foreground">Phone: +91 9876543210</p>
                       <p className="text-muted-foreground">Address: 123 Fashion Street, Mumbai, India</p>
