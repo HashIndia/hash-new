@@ -240,9 +240,9 @@ export default function Orders() {
         const nameLines = pdf.splitTextToSize(productName, 85);
         pdf.text(nameLines[0], margin + 3, tableY + 5);
         
-        pdf.text(`${price.toFixed(0)}`, margin + 100, tableY + 5);
+        pdf.text(`₹${price.toFixed(0)}`, margin + 100, tableY + 5);
         pdf.text(quantity.toString(), margin + 135, tableY + 5);
-        pdf.text(`${total.toFixed(0)}`, margin + 160, tableY + 5);
+        pdf.text(`₹${total.toFixed(0)}`, margin + 160, tableY + 5);
         
         tableY += 15;
       });
