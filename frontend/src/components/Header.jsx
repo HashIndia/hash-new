@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import useCartStore from '../stores/useCartStore';
-import useUserStore from '../stores/useUserStore';
+import useUserStore from '../utils/useUserStore';
 import useNotificationStore from '../stores/useNotificationStore';
 import { authAPI } from '../services/api';
 import toast from 'react-hot-toast';

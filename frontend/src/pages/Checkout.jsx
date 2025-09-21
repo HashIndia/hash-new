@@ -4,7 +4,7 @@ import { Input } from "../components/ui/input";
 import AddressForm from "../components/AddressForm";
 import CheckoutPageSkeleton from "../components/CheckoutPageSkeleton";
 import useCartStore from "../stores/useCartStore";
-import useUserStore from "../stores/useUserStore";
+import useUserStore from "../utils/useUserStore";
 import useNotificationStore from "../stores/useNotificationStore";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";

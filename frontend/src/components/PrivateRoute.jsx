@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import useUserStore from "../stores/useUserStore";
+import useUserStore from "../utils/useUserStore";
 
 export default function PrivateRoute({ children }) {
   const { isAuthenticated } = useUserStore();

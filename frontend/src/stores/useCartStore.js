@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ordersAPI, handleAPIError } from '../services/api.js';
-import useUserStore from './useUserStore.js';
+import useUserStore from '../utils/useUserStore.js';
 import toast from 'react-hot-toast';
 
 const useCartStore = create(

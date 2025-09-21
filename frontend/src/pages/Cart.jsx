@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import useCartStore from "../stores/useCartStore";
-import useUserStore from "../stores/useUserStore";
+import useUserStore from "../utils/useUserStore";
 import CartPageSkeleton from "../components/CartPageSkeleton";
 import { motion } from "framer-motion";
 import { Link, Navigate } from "react-router-dom";

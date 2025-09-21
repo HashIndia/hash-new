@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import useCartStore from '../stores/useCartStore';
-import useUserStore from '../stores/useUserStore';
+import useUserStore from '../utils/useUserStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { authAPI } from '../services/api';

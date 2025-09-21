@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { authAPI } from "../services/api";
 import { setSafariAuthToken } from "../services/api";
 import toast from "react-hot-toast";
-import useUserStore from "../stores/useUserStore";
+import useUserStore from "../utils/useUserStore";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";

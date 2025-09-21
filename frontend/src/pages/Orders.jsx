@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import useUserStore from "../stores/useUserStore";
+import useUserStore from "../utils/useUserStore";
 import ReviewModal from "../components/ReviewModal";
 import OrdersPageSkeleton from "../components/OrdersPageSkeleton";
 import { useState, useEffect } from "react";

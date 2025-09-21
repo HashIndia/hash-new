@@ -4,7 +4,7 @@ import { X, Package, Heart, ShoppingCart, User, AlertCircle, Truck, CheckCircle,
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
-import useUserStore from '../stores/useUserStore';
+import useUserStore from '../utils/useUserStore';
 import useNotificationStore from '../stores/useNotificationStore';
 
 const NotificationCenter = ({ isOpen, onClose }) => {

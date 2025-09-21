@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { authAPI, ordersAPI } from "../services/api";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import useUserStore from "../stores/useUserStore";
+import useUserStore from "../utils/useUserStore";
 import AddressForm from "../components/AddressForm";
 import ProfilePageSkeleton from "../components/ProfilePageSkeleton";
 import toast from "react-hot-toast";

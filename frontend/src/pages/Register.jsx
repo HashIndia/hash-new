@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../co
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import OTPModal from "../components/OTPModal";
-import useUserStore from "../stores/useUserStore";
+import useUserStore from "../utils/useUserStore";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authAPI } from "../services/api";

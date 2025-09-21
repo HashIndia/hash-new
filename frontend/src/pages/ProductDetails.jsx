@@ -12,7 +12,7 @@ import ProductDetailSkeleton from '../components/ProductDetailSkeleton';
 import SEO from '../components/SEO';
 import useProductStore from '../stores/useProductStore';
 import useCartStore from '../stores/useCartStore';
-import useUserStore from '../stores/useUserStore';
+import useUserStore from '../utils/useUserStore';
 import { authAPI } from '../services/api';
 import toast from 'react-hot-toast';
 
