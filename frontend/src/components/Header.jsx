@@ -233,7 +233,7 @@ export default function Header() {
               </Link>
               <a
                 href="#core-team"
-                className="block p-3 rounded-xl hover:bg-neutral-100 text-neutral-700 font-medium transition-all duration-200 flex items-center gap-2"
+                className=" p-3 rounded-xl hover:bg-neutral-100 text-neutral-700 font-medium transition-all duration-200 flex items-center gap-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <Users className="w-4 h-4" /> Core
