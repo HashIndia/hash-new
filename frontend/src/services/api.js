@@ -1,5 +1,5 @@
 import axios from 'axios';
-import useUserStore from '../stores/useUserStore';
+import useUserStore from '../utils/useUserStore';
 
 // Safari/iOS detection utility
 const isSafariOrIOS = () => {

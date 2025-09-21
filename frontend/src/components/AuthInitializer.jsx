@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { authAPI } from '../services/api';
-import useUserStore from '../stores/useUserStore';
+import useUserStore from '../utils/useUserStore';
 import useProductStore from '../stores/useProductStore';
 import performanceMonitor from '../utils/performanceMonitor';
 import { startBackgroundLoading, endBackgroundLoading } from './BackgroundLoadingIndicator';
