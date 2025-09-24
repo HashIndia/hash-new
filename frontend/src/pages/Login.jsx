@@ -64,11 +64,11 @@ export default function Login() {
   };
 
   return (
-    <div className="container mx-auto flex items-center justify-center min-h-screen p-4 md:p-6 bg-background relative">
+    <div className="container mx-auto flex items-center justify-center min-h-screen p-4 md:p-6 bg-white text-neutral-900 relative">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_75%_75%,hsl(var(--hash-blue))_0%,transparent_50%)] opacity-5"></div>
       
-      <Card className="w-full max-w-md bg-card/80 backdrop-blur-xl border border-border shadow-2xl shadow-hash-purple/10 relative z-10">
+      <Card className="w-full max-w-md bg-white border border-neutral-200 shadow-2xl shadow-hash-purple/10 relative z-10">
         <CardHeader className="text-center space-y-3 md:space-y-4">
           {/* Logo */}
           <div className="mx-auto w-14 h-14 md:w-16 md:h-16 rounded-2xl overflow-hidden shadow-lg">
@@ -78,8 +78,8 @@ export default function Login() {
               className="w-full h-full object-cover"
             />
           </div>
-          <CardTitle className="text-xl md:text-2xl font-bold text-foreground font-space">Welcome Back</CardTitle>
-          <CardDescription className="text-xs md:text-sm text-muted-foreground px-2">Sign in to your HASH account to continue your style journey</CardDescription>
+          <CardTitle className="text-xl md:text-2xl font-bold text-neutral-900 font-space">Welcome Back</CardTitle>
+          <CardDescription className="text-xs md:text-sm text-neutral-600 px-2">Sign in to your HASH account to continue your style journey</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
@@ -96,7 +96,7 @@ export default function Login() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className={`h-10 md:h-12 text-sm md:text-base ${errors.email ? "border-destructive focus:ring-destructive" : "border-border focus:ring-hash-purple"}`}
+                className={`h-10 md:h-12 text-sm md:text-base bg-white text-neutral-900 placeholder-neutral-500 ${errors.email ? "border-destructive focus:ring-destructive" : "border-neutral-300 focus:ring-hash-purple"}`}
               />
               {errors.email && <p className="text-destructive text-xs md:text-sm">{errors.email}</p>}
             </div>
@@ -108,7 +108,7 @@ export default function Login() {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className={`h-10 md:h-12 text-sm md:text-base ${errors.password ? "border-destructive focus:ring-destructive" : "border-border focus:ring-hash-purple"}`}
+                className={`h-10 md:h-12 text-sm md:text-base bg-white text-neutral-900 placeholder-neutral-500 ${errors.password ? "border-destructive focus:ring-destructive" : "border-neutral-300 focus:ring-hash-purple"}`}
               />
               {errors.password && <p className="text-destructive text-xs md:text-sm">{errors.password}</p>}
             </div>

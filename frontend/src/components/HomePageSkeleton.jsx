@@ -1,13 +1,13 @@
 import { motion } from 'framer-motion';
 
 const ProductCardSkeleton = () => (
-  <div className="bg-card rounded-2xl shadow-sm border border-border p-4 animate-pulse overflow-hidden">
-    <div className="bg-gray-200 h-48 rounded-xl mb-4"></div>
-    <div className="space-y-3">
-      <div className="bg-gray-200 h-5 rounded w-3/4"></div>
-      <div className="bg-gray-200 h-4 rounded w-1/2"></div>
-      <div className="bg-gray-200 h-6 rounded w-1/3"></div>
-      <div className="bg-gray-200 h-10 rounded-xl w-full"></div>
+  <div className="bg-card rounded-2xl shadow-sm border border-border p-3 animate-pulse overflow-hidden">
+    <div className="bg-gray-200 h-32 rounded-xl mb-3"></div>
+    <div className="space-y-2">
+      <div className="bg-gray-200 h-4 rounded w-3/4"></div>
+      <div className="bg-gray-200 h-3 rounded w-1/2"></div>
+      <div className="bg-gray-200 h-4 rounded w-1/3"></div>
+      <div className="bg-gray-200 h-8 rounded-xl w-full"></div>
     </div>
   </div>
 );
@@ -54,20 +54,21 @@ export default function HomePageSkeleton() {
       <HeroSkeleton />
 
       {/* Featured Products Section Skeleton */}
-      <section className="py-20 bg-background relative overflow-hidden">
+      <section className="py-12 bg-background relative overflow-hidden">
         <div className="container mx-auto px-6 relative z-10">
-          <div className="text-center mb-16">
-            <div className="bg-gray-200 h-12 rounded w-64 mx-auto mb-6 animate-pulse"></div>
-            <div className="bg-gray-200 h-6 rounded w-96 mx-auto animate-pulse"></div>
+          <div className="text-center mb-10">
+            <div className="bg-gray-200 h-10 rounded w-64 mx-auto mb-4 animate-pulse"></div>
+            <div className="bg-gray-200 h-5 rounded w-96 mx-auto animate-pulse"></div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[...Array(6)].map((_, index) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
+                className={`${index >= 2 ? 'hidden md:block' : ''}`}
               >
                 <ProductCardSkeleton />
               </motion.div>
@@ -77,9 +78,9 @@ export default function HomePageSkeleton() {
       </section>
 
       {/* Quick Info Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-10 bg-gray-50">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[...Array(3)].map((_, index) => (
               <div key={index} className="text-center animate-pulse">
                 <div className="bg-gray-200 w-16 h-16 rounded-full mx-auto mb-4"></div>

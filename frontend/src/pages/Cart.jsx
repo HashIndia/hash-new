@@ -80,7 +80,7 @@ export default function Cart() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-white text-neutral-900 flex items-center justify-center">
         <motion.div 
           className="text-center"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -88,8 +88,8 @@ export default function Cart() {
           transition={{ duration: 0.6 }}
         >
           <div className="text-6xl mb-4">🛒</div>
-          <h2 className="text-3xl font-bold text-foreground mb-4 font-space">Your Cart is Empty</h2>
-          <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+          <h2 className="text-3xl font-bold text-neutral-900 mb-4 font-space">Your Cart is Empty</h2>
+          <p className="text-neutral-600 mb-8 max-w-md mx-auto">
             Looks like you haven't added anything to your cart yet. Start shopping to fill it up!
           </p>
           <motion.div
@@ -109,10 +109,10 @@ export default function Cart() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-6 md:py-8">
+    <div className="min-h-screen bg-white text-neutral-900 py-6 md:py-8">
       <div className="container mx-auto px-4 md:px-6">
         <motion.h1
-          className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-6 md:mb-8 text-center font-space"
+          className="text-2xl md:text-3xl lg:text-4xl font-bold text-neutral-900 mb-6 md:mb-8 text-center font-space"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -133,7 +133,7 @@ export default function Cart() {
                 key={item.id}
                 variants={itemVariants}
                 layout
-                className="bg-card rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border border-border"
+                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border border-neutral-200"
               >
                 <div className="p-4 md:p-6">
                   <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
@@ -154,7 +154,7 @@ export default function Cart() {
                     {/* Product Details */}
                     <div className="flex-1 text-center sm:text-left">
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-2">
-                        <h3 className="text-base md:text-lg font-semibold text-foreground">{item.product.name}</h3>
+                        <h3 className="text-base md:text-lg font-semibold text-neutral-900">{item.product.name}</h3>
                         <button
                           onClick={() => removeFromCart(item.id)}
                           className="text-destructive hover:text-destructive/80 font-bold text-xl self-center sm:self-start"
@@ -163,21 +163,21 @@ export default function Cart() {
                         </button>
                       </div>
                       
-                      <p className="text-muted-foreground text-xs md:text-sm mb-3 md:mb-4 line-clamp-2">{item.product.description}</p>
+                      <p className="text-neutral-600 text-xs md:text-sm mb-3 md:mb-4 line-clamp-2">{item.product.description}</p>
                         
                       <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4">
                         {/* Quantity Controls */}
-                        <div className="flex items-center border-2 border-border rounded-xl overflow-hidden">
+                        <div className="flex items-center border-2 border-neutral-300 rounded-xl overflow-hidden">
                           <button
                             onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                            className="px-2 md:px-3 py-1 bg-accent hover:bg-accent/80 text-foreground transition-colors text-sm md:text-base"
+                            className="px-2 md:px-3 py-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 transition-colors text-sm md:text-base"
                           >
                             -
                           </button>
                           <span className="px-3 md:px-4 py-1 font-semibold text-foreground text-sm md:text-base">{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="px-2 md:px-3 py-1 bg-accent hover:bg-accent/80 text-foreground transition-colors text-sm md:text-base"
+                            className="px-2 md:px-3 py-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 transition-colors text-sm md:text-base"
                           >
                             +
                           </button>
@@ -203,7 +203,7 @@ export default function Cart() {
                         <div className="text-lg md:text-xl font-bold text-hash-purple text-center sm:text-left">
                           ₹{item.price * item.quantity}
                         </div>
-                        <div className="text-xs md:text-sm text-muted-foreground text-center sm:text-right">
+                        <div className="text-xs md:text-sm text-neutral-600 text-center sm:text-right">
                           {item.quantity} × ₹{item.price}
                         </div>
                       </div>
@@ -216,25 +216,25 @@ export default function Cart() {
 
           {/* Order Summary */}
           <motion.div variants={itemVariants}>
-            <Card className="bg-card shadow-lg rounded-2xl overflow-hidden sticky top-4 border border-border">
+            <Card className="bg-white shadow-lg rounded-2xl overflow-hidden sticky top-4 border border-neutral-200">
               <CardHeader className="bg-hash-purple text-white">
                 <CardTitle className="text-xl font-space">Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
-                <div className="flex justify-between text-muted-foreground">
+                <div className="flex justify-between text-neutral-600">
                   <span>Subtotal</span>
                   <span>₹{Math.round(subtotal)}</span>
                 </div>
-                <div className="flex justify-between text-muted-foreground">
+                <div className="flex justify-between text-neutral-600">
                   <span>Shipping</span>
                   <span>{shipping === 0 ? 'Free' : `₹${Math.round(shipping)}`}</span>
                 </div>
-                <div className="flex justify-between text-muted-foreground">
+                <div className="flex justify-between text-neutral-600">
                   <span>Gateway Charges (2%)</span>
                   <span>₹{Math.round(tax)}</span>
                 </div>
-                <hr className="border-border" />
-                <div className="flex justify-between text-xl font-bold text-foreground">
+                <hr className="border-neutral-200" />
+                <div className="flex justify-between text-xl font-bold text-neutral-900">
                   <span>Total</span>
                   <span>₹{Math.round(total)}</span>
                 </div>
@@ -250,7 +250,7 @@ export default function Cart() {
                   <Button 
                     variant="outline" 
                     size="lg" 
-                    className="w-full border-2 border-border hover:bg-border/50 rounded-xl py-3"
+                    className="w-full border-2 border-neutral-300 hover:bg-neutral-100 rounded-xl py-3"
                     onClick={clearCart}
                   >
                     Clear Cart

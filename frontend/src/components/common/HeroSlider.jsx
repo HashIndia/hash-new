@@ -54,7 +54,7 @@ const itemVariants = {
 
 const HeroSlider = () => {
   return (
-    <section className="relative h-[400px] md:h-[600px] text-white">
+    <section className="relative h-[400px] md:h-[600px] text-white overflow-hidden rounded-b-3xl">
       <Swiper
         spaceBetween={30}
         centeredSlides={true}

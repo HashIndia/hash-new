@@ -122,7 +122,7 @@ export default function Register() {
   const passwordStrength = getPasswordStrength(form.password);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 md:p-6 relative">
+    <div className="min-h-screen bg-white text-neutral-900 flex items-center justify-center p-4 md:p-6 relative">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_80%_20%,hsl(var(--hash-blue))_0%,transparent_50%),radial-gradient(circle_at_40%_40%,hsl(var(--hash-pink))_0%,transparent_50%)] opacity-5"></div>
       
@@ -137,16 +137,16 @@ export default function Register() {
               className="w-full h-full object-cover"
             />
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2 font-space">Join HASH</h1>
-          <p className="text-sm md:text-base text-muted-foreground">Start your style journey with us</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-2 font-space">Join HASH</h1>
+          <p className="text-sm md:text-base text-neutral-600">Start your style journey with us</p>
         </div>
 
-        <Card className="bg-card/80 backdrop-blur-xl border border-border shadow-2xl shadow-hash-purple/10">
+        <Card className="bg-white border border-neutral-200 shadow-2xl shadow-hash-purple/10">
           <CardHeader className="space-y-1 pb-4 md:pb-6">
-            <CardTitle className="text-xl md:text-2xl font-semibold text-center text-foreground font-space">
+            <CardTitle className="text-xl md:text-2xl font-semibold text-center text-neutral-900 font-space">
               Create Account
             </CardTitle>
-            <CardDescription className="text-center text-xs md:text-sm text-muted-foreground">
+            <CardDescription className="text-center text-xs md:text-sm text-neutral-600">
               Enter your details to get started with HASH.
             </CardDescription>
           </CardHeader>
@@ -154,7 +154,7 @@ export default function Register() {
             <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
               {/* Name Field */}
               <div className="space-y-2">
-                <label className="text-xs md:text-sm font-medium text-foreground">
+                <label className="text-xs md:text-sm font-medium text-neutral-700 ">
                   Full Name
                 </label>
                 <Input
@@ -163,7 +163,7 @@ export default function Register() {
                   placeholder="Enter your full name"
                   value={form.name}
                   onChange={handleChange}
-                  className={`h-10 md:h-12 ${errors.name ? 'border-destructive focus:ring-destructive' : 'border-border focus:ring-hash-purple'}`}
+                  className={`h-10 md:h-12 bg-white text-neutral-900 placeholder-neutral-500 ${errors.name ? 'border-destructive focus:ring-destructive' : 'border-neutral-300 focus:ring-hash-purple'}`}
                 />
                 {errors.name && (
                   <p className="text-sm text-destructive flex items-center gap-1">
@@ -174,7 +174,7 @@ export default function Register() {
 
               {/* Email Field */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
+                <label className="text-sm font-medium text-neutral-700 ">
                   Email Address
                 </label>
                 <Input
@@ -183,7 +183,7 @@ export default function Register() {
                   placeholder="Enter your email"
                   value={form.email}
                   onChange={handleChange}
-                  className={`h-12 ${errors.email ? 'border-destructive focus:ring-destructive' : 'border-border focus:ring-hash-purple'}`}
+                  className={`h-12 bg-white text-neutral-900 placeholder-neutral-500 ${errors.email ? 'border-destructive focus:ring-destructive' : 'border-neutral-300 focus:ring-hash-purple'}`}
                 />
                 {errors.email && (
                   <p className="text-sm text-destructive flex items-center gap-1">
@@ -194,7 +194,7 @@ export default function Register() {
 
               {/* Phone Field */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
+                <label className="text-sm font-medium text-neutral-700">
                   Phone Number
                 </label>
                 <Input
@@ -203,7 +203,7 @@ export default function Register() {
                   placeholder="Enter your phone number"
                   value={form.phone}
                   onChange={handleChange}
-                  className={`h-12 ${errors.phone ? 'border-destructive focus:ring-destructive' : 'border-border focus:ring-hash-purple'}`}
+                  className={`h-12 bg-white text-neutral-900 placeholder-neutral-500 ${errors.phone ? 'border-destructive focus:ring-destructive' : 'border-neutral-300 focus:ring-hash-purple'}`}
                 />
                 {errors.phone && (
                   <p className="text-sm text-destructive flex items-center gap-1">
@@ -214,7 +214,7 @@ export default function Register() {
 
               {/* Password Field */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
+                <label className="text-sm font-medium text-neutral-700">
                   Password
                 </label>
                 <div className="relative">
@@ -224,7 +224,7 @@ export default function Register() {
                     placeholder="Create a password"
                     value={form.password}
                     onChange={handleChange}
-                    className={`h-12 pr-12 ${errors.password ? 'border-destructive focus:ring-destructive' : 'border-border focus:ring-hash-purple'}`}
+                    className={`h-12 pr-12 bg-white text-neutral-900 placeholder-neutral-500 ${errors.password ? 'border-destructive focus:ring-destructive' : 'border-neutral-300 focus:ring-hash-purple'}`}
                   />
                   <button
                     type="button"
@@ -256,7 +256,7 @@ export default function Register() {
 
               {/* Confirm Password Field */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
+                <label className="text-sm font-medium text-neutral-700">
                   Confirm Password
                 </label>
                 <Input
@@ -265,7 +265,7 @@ export default function Register() {
                   placeholder="Confirm your password"
                   value={form.confirmPassword}
                   onChange={handleChange}
-                  className={`h-12 ${errors.confirmPassword ? 'border-destructive focus:ring-destructive' : 'border-border focus:ring-hash-purple'}`}
+                  className={`h-12 bg-white text-neutral-900 placeholder-neutral-500 ${errors.confirmPassword ? 'border-destructive focus:ring-destructive' : 'border-neutral-300 focus:ring-hash-purple'}`}
                 />
                 {errors.confirmPassword && (
                   <p className="text-sm text-destructive flex items-center gap-1">
@@ -282,7 +282,7 @@ export default function Register() {
                   className="mt-1 w-4 h-4 text-hash-purple border-border rounded focus:ring-hash-purple"
                   required
                 />
-                <label htmlFor="terms" className="text-sm text-muted-foreground">
+                <label htmlFor="terms" className="text-sm text-neutral-700">
                   I agree to the{" "}
                   <a href="/terms" className="text-hash-purple underline hover:text-hash-blue transition-colors">
                     Terms of Service
