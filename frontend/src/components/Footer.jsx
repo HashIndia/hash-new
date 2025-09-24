@@ -73,7 +73,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-background text-foreground mt-auto relative overflow-hidden border-t border-border">
+    <footer className="hidden min-[1200px]:block bg-background text-foreground mt-auto relative overflow-hidden border-t border-border">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_80%_20%,hsl(var(--hash-blue))_0%,transparent_50%)] opacity-5"></div>
       {/* Background Pattern */}

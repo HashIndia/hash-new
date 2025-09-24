@@ -94,7 +94,7 @@ export default function Shop() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white text-neutral-900">
       <SEO 
         title="Shop Premium Fashion - HASH India | Latest Collection"
         description="Shop the latest collection at HASH India. Discover premium t-shirts, jeans, dresses, and accessories. Free shipping, easy returns, and best quality guaranteed. Find your style today!"
@@ -149,7 +149,7 @@ export default function Shop() {
       </section>
 
       {/* Search & Filters Section */}
-      <section className="bg-card border-b border-border md:sticky md:top-16 md:z-40 md:backdrop-blur-sm shadow-sm">
+      <section className="bg-white border-b border-neutral-200 md:sticky md:top-16 md:z-40 md:backdrop-blur-sm shadow-sm">
         <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
           <div className="flex flex-col gap-4">
             {/* Search */}
@@ -160,48 +160,48 @@ export default function Shop() {
                 placeholder="Search products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 md:pl-12 pr-4 py-2 md:py-3 text-base md:text-lg bg-background border-border focus:ring-hash-purple shadow-sm"
+                className="pl-10 md:pl-12 pr-4 py-2 md:py-3 text-base md:text-lg bg-white border-neutral-300 focus:ring-hash-purple shadow-sm"
               />
             </div>
             
             {/* Quick Filters */}
             <div className="flex flex-wrap gap-2 md:gap-3 relative z-50">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-full sm:w-40 bg-background border-border text-foreground text-sm md:text-base shadow-sm">
+              <SelectTrigger className="w-full sm:w-40 bg-white border-neutral-300 text-neutral-800 text-sm md:text-base shadow-sm">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
-                <SelectContent className="bg-card border-border shadow-lg z-50">
-                  <SelectItem value="all" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">All Categories</SelectItem>
-                  <SelectItem value="t-shirts" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">T-Shirts</SelectItem>
-                  <SelectItem value="jeans" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">Jeans</SelectItem>
-                  <SelectItem value="dresses" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">Dresses</SelectItem>
-                  <SelectItem value="accessories" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">Accessories</SelectItem>
+              <SelectContent className="bg-white border border-neutral-200 shadow-lg z-50">
+                  <SelectItem value="all" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">All Categories</SelectItem>
+                  <SelectItem value="t-shirts" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">T-Shirts</SelectItem>
+                  <SelectItem value="jeans" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Jeans</SelectItem>
+                  <SelectItem value="dresses" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Dresses</SelectItem>
+                  <SelectItem value="accessories" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Accessories</SelectItem>
                 </SelectContent>
               </Select>
               
               <Select value={priceRange} onValueChange={setPriceRange}>
-                <SelectTrigger className="w-full sm:w-40 bg-background border-border text-foreground text-sm md:text-base shadow-sm">
+              <SelectTrigger className="w-full sm:w-40 bg-white border-neutral-300 text-neutral-800 text-sm md:text-base shadow-sm">
                   <SelectValue placeholder="Price Range" />
                 </SelectTrigger>
-                <SelectContent className="bg-card border-border shadow-lg z-50">
-                  <SelectItem value="all" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">All Prices</SelectItem>
-                  <SelectItem value="under-500" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">Under ₹500</SelectItem>
-                  <SelectItem value="500-1000" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">₹500 - ₹1,000</SelectItem>
-                  <SelectItem value="1000-2500" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">₹1,000 - ₹2,500</SelectItem>
-                  <SelectItem value="2500-5000" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">₹2,500 - ₹5,000</SelectItem>
-                  <SelectItem value="5000-above" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">₹5,000 & Above</SelectItem>
+              <SelectContent className="bg-white border border-neutral-200 shadow-lg z-50">
+                  <SelectItem value="all" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">All Prices</SelectItem>
+                  <SelectItem value="under-500" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Under ₹500</SelectItem>
+                  <SelectItem value="500-1000" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">₹500 - ₹1,000</SelectItem>
+                  <SelectItem value="1000-2500" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">₹1,000 - ₹2,500</SelectItem>
+                  <SelectItem value="2500-5000" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">₹2,500 - ₹5,000</SelectItem>
+                  <SelectItem value="5000-above" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">₹5,000 & Above</SelectItem>
                 </SelectContent>
               </Select>
               
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full sm:w-40 bg-background border-border text-foreground text-sm md:text-base shadow-sm">
+              <SelectTrigger className="w-full sm:w-40 bg-white border-neutral-300 text-neutral-800 text-sm md:text-base shadow-sm">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
-                <SelectContent className="bg-card border-border shadow-lg z-50">
-                  <SelectItem value="createdAt-desc" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">Newest</SelectItem>
-                  <SelectItem value="price-asc" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">Price: Low to High</SelectItem>
-                  <SelectItem value="price-desc" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">Price: High to Low</SelectItem>
-                  <SelectItem value="name-asc" className="text-foreground hover:bg-hash-purple/10 focus:bg-hash-purple/20">Name: A to Z</SelectItem>
+              <SelectContent className="bg-white border border-neutral-200 shadow-lg z-50">
+                  <SelectItem value="createdAt-desc" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Newest</SelectItem>
+                  <SelectItem value="price-asc" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Price: Low to High</SelectItem>
+                  <SelectItem value="price-desc" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Price: High to Low</SelectItem>
+                  <SelectItem value="name-asc" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Name: A to Z</SelectItem>
                 </SelectContent>
               </Select>
               
@@ -229,7 +229,7 @@ export default function Shop() {
       </section>
 
       {/* Products Grid */}
-      <section className="py-8 md:py-12 bg-background">
+      <section className="py-8 md:py-12 bg-white">
         <div className="container mx-auto px-4 md:px-6">
           {/* Results Summary */}
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 md:mb-8 gap-2">
@@ -251,7 +251,7 @@ export default function Shop() {
 
           {filteredProducts.length === 0 && !loading ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">No products found matching your criteria.</p>
+              <p className="text-neutral-600">No products found matching your criteria.</p>
             </div>
           ) : (
             <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
@@ -277,8 +277,8 @@ export default function Shop() {
                           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         </div>
                         <div className="p-4">
-                          <h3 className="font-semibold text-lg mb-2 text-foreground group-hover:text-hash-purple transition-colors duration-200">{product.name}</h3>
-                          <p className="text-muted-foreground text-sm mb-3 line-clamp-2">{product.description}</p>
+                          <h3 className="font-semibold text-lg mb-2 text-neutral-900 group-hover:text-hash-purple transition-colors duration-200">{product.name}</h3>
+                          <p className="text-neutral-600 text-sm mb-3 line-clamp-2">{product.description}</p>
                           <div className="flex justify-between items-center">
                             <span className="text-xl font-bold text-hash-purple">₹{product.price}</span>
                             <Badge variant="secondary" className="bg-hash-purple/10 text-hash-purple border-hash-purple/20">
