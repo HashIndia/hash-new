@@ -41,7 +41,9 @@ const productSchema = new mongoose.Schema({
     min: [0, 'Stock cannot be negative'],
     default: 0
   },
-  // Inventory management - size-color combinations
+  isTrending: { type: Boolean, default: false },
+  isHero: { type: Boolean, default: false },
+
   variants: [{
     size: {
       type: String,
@@ -58,88 +60,67 @@ const productSchema = new mongoose.Schema({
       min: [0, 'Variant stock cannot be negative'],
       default: 0
     },
-    price: {
-      type: Number, // Optional different price for different variants
-      min: [0, 'Variant price cannot be negative']
-    },
-    sku: {
-      type: String, // Optional SKU for this specific variant
-      trim: true
-    }
+    price: { type: Number, min: [0, 'Variant price cannot be negative'] },
+    sku: { type: String, trim: true },
+    brand: { type: String, trim: true }
   }],
-  // Size chart information
+
   sizeChart: {
-    hasChart: {
-      type: Boolean,
-      default: false
-    },
-    chartType: {
-      type: String,
-      enum: ['clothing', 'shoes', 'accessories'],
-      default: 'clothing'
-    },
+    hasChart: { type: Boolean, default: false },
+    chartType: { type: String, enum: ['clothing', 'shoes', 'accessories'], default: 'clothing' },
     measurements: [{
       size: String,
-      chest: Number, // in cm
-      waist: Number, // in cm
-      hips: Number,  // in cm
-      length: Number, // in cm
-      shoulders: Number, // in cm
-      sleeves: Number   // in cm
+      chest: Number,
+      waist: Number,
+      hips: Number,
+      length: Number,
+      shoulders: Number,
+      sleeves: Number
     }],
-    guidelines: [String] // Array of sizing guidelines
+    guidelines: [String]
   },
+
   images: [{
     url: { type: String, required: true },
     alt: { type: String, default: '' },
     isPrimary: { type: Boolean, default: false }
   }],
+
   status: {
     type: String,
     enum: ['active', 'inactive', 'draft', 'discontinued'],
     default: 'active'
   },
   tags: [String],
-  weight: {
-    type: Number,
-    min: [0, 'Weight cannot be negative']
-  },
-  dimensions: {
-    length: Number,
-    width: Number,
-    height: Number
-  },
-  isFeatures: {
-    type: Boolean,
-    default: false
-  },
-  salePrice: {
-    type: Number,
-    min: [0, 'Sale price cannot be negative']
-  },
+  weight: { type: Number, min: [0, 'Weight cannot be negative'] },
+  dimensions: { length: Number, width: Number, height: Number },
+  isFeatures: { type: Boolean, default: false },
+  salePrice: { type: Number, min: [0, 'Sale price cannot be negative'] },
   saleStartDate: Date,
   saleEndDate: Date,
-  minOrderQuantity: {
-    type: Number,
-    default: 1,
-    min: [1, 'Minimum order quantity must be at least 1']
+
+  // ✅ New: Limited stock offer
+  limitedOffer: {
+    isActive: { type: Boolean, default: false },
+    specialPrice: { type: Number, min: 0 },
+    maxUnits: { type: Number, default: 0 }, // e.g. first 100 units
+    unitsSold: { type: Number, default: 0 }
   },
-  maxOrderQuantity: {
-    type: Number,
-    default: 100
+
+  // ✅ New: Bundle offer (variety discount)
+  bundleOffer: {
+    isActive: { type: Boolean, default: false },
+    type: { type: String, enum: ['variety'], default: 'variety' },
+    minUniqueProducts: { type: Number, default: 0 }, // e.g. 12
+    discountPerItem: { type: Number, default: 0 }    // e.g. ₹26 off each
   },
-  // Review aggregation
+
+  minOrderQuantity: { type: Number, default: 1, min: [1, 'Minimum order quantity must be at least 1'] },
+  maxOrderQuantity: { type: Number, default: 100 },
+
   reviewStats: {
-    averageRating: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 5
-    },
-    totalReviews: {
-      type: Number,
-      default: 0
-    },
+    averageRating: { type: Number, default: 0, min: 0, max: 5 },
+    totalReviews: { type: Number, default: 0 },
     ratingDistribution: {
       1: { type: Number, default: 0 },
       2: { type: Number, default: 0 },
@@ -148,17 +129,15 @@ const productSchema = new mongoose.Schema({
       5: { type: Number, default: 0 }
     }
   }
-}, {
-  timestamps: true
-});
+}, { timestamps: true });
 
-// Indexes for better performance
+// Indexes
 productSchema.index({ category: 1 });
 productSchema.index({ status: 1 });
 productSchema.index({ sku: 1 });
 productSchema.index({ name: 'text', description: 'text' });
 
-// Virtual for current selling price
+// Virtuals
 productSchema.virtual('currentPrice').get(function() {
   if (this.salePrice && this.saleStartDate && this.saleEndDate) {
     const now = new Date();
@@ -169,109 +148,77 @@ productSchema.virtual('currentPrice').get(function() {
   return this.price;
 });
 
-// Virtual for total stock across all variants
+// ✅ Effective price considering limited offer
+productSchema.methods.getEffectivePrice = function() {
+  if (this.limitedOffer?.isActive && this.limitedOffer.unitsSold < this.limitedOffer.maxUnits) {
+    return this.limitedOffer.specialPrice;
+  }
+  return this.currentPrice;
+};
+
 productSchema.virtual('totalStock').get(function() {
-  if (this.variants && this.variants.length > 0) {
+  if (this.variants?.length > 0) {
     return this.variants.reduce((total, variant) => total + variant.stock, 0);
   }
   return this.stock;
 });
 
-// Virtual for available sizes
 productSchema.virtual('availableSizes').get(function() {
-  if (this.variants && this.variants.length > 0) {
+  if (this.variants?.length > 0) {
     const sizesWithStock = this.variants.filter(variant => variant.stock > 0);
     return [...new Set(sizesWithStock.map(variant => variant.size))];
   }
   return [];
 });
 
-// Virtual for available colors
 productSchema.virtual('availableColors').get(function() {
-  if (this.variants && this.variants.length > 0) {
+  if (this.variants?.length > 0) {
     const colorsWithStock = this.variants.filter(variant => variant.stock > 0);
     return colorsWithStock.reduce((colors, variant) => {
       const existingColor = colors.find(c => c.hex === variant.color.hex);
-      if (!existingColor) {
-        colors.push(variant.color);
-      }
+      if (!existingColor) colors.push(variant.color);
       return colors;
     }, []);
   }
   return [];
 });
 
-// Method to check if product is on sale
+// Stock methods
 productSchema.methods.isOnSale = function() {
-  if (!this.salePrice || !this.saleStartDate || !this.saleEndDate) {
-    return false;
-  }
+  if (!this.salePrice || !this.saleStartDate || !this.saleEndDate) return false;
   const now = new Date();
   return now >= this.saleStartDate && now <= this.saleEndDate;
 };
 
-// Method to get stock for specific size-color combination
 productSchema.methods.getVariantStock = function(size, colorHex) {
-  if (this.variants && this.variants.length > 0) {
+  if (this.variants?.length > 0) {
     const variant = this.variants.find(v => v.size === size && v.color.hex === colorHex);
     return variant ? variant.stock : 0;
   }
   return 0;
 };
 
-// Method to get available sizes for a specific color
 productSchema.methods.getSizesForColor = function(colorHex) {
-  if (this.variants && this.variants.length > 0) {
-    const sizesForColor = this.variants
-      .filter(v => v.color.hex === colorHex && v.stock > 0)
-      .map(v => v.size);
+  if (this.variants?.length > 0) {
+    const sizesForColor = this.variants.filter(v => v.color.hex === colorHex && v.stock > 0).map(v => v.size);
     return [...new Set(sizesForColor)];
   }
   return [];
 };
 
-// Method to get available colors for a specific size
 productSchema.methods.getColorsForSize = function(size) {
-  if (this.variants && this.variants.length > 0) {
-    const colorsForSize = this.variants
-      .filter(v => v.size === size && v.stock > 0)
-      .map(v => v.color);
+  if (this.variants?.length > 0) {
+    const colorsForSize = this.variants.filter(v => v.size === size && v.stock > 0).map(v => v.color);
     return colorsForSize.reduce((colors, color) => {
-      const exists = colors.find(c => c.hex === color.hex);
-      if (!exists) colors.push(color);
+      if (!colors.find(c => c.hex === color.hex)) colors.push(color);
       return colors;
     }, []);
   }
   return [];
 };
 
-// Method to update stock for specific size-color combination
 productSchema.methods.updateVariantStock = function(size, colorHex, quantity) {
-  if (this.variants && this.variants.length > 0) {
-    const variant = this.variants.find(v => v.size === size && v.color.hex === colorHex);
-    if (variant) {
-      variant.stock = Math.max(0, variant.stock - quantity);
-      return true;
-    }
-    return false;
-  }
-  // Fallback to legacy method
-  this.updateSizeStock(size, quantity);
-  return true;
-};
-
-// Method to get stock for specific size (total across all colors)
-productSchema.methods.getStockForSize = function(size) {
-  if (this.variants && this.variants.length > 0) {
-    const variantsForSize = this.variants.filter(v => v.size === size);
-    return variantsForSize.reduce((total, variant) => total + variant.stock, 0);
-  }
-  return this.stock;
-};
-
-// Method to update stock for specific variant
-productSchema.methods.updateVariantStock = function(size, colorHex, quantity) {
-  if (this.variants && this.variants.length > 0) {
+  if (this.variants?.length > 0) {
     const variant = this.variants.find(v => v.size === size && v.color.hex === colorHex);
     if (variant) {
       variant.stock = Math.max(0, variant.stock - quantity);
@@ -281,17 +228,13 @@ productSchema.methods.updateVariantStock = function(size, colorHex, quantity) {
   return false;
 };
 
-// Pre-save middleware to generate SKU and calculate total stock
 productSchema.pre('save', function(next) {
   if (!this.sku) {
     this.sku = `HASH-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
   }
-  
-  // Auto-calculate total stock from variants if variants exist
-  if (this.variants && this.variants.length > 0) {
+  if (this.variants?.length > 0) {
     this.stock = this.variants.reduce((total, variant) => total + variant.stock, 0);
   }
-  
   next();
 });
 

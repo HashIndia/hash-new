@@ -44,6 +44,26 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+
+  // ✅ New: applied offers
+  appliedOffers: [{
+    type: {
+      type: String,
+      enum: ['limited', 'bundle'],
+      required: true
+    },
+    description: String,
+    discount: {
+      type: Number,
+      default: 0
+    }
+  }],
+
+  discountAmount: {
+    type: Number,
+    default: 0
+  },
+
   shippingAddress: {
     name: String,
     phone: String,
@@ -64,25 +84,15 @@ const orderSchema = new mongoose.Schema({
     enum: ['pending', 'initiated', 'paid', 'failed', 'refunded', 'partially_refunded'],
     default: 'pending'
   },
-  paymentSessionId: {
-    type: String // Legacy field for other payment gateways
-  },
-  razorpayOrderId: {
-    type: String // Razorpay order ID
-  },
-  paymentId: {
-    type: String // Razorpay payment ID
-  },
-  refundId: {
-    type: String // Razorpay refund ID
-  },
+  paymentSessionId: String,
+  razorpayOrderId: String,
+  paymentId: String,
+  refundId: String,
   refundStatus: {
     type: String,
     enum: ['pending', 'processed', 'failed']
   },
-  refundAmount: {
-    type: Number
-  },
+  refundAmount: Number,
   status: {
     type: String,
     enum: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'],
@@ -93,7 +103,7 @@ const orderSchema = new mongoose.Schema({
   estimatedDelivery: Date,
   deliveryOTP: {
     type: String,
-    select: false // Don't include in regular queries for security
+    select: false
   },
   deliveryOTPExpires: {
     type: Date,
@@ -109,13 +119,18 @@ const orderSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// Virtual for customer info
+// Virtual: customer info
 orderSchema.virtual('customerInfo').get(function() {
   return {
-    name: this.shippingAddress.name,
-    email: this.user.email,
-    phone: this.shippingAddress.phone
+    name: this.shippingAddress?.name,
+    email: this.user?.email,
+    phone: this.shippingAddress?.phone
   };
+});
+
+// Virtual: final payable amount
+orderSchema.virtual('finalTotal').get(function() {
+  return (this.totalAmount - this.discountAmount + this.shippingCost + this.taxAmount);
 });
 
 const Order = mongoose.model('Order', orderSchema);

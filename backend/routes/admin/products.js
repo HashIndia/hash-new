@@ -84,7 +84,10 @@ const productValidation = [
   body('brand')
     .optional(),
   body('subcategory')
-    .optional()
+    .optional(),
+    body('isTrending').optional().isBoolean().withMessage('isTrending must be a boolean'),
+body('isHero').optional().isBoolean().withMessage('isHero must be a boolean'),
+
 ];
 
 const stockValidation = [
