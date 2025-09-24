@@ -233,7 +233,7 @@ export default function Home() {
         url="https://hashindia.com/"
         canonicalUrl="https://hashindia.com/"
       />
-      <div className="bg-white shadow-lg rounded-b-3xl ">
+      <div className="bg-white shadow-lg rounded-b-3xl">
         <HeroSlider />
       </div>
       {/* End Hero Section */}
