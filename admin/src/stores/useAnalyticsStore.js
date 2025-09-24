@@ -72,13 +72,31 @@ const useAnalyticsStore = create((set, get) => ({
   },
 
   // Initialize store by loading all analytics data
+
+  loadSizeAnalytics: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await analyticsAPI.getSizeAnalytics();
+      set({
+        sizeAnalytics: response.data,
+        isLoading: false
+      });
+    } catch (error) {
+      const errorMessage = handleAPIError(error);
+      console.error('Failed to load size analytics:', error);
+      set({ isLoading: false, error: errorMessage });
+    }
+  },
+
+  // Initialize store by loading all analytics data
   initialize: async () => {
-    const { loadDashboardStats, loadRevenueAnalytics, loadCustomerAnalytics, loadProductAnalytics } = get();
+    const { loadDashboardStats, loadRevenueAnalytics, loadCustomerAnalytics, loadProductAnalytics, loadSizeAnalytics } = get();
     await Promise.all([
       loadDashboardStats(),
       loadRevenueAnalytics(),
       loadCustomerAnalytics(),
-      loadProductAnalytics()
+      loadProductAnalytics(),
+      loadSizeAnalytics() // <-- Added
     ]);
   },
 

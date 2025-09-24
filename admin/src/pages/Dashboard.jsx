@@ -7,15 +7,13 @@ import {
   Users, 
   DollarSign, 
   TrendingUp, 
-  TrendingDown,
-  ArrowUpRight,
-  ArrowDownRight
+  TrendingDown 
 } from 'lucide-react';
 import { Card } from '../components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { adminAuthAPI, productsAPI, ordersAPI, customersAPI } from '../services/api';
+import { adminAuthAPI, adminProductsAPI, ordersAPI, customersAPI } from '../services/api.js';
 
-// Move static data outside component to prevent re-creation
+// Static chart data
 const salesData = [
   { name: 'Jan', sales: 4000, orders: 24 },
   { name: 'Feb', sales: 3000, orders: 18 },
@@ -32,7 +30,7 @@ const categoryData = [
   { name: 'Accessories', value: 20, color: '#f59e0b' }
 ];
 
-// Memoized chart components to prevent re-renders
+// Memoized charts
 const SalesChart = memo(() => (
   <ResponsiveContainer width="100%" height={300}>
     <LineChart data={salesData}>
@@ -40,17 +38,10 @@ const SalesChart = memo(() => (
       <XAxis dataKey="name" />
       <YAxis />
       <Tooltip />
-      <Line 
-        type="monotone" 
-        dataKey="sales" 
-        stroke="#3b82f6" 
-        strokeWidth={2}
-        dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
-      />
+      <Line type="monotone" dataKey="sales" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }} />
     </LineChart>
   </ResponsiveContainer>
 ));
-
 SalesChart.displayName = 'SalesChart';
 
 const CategoryChart = memo(() => (
@@ -73,27 +64,18 @@ const CategoryChart = memo(() => (
     </PieChart>
   </ResponsiveContainer>
 ));
-
 CategoryChart.displayName = 'CategoryChart';
 
 export default function Dashboard() {
-  // ALL HOOKS MUST BE CALLED AT THE TOP - BEFORE ANY CONDITIONS OR EARLY RETURNS
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Real data from API instead of dummy stores
   const [orders, setOrders] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
-  const [dashboardStats, setDashboardStats] = useState({
-    totalRevenue: 0,
-    totalOrders: 0,
-    totalCustomers: 0,
-    lowStockProducts: 0
-  });
 
-  // Memoize computed values to prevent recalculation on every render
+  // Derived dashboard stats
   const orderStats = useMemo(() => {
     const total = orders.length;
     const pending = orders.filter(o => o.status === 'pending').length;
@@ -103,15 +85,7 @@ export default function Dashboard() {
     const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
     const avgOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
     
-    return {
-      total,
-      pending,
-      shipped,
-      delivered,
-      cancelled,
-      totalRevenue,
-      avgOrderValue
-    };
+    return { total, pending, shipped, delivered, cancelled, totalRevenue, avgOrderValue };
   }, [orders]);
 
   const customerStats = useMemo(() => {
@@ -119,53 +93,16 @@ export default function Dashboard() {
     const active = customers.filter(c => c.status === 'active').length;
     const inactive = customers.filter(c => c.status === 'inactive').length;
     const vip = customers.filter(c => c.tags?.includes('VIP')).length;
-    
-    return {
-      total,
-      active,
-      inactive,
-      vip
-    };
+    return { total, active, inactive, vip };
   }, [customers]);
 
-  const lowStockProducts = useMemo(() => {
-    return products.filter(product => (product.stock || 0) < 20);
-  }, [products]);
+  const lowStockProducts = useMemo(() => products.filter(p => (p.stock || 0) < 20), [products]);
 
-  // Use useMemo for derived data to prevent re-computation
   const stats = useMemo(() => [
-    {
-      name: 'Total Revenue',
-      value: `₹${orderStats.totalRevenue.toFixed(2)}`,
-      change: '+12.5%',
-      changeType: 'increase',
-      icon: DollarSign,
-      color: 'bg-green-500'
-    },
-    {
-      name: 'Total Orders',
-      value: orderStats.total,
-      change: '+8.2%',
-      changeType: 'increase',
-      icon: ShoppingCart,
-      color: 'bg-blue-500'
-    },
-    {
-      name: 'Total Customers',
-      value: customerStats.total,
-      change: '+15.3%',
-      changeType: 'increase',
-      icon: Users,
-      color: 'bg-purple-500'
-    },
-    {
-      name: 'Low Stock Items',
-      value: lowStockProducts.length,
-      change: '-2.1%',
-      changeType: 'decrease',
-      icon: Package,
-      color: 'bg-orange-500'
-    }
+    { name: 'Total Revenue', value: `₹${orderStats.totalRevenue.toFixed(2)}`, change: '+12.5%', changeType: 'increase', icon: DollarSign, color: 'bg-green-500' },
+    { name: 'Total Orders', value: orderStats.total, change: '+8.2%', changeType: 'increase', icon: ShoppingCart, color: 'bg-blue-500' },
+    { name: 'Total Customers', value: customerStats.total, change: '+15.3%', changeType: 'increase', icon: Users, color: 'bg-purple-500' },
+    { name: 'Low Stock Items', value: lowStockProducts.length, change: '-2.1%', changeType: 'decrease', icon: Package, color: 'bg-orange-500' }
   ], [orderStats, customerStats, lowStockProducts]);
 
   const getStatusColor = useCallback((status) => {
@@ -177,57 +114,28 @@ export default function Dashboard() {
     }
   }, []);
 
-  // Fetch dashboard data from API
   const fetchDashboardData = useCallback(async () => {
     try {
-      // Fetch all data in parallel with error handling
       const [ordersResult, customersResult, productsResult] = await Promise.all([
         ordersAPI.getOrders({ limit: 100 }).catch(() => ({ data: { orders: [] } })),
         customersAPI.getCustomers({ limit: 100 }).catch(() => ({ data: { customers: [] } })),
-        productsAPI.getProducts({ limit: 100 }).catch(() => ({ data: { products: [] } })),
+        adminProductsAPI.getProducts({ limit: 100 }).catch(() => ({ data: { products: [] } })),
       ]);
 
-      // Handle orders - safe extraction
-      if (ordersResult) {
-        const ordersData = ordersResult.data?.orders || [];
-        setOrders(Array.isArray(ordersData) ? ordersData : []);
-      } else {
-        setOrders([]);
-      }
-
-      // Handle customers - safe extraction
-      if (customersResult) {
-        const customersData = customersResult.data?.customers || [];
-        setCustomers(Array.isArray(customersData) ? customersData : []);
-      } else {
-        setCustomers([]);
-      }
-
-      // Handle products - safe extraction
-      if (productsResult) {
-        const productsData = productsResult.data?.products || [];
-        setProducts(Array.isArray(productsData) ? productsData : []);
-      } else {
-        setProducts([]);
-      }
-
+      setOrders(ordersResult?.data?.orders || []);
+      setCustomers(customersResult?.data?.customers || []);
+      setProducts(productsResult?.data?.products || []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      // Set empty arrays as fallback
-      setOrders([]);
-      setCustomers([]);
-      setProducts([]);
+      setOrders([]); setCustomers([]); setProducts([]);
     }
   }, []);
 
-  // ALL HOOKS CALLED ABOVE - NOW SAFE FOR EFFECTS AND CONDITIONAL LOGIC
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const response = await adminAuthAPI.getCurrentAdmin();
         setAdmin(response.data.user);
-        
-        // Fetch dashboard data after authentication
         await fetchDashboardData();
       } catch (error) {
         navigate('/admin/login');
@@ -235,35 +143,25 @@ export default function Dashboard() {
         setLoading(false);
       }
     };
-
     checkAuth();
   }, [navigate, fetchDashboardData]);
 
   const handleLogout = async () => {
-    try {
-      await adminAuthAPI.logout();
-    } catch (error) {
-      console.log('Logout error (ignored):', error);
-    } finally {
-      localStorage.removeItem('admin-auth');
-      navigate('/admin/login');
-    }
+    try { await adminAuthAPI.logout(); } catch { }
+    localStorage.removeItem('admin-auth');
+    navigate('/admin/login');
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading dashboard...</p>
-        </div>
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        <p className="mt-2 text-gray-600">Loading dashboard...</p>
       </div>
-    );
-  }
+    </div>
+  );
 
-  if (!admin) {
-    return null; // Will redirect to login
-  }
+  if (!admin) return null;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -273,10 +171,7 @@ export default function Dashboard() {
             <h1 className="text-xl font-semibold text-gray-900">Admin Dashboard</h1>
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">Welcome, {admin.email}</span>
-              <button
-                onClick={handleLogout}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm"
-              >
+              <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
                 Logout
               </button>
             </div>
@@ -286,28 +181,16 @@ export default function Dashboard() {
 
       <main className="max-w-7xl mx-auto py-4 md:py-6 px-4 sm:px-6 lg:px-8">
         <div className="py-4 md:py-6">
-          {/* Stats Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
             {stats.map((stat, index) => (
-              <motion.div
-                key={stat.name}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1, duration: 0.5 }}
-              >
+              <motion.div key={stat.name} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1, duration: 0.5 }}>
                 <Card className="p-3 md:p-6 hover:shadow-lg transition-shadow">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                     <div className="mb-2 md:mb-0">
                       <p className="text-xs md:text-sm font-medium text-gray-600">{stat.name}</p>
                       <p className="text-lg md:text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
-                      <div className={`flex items-center mt-1 md:mt-2 text-xs md:text-sm ${
-                        stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {stat.changeType === 'increase' ? (
-                          <TrendingUp className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                        ) : (
-                          <TrendingDown className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                        )}
+                      <div className={`flex items-center mt-1 md:mt-2 text-xs md:text-sm ${stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'}`}>
+                        {stat.changeType === 'increase' ? <TrendingUp className="w-3 h-3 md:w-4 md:h-4 mr-1" /> : <TrendingDown className="w-3 h-3 md:w-4 md:h-4 mr-1" />}
                         {stat.change}
                       </div>
                     </div>
@@ -320,7 +203,6 @@ export default function Dashboard() {
             ))}
           </div>
 
-          {/* Quick Summary */}
           <div className="bg-white p-4 md:p-8 rounded-lg shadow">
             <h2 className="text-lg md:text-2xl font-bold text-gray-900 mb-2 md:mb-4">Dashboard Overview</h2>
             <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6">Real-time data from your store</p>

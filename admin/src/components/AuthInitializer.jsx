@@ -3,15 +3,28 @@ import useAuthStore from '../stores/useAuthStore';
 
 export default function AuthInitializer({ children }) {
   const [isInitialized, setIsInitialized] = useState(false);
-  const checkAuth = useAuthStore(state => state.checkAuth);
+
+  // Zustand hook must be called at the top level
+  const checkAuth = useAuthStore((state) => state.checkAuth);
 
   useEffect(() => {
+    let isMounted = true; // safety check for unmounted component
+
     const initializeAuth = async () => {
-      await checkAuth();
-      setIsInitialized(true);
+      try {
+        await checkAuth();
+      } catch (error) {
+        console.error('Auth initialization failed:', error);
+      } finally {
+        if (isMounted) setIsInitialized(true);
+      }
     };
 
     initializeAuth();
+
+    return () => {
+      isMounted = false; // cleanup
+    };
   }, [checkAuth]);
 
   if (!isInitialized) {
@@ -25,6 +38,5 @@ export default function AuthInitializer({ children }) {
     );
   }
 
-  return children;
+  return <>{children}</>;
 }
- 

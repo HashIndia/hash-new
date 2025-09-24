@@ -1,551 +1,529 @@
-import { useState, useMemo, memo, useCallback, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  ShoppingCart, 
-  Users, 
+import { useState, useMemo, useEffect } from "react";
+import { motion } from "framer-motion";
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  ShoppingCart,
+  Users,
   Eye,
   Download,
-  Calendar
-} from 'lucide-react';
-import { Card } from '../components/ui/card';
-import { Button } from '../components/ui/button';
+  Pencil,
+  Trash2,
+  Save,
+  X,
+} from "lucide-react";
+import { Card } from "../components/ui/card";
+import { Button } from "../components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../components/ui/select';
-import { 
-  LineChart, 
-  Line, 
+} from "../components/ui/select";
+import {
   AreaChart,
   Area,
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
-} from 'recharts';
-import useOrderStore from '../stores/useOrderStore';
-import useCustomerStore from '../stores/useCustomerStore';
-import useInventoryStore from '../stores/useInventoryStore';
-import useAnalyticsStore from '../stores/useAnalyticsStore';
+  Cell,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import useOrderStore from "../stores/useOrderStore";
+import useAnalyticsStore from "../stores/useAnalyticsStore";
 
-// Move static data outside component to prevent re-creation
+const VENDOR_ENTRIES_KEY = "hash_vendor_entries";
+
 const revenueDataFallback = [
-  { date: '2024-01-01', revenue: 45000, orders: 23 },
-  { date: '2024-01-02', revenue: 32000, orders: 18 },
-  { date: '2024-01-03', revenue: 51000, orders: 28 },
-  { date: '2024-01-04', revenue: 48000, orders: 25 },
-  { date: '2024-01-05', revenue: 62000, orders: 34 },
-  { date: '2024-01-06', revenue: 55000, orders: 29 },
-  { date: '2024-01-07', revenue: 72000, orders: 42 }
-];
-
-const topProductsDataFallback = [
-  { name: 'Cotton T-Shirt', sales: 145, revenue: 43500 },
-  { name: 'Denim Jeans', sales: 98, revenue: 58800 },
-  { name: 'Summer Dress', sales: 67, revenue: 53600 },
-  { name: 'Hoodie', sales: 45, revenue: 22500 },
-  { name: 'Sneakers', sales: 34, revenue: 34000 }
+  { date: "2024-01-01", revenue: 45000, orders: 23 },
+  { date: "2024-01-02", revenue: 32000, orders: 18 },
+  { date: "2024-01-03", revenue: 51000, orders: 28 },
+  { date: "2024-01-04", revenue: 48000, orders: 25 },
+  { date: "2024-01-05", revenue: 62000, orders: 34 },
+  { date: "2024-01-06", revenue: 55000, orders: 29 },
+  { date: "2024-01-07", revenue: 72000, orders: 42 },
 ];
 
 const customerSegmentDataFallback = [
-  { name: 'New Customers', value: 35, color: '#3b82f6' },
-  { name: 'Returning', value: 45, color: '#8b5cf6' },
-  { name: 'VIP', value: 20, color: '#10b981' }
+  { name: "New Customers", value: 35, color: "#3b82f6" },
+  { name: "Returning", value: 45, color: "#8b5cf6" },
+  { name: "VIP", value: 20, color: "#10b981" },
 ];
 
 const trafficSourceData = [
-  { source: 'Organic Search', visitors: 2400, conversions: 180 },
-  { source: 'Social Media', visitors: 1800, conversions: 95 },
-  { source: 'Direct', visitors: 1200, conversions: 145 },
-  { source: 'Email', visitors: 800, conversions: 120 },
-  { source: 'Paid Ads', visitors: 600, conversions: 85 }
+  { source: "Organic Search", visitors: 2400, conversions: 180 },
+  { source: "Social Media", visitors: 1800, conversions: 95 },
+  { source: "Direct", visitors: 1200, conversions: 145 },
+  { source: "Email", visitors: 800, conversions: 120 },
+  { source: "Paid Ads", visitors: 600, conversions: 85 },
 ];
 
-// Memoized chart components to prevent re-renders
-const RevenueChart = memo(({ data }) => (
-  <ResponsiveContainer width="100%" height={300}>
-    <AreaChart data={data}>
-      <defs>
-        <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-        </linearGradient>
-      </defs>
-      <CartesianGrid strokeDasharray="3 3" />
-      <XAxis 
-        dataKey="date" 
-        tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-      />
-      <YAxis />
-      <Tooltip 
-        formatter={(value, name) => [`₹${value}`, 'Revenue']}
-        labelFormatter={(date) => new Date(date).toLocaleDateString()}
-      />
-      <Area 
-        type="monotone" 
-        dataKey="revenue" 
-        stroke="#3b82f6" 
-        fillOpacity={1} 
-        fill="url(#revenueGradient)"
-        strokeWidth={2}
-      />
-    </AreaChart>
-  </ResponsiveContainer>
-));
+const ManualVendorEntryTable = ({
+  vendorEntries,
+  setVendorEntries,
+  soldVariants,
+}) => {
+  const [newEntry, setNewEntry] = useState({
+    brand: "",
+    size: "",
+    price: "",
+    quantityBought: "",
+  });
 
-RevenueChart.displayName = 'RevenueChart';
+  const [editIndex, setEditIndex] = useState(null);
+  const [editEntry, setEditEntry] = useState({
+    brand: "",
+    size: "",
+    price: "",
+    quantityBought: "",
+  });
 
-const CustomerSegmentChart = memo(({ data }) => (
-  <ResponsiveContainer width="100%" height={300}>
-    <PieChart>
-      <Pie
-        data={data}
-        cx="50%"
-        cy="50%"
-        outerRadius={100}
-        fill="#8884d8"
-        dataKey="value"
-        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-      >
-        {data?.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={entry.color} />
-        ))}
-      </Pie>
-      <Tooltip />
-    </PieChart>
-  </ResponsiveContainer>
-));
+  const sizes = [
+    "XS", "S", "M", "L", "XL", "XXL", "XXXL", "28", "30", "32", "34", "36", "38", "40", "42", "ONE_SIZE"
+  ];
 
-CustomerSegmentChart.displayName = 'CustomerSegmentChart';
+  const handleInputChange = (field, value) => {
+    setNewEntry((prev) => ({ ...prev, [field]: value }));
+  };
 
-const TopProductsChart = memo(({ data }) => (
-  <ResponsiveContainer width="100%" height={300}>
-    <BarChart data={data} layout="horizontal">
-      <CartesianGrid strokeDasharray="3 3" />
-      <XAxis type="number" />
-      <YAxis dataKey="name" type="category" width={100} />
-      <Tooltip formatter={(value, name) => [
-        name === 'sales' ? value : `₹${value}`, 
-        name === 'sales' ? 'Sales' : 'Revenue'
-      ]} />
-      <Bar dataKey="sales" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
-    </BarChart>
-  </ResponsiveContainer>
-));
+  const handleEditInputChange = (field, value) => {
+    setEditEntry((prev) => ({ ...prev, [field]: value }));
+  };
 
-TopProductsChart.displayName = 'TopProductsChart';
+  const handleAddEntry = () => {
+    if (
+      !newEntry.brand ||
+      !newEntry.size ||
+      !newEntry.price ||
+      !newEntry.quantityBought
+    ) {
+      return;
+    }
+    const entry = {
+      ...newEntry,
+      price: parseFloat(newEntry.price),
+      quantityBought: parseInt(newEntry.quantityBought),
+    };
+    const updatedEntries = [...vendorEntries, entry];
+    setVendorEntries(updatedEntries);
+    localStorage.setItem(VENDOR_ENTRIES_KEY, JSON.stringify(updatedEntries));
+    setNewEntry({
+      brand: "",
+      size: "",
+      price: "",
+      quantityBought: "",
+    });
+  };
 
-// Variant Analytics Component for Manufacturing Intelligence
-const VariantAnalyticsSection = memo(() => {
-  const orders = useOrderStore(state => state.orders);
-  
-  // Process variant sales data
-  const variantData = useMemo(() => {
-    const variants = {};
-    
-    orders.forEach(order => {
-      if (order.status !== 'cancelled' && order.items) {
-        order.items.forEach(item => {
-          if (item.size && item.color) {
-            const key = `${item.name || 'Unknown Product'}-${item.size}-${item.color}`;
-            if (!variants[key]) {
-              variants[key] = {
-                productName: item.name || 'Unknown Product',
-                size: item.size,
-                color: item.color,
-                quantity: 0,
-                revenue: 0,
-                orders: new Set()
-              };
-            }
-            variants[key].quantity += item.quantity;
-            variants[key].revenue += (item.price * item.quantity);
-            variants[key].orders.add(order._id);
+  const handleDeleteEntry = (idx) => {
+    const updatedEntries = vendorEntries.filter((_, i) => i !== idx);
+    setVendorEntries(updatedEntries);
+    localStorage.setItem(VENDOR_ENTRIES_KEY, JSON.stringify(updatedEntries));
+    setEditIndex(null);
+  };
+
+  const handleEditEntry = (idx) => {
+    setEditIndex(idx);
+    setEditEntry({ ...vendorEntries[idx] });
+  };
+
+  const handleSaveEditEntry = (idx) => {
+    if (
+      !editEntry.brand ||
+      !editEntry.size ||
+      !editEntry.price ||
+      !editEntry.quantityBought
+    ) {
+      return;
+    }
+    const updatedEntries = vendorEntries.map((entry, i) =>
+      i === idx
+        ? {
+            ...editEntry,
+            price: parseFloat(editEntry.price),
+            quantityBought: parseInt(editEntry.quantityBought),
           }
-        });
-      }
-    });
-    
-    // Convert to array and sort by quantity sold
-    return Object.values(variants)
-      .map(variant => ({
-        ...variant,
-        orderCount: variant.orders.size
-      }))
-      .sort((a, b) => b.quantity - a.quantity);
-  }, [orders]);
+        : entry
+    );
+    setVendorEntries(updatedEntries);
+    localStorage.setItem(VENDOR_ENTRIES_KEY, JSON.stringify(updatedEntries));
+    setEditIndex(null);
+  };
 
-  // Group by product for better overview
-  const productGroups = useMemo(() => {
-    const groups = {};
-    variantData.forEach(variant => {
-      if (!groups[variant.productName]) {
-        groups[variant.productName] = [];
-      }
-      groups[variant.productName].push(variant);
-    });
-    return groups;
-  }, [variantData]);
-
-  // Top performing variants for quick insights
-  const topVariants = variantData.slice(0, 10);
+  const handleCancelEdit = () => {
+    setEditIndex(null);
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Quick Insights */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <h4 className="text-sm font-semibold text-blue-900 mb-1">Total Variants Sold</h4>
-          <p className="text-2xl font-bold text-blue-600">{variantData.length}</p>
-        </div>
-        <div className="bg-green-50 p-4 rounded-lg">
-          <h4 className="text-sm font-semibold text-green-900 mb-1">Best Selling Variant</h4>
-          <p className="text-sm font-bold text-green-600">
-            {topVariants[0] ? `${topVariants[0].productName} - ${topVariants[0].size} - ${topVariants[0].color}` : 'No data'}
-          </p>
-          <p className="text-xs text-green-700">
-            {topVariants[0] ? `${topVariants[0].quantity} units` : ''}
-          </p>
-        </div>
-        <div className="bg-purple-50 p-4 rounded-lg">
-          <h4 className="text-sm font-semibold text-purple-900 mb-1">Total Units Sold</h4>
-          <p className="text-2xl font-bold text-purple-600">
-            {variantData.reduce((sum, variant) => sum + variant.quantity, 0)}
-          </p>
-        </div>
+    <div className="mb-8">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        Vendor Purchase Entry (Manual)
+      </h3>
+      <div className="mb-4 flex flex-wrap gap-4 items-end">
+        <input
+          type="text"
+          placeholder="Brand Name"
+          value={newEntry.brand}
+          onChange={(e) => handleInputChange("brand", e.target.value)}
+          className="border px-3 py-2 rounded w-32"
+        />
+        <select
+          value={newEntry.size}
+          onChange={(e) => handleInputChange("size", e.target.value)}
+          className="border px-3 py-2 rounded w-24"
+        >
+          <option value="">Size</option>
+          {sizes.map((size) => (
+            <option key={size} value={size}>
+              {size}
+            </option>
+          ))}
+        </select>
+        <input
+          type="number"
+          placeholder="Price per unit"
+          value={newEntry.price}
+          onChange={(e) => handleInputChange("price", e.target.value)}
+          className="border px-3 py-2 rounded w-28"
+        />
+        <input
+          type="number"
+          placeholder="Quantity Bought"
+          value={newEntry.quantityBought}
+          onChange={(e) => handleInputChange("quantityBought", e.target.value)}
+          className="border px-3 py-2 rounded w-32"
+        />
+        <Button type="button" onClick={handleAddEntry}>
+          Add Entry
+        </Button>
       </div>
-
-      {/* Top 10 Variants Chart */}
-      <div className="mb-6">
-        <h4 className="text-lg font-semibold text-gray-900 mb-4">Top 10 Best Selling Variants</h4>
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={topVariants}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="productName" 
-                angle={-45}
-                textAnchor="end"
-                height={100}
-                interval={0}
-                fontSize={10}
-              />
-              <YAxis />
-              <Tooltip 
-                formatter={(value, name) => [value, name === 'quantity' ? 'Units Sold' : 'Revenue']}
-                labelFormatter={(label) => {
-                  const variant = topVariants.find(v => v.productName === label);
-                  return variant ? `${variant.productName} (${variant.size} - ${variant.color})` : label;
-                }}
-              />
-              <Bar dataKey="quantity" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Detailed Variant Table */}
-      <div>
-        <h4 className="text-lg font-semibold text-gray-900 mb-4">Detailed Variant Analysis</h4>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-200 rounded-lg">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-900">Product</th>
-                <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-900">Size</th>
-                <th className="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-900">Color</th>
-                <th className="border border-gray-200 px-4 py-3 text-right text-sm font-semibold text-gray-900">Units Sold</th>
-                <th className="border border-gray-200 px-4 py-3 text-right text-sm font-semibold text-gray-900">Revenue</th>
-                <th className="border border-gray-200 px-4 py-3 text-right text-sm font-semibold text-gray-900">Orders</th>
-                <th className="border border-gray-200 px-4 py-3 text-right text-sm font-semibold text-gray-900">Avg/Order</th>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse border border-gray-200 rounded-lg">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="border px-4 py-3 text-left text-sm font-semibold text-gray-900">
+                Brand
+              </th>
+              <th className="border px-4 py-3 text-left text-sm font-semibold text-gray-900">
+                Size
+              </th>
+              <th className="border px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                Price/Unit
+              </th>
+              <th className="border px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                Bought from Vendor
+              </th>
+              <th className="border px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                Sold to Customer
+              </th>
+              <th className="border px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                Remaining Stock
+              </th>
+              <th className="border px-4 py-3 text-center text-sm font-semibold text-gray-900">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {vendorEntries.length === 0 ? (
+              <tr>
+                <td
+                  colSpan="7"
+                  className="border px-4 py-8 text-center text-gray-500"
+                >
+                  No vendor entries yet. Please add manually.
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {variantData.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="border border-gray-200 px-4 py-8 text-center text-gray-500">
-                    No variant data available. Sales data will appear here once orders are placed.
-                  </td>
-                </tr>
-              ) : (
-                variantData.map((variant, index) => (
-                  <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="border border-gray-200 px-4 py-3 text-sm font-medium text-gray-900">
-                      {variant.productName}
-                    </td>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-700">
-                      {variant.size}
-                    </td>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-gray-700">
-                      <div className="flex items-center">
-                        <div 
-                          className="w-4 h-4 rounded-full mr-2 border border-gray-300"
-                          style={{ backgroundColor: variant.color.toLowerCase() === 'white' ? '#f3f4f6' : variant.color.toLowerCase() }}
-                          title={variant.color}
+            ) : (
+              vendorEntries.map((entry, idx) => {
+                const sold = soldVariants
+                  .filter(
+                    (v) =>
+                      v.brand === entry.brand && v.size === entry.size
+                  )
+                  .reduce((sum, v) => sum + v.quantity, 0);
+                const isEditing = editIndex === idx;
+                return (
+                  <tr
+                    key={idx}
+                    className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                  >
+                    <td className="border px-4 py-3 text-sm font-medium text-gray-900">
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={editEntry.brand}
+                          onChange={(e) =>
+                            handleEditInputChange("brand", e.target.value)
+                          }
+                          className="border px-2 py-1 rounded w-24"
                         />
-                        {variant.color}
-                      </div>
+                      ) : (
+                        entry.brand
+                      )}
                     </td>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-right font-semibold text-gray-900">
-                      {variant.quantity}
+                    <td className="border px-4 py-3 text-sm text-gray-700">
+                      {isEditing ? (
+                        <select
+                          value={editEntry.size}
+                          onChange={(e) =>
+                            handleEditInputChange("size", e.target.value)
+                          }
+                          className="border px-2 py-1 rounded w-20"
+                        >
+                          <option value="">Size</option>
+                          {sizes.map((size) => (
+                            <option key={size} value={size}>
+                              {size}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        entry.size
+                      )}
                     </td>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-right text-gray-700">
-                      ₹{variant.revenue.toLocaleString()}
+                    <td className="border px-4 py-3 text-sm text-right text-gray-700">
+                      {isEditing ? (
+                        <input
+                          type="number"
+                          value={editEntry.price}
+                          onChange={(e) =>
+                            handleEditInputChange("price", e.target.value)
+                          }
+                          className="border px-2 py-1 rounded w-16 text-right"
+                        />
+                      ) : (
+                        `₹${entry.price}`
+                      )}
                     </td>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-right text-gray-700">
-                      {variant.orderCount}
+                    <td className="border px-4 py-3 text-sm text-right text-gray-900 font-semibold">
+                      {isEditing ? (
+                        <input
+                          type="number"
+                          value={editEntry.quantityBought}
+                          onChange={(e) =>
+                            handleEditInputChange("quantityBought", e.target.value)
+                          }
+                          className="border px-2 py-1 rounded w-16 text-right"
+                        />
+                      ) : (
+                        entry.quantityBought
+                      )}
                     </td>
-                    <td className="border border-gray-200 px-4 py-3 text-sm text-right text-gray-700">
-                      {(variant.quantity / variant.orderCount).toFixed(1)}
+                    <td className="border px-4 py-3 text-sm text-right text-blue-700 font-semibold">
+                      {sold}
+                    </td>
+                    <td className="border px-4 py-3 text-sm text-right text-green-700 font-semibold">
+                      {entry.quantityBought - sold}
+                    </td>
+                    <td className="border px-4 py-3 text-center">
+                      {isEditing ? (
+                        <div className="flex gap-2 justify-center">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleSaveEditEntry(idx)}
+                          >
+                            <Save className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={handleCancelEdit}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2 justify-center">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditEntry(idx)}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDeleteEntry(idx)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
-
-      {/* Manufacturing Recommendations */}
-      {variantData.length > 0 && (
-        <div className="mt-6">
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">Manufacturing Recommendations</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-              <h5 className="font-semibold text-green-900 mb-2">🏆 High Demand Variants</h5>
-              <p className="text-sm text-green-800 mb-2">Focus production on these top performers:</p>
-              <ul className="text-sm text-green-700 space-y-1">
-                {topVariants.slice(0, 3).map((variant, index) => (
-                  <li key={index}>
-                    • {variant.productName} - {variant.size} - {variant.color} ({variant.quantity} units)
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-              <h5 className="font-semibold text-yellow-900 mb-2">📊 Size Analysis</h5>
-              <p className="text-sm text-yellow-800 mb-2">Most popular sizes:</p>
-              <div className="text-sm text-yellow-700">
-                {(() => {
-                  const sizeStats = {};
-                  variantData.forEach(variant => {
-                    sizeStats[variant.size] = (sizeStats[variant.size] || 0) + variant.quantity;
-                  });
-                  return Object.entries(sizeStats)
-                    .sort(([,a], [,b]) => b - a)
-                    .slice(0, 3)
-                    .map(([size, quantity]) => (
-                      <div key={size}>• {size}: {quantity} units</div>
-                    ));
-                })()}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
-});
-
-VariantAnalyticsSection.displayName = 'VariantAnalyticsSection';
+};
 
 const Analytics = () => {
-  const [dateRange, setDateRange] = useState('7d');
-  const [recentActivities, setRecentActivities] = useState([]);
-  
+  const [dateRange, setDateRange] = useState("7d");
+  const [vendorEntries, setVendorEntries] = useState([]);
   const {
     dashboardStats,
     revenueAnalytics,
     customerAnalytics,
-    productAnalytics,
     isLoading,
     error,
     initialize,
     loadRevenueAnalytics,
     loadCustomerAnalytics,
-    loadProductAnalytics
   } = useAnalyticsStore();
 
-  // Initialize analytics data on component mount
   useEffect(() => {
     initialize();
-    loadRecentActivities();
+    const savedEntries = localStorage.getItem(VENDOR_ENTRIES_KEY);
+    if (savedEntries) {
+      setVendorEntries(JSON.parse(savedEntries));
+    }
   }, [initialize]);
 
-  // Function to load recent activities from orders
-  const loadRecentActivities = useCallback(async () => {
-    try {
-      const { ordersAPI } = await import('../services/api');
-      const response = await ordersAPI.getOrders({ limit: 5, sort: 'createdAt' });
-      const activities = response.data.orders.map(order => {
-        const orderDate = new Date(order.createdAt);
-        const now = new Date();
-        const diffInMinutes = Math.floor((now - orderDate) / (1000 * 60));
-        
-        let timeAgo;
-        if (diffInMinutes < 1) timeAgo = 'Just now';
-        else if (diffInMinutes < 60) timeAgo = `${diffInMinutes}m ago`;
-        else if (diffInMinutes < 1440) timeAgo = `${Math.floor(diffInMinutes / 60)}h ago`;
-        else timeAgo = `${Math.floor(diffInMinutes / 1440)}d ago`;
-        
-        return {
-          action: 'New order received',
-          details: `Order #${order._id.slice(-6)} - ₹${order.totalAmount}`,
-          time: timeAgo,
-          type: 'order'
-        };
-      });
-      setRecentActivities(activities);
-    } catch (error) {
-      console.error('Failed to load recent activities:', error);
-      // Keep fallback data if API fails
-      setRecentActivities([
-        { action: 'New order received', details: 'Order #ORD004 - ₹8,750', time: '2 minutes ago', type: 'order' },
-        { action: 'Low stock alert', details: 'Cotton T-Shirt - 8 units left', time: '15 minutes ago', type: 'alert' },
-        { action: 'New customer registered', details: 'Sarah Johnson', time: '1 hour ago', type: 'customer' },
-        { action: 'Payment processed', details: 'Order #ORD003 - ₹10,796', time: '2 hours ago', type: 'payment' }
-      ]);
-    }
-  }, []);
-
-  // Reload data when date range changes
   useEffect(() => {
     if (dateRange) {
       const params = { period: dateRange };
       Promise.all([
         loadRevenueAnalytics(params),
         loadCustomerAnalytics(params),
-        loadProductAnalytics(params)
       ]);
     }
-  }, [dateRange, loadRevenueAnalytics, loadCustomerAnalytics, loadProductAnalytics]);
-  
-  // Use stable selectors to prevent infinite re-renders - fallback to previous implementation for now
-  const orders = useOrderStore(state => state.orders);
-  const customers = useCustomerStore(state => state.customers);
-  const products = useInventoryStore(state => state.products);
+  }, [
+    dateRange,
+    loadRevenueAnalytics,
+    loadCustomerAnalytics,
+  ]);
 
-  // Use real data from analytics API when available, otherwise fallback to computed values
-  const revenueData = revenueAnalytics?.dailyData?.map(item => ({
-    date: `${item._id.year}-${String(item._id.month).padStart(2, '0')}-${String(item._id.day).padStart(2, '0')}`,
-    revenue: item.revenue,
-    orders: item.orders
-  })) || revenueDataFallback;
-  
-  const topProductsData = productAnalytics?.topProducts?.map(product => ({
-    name: product.name,
-    sales: product.totalSold,
-    revenue: product.revenue
-  })) || topProductsDataFallback;
-  
-  const customerSegmentData = customerAnalytics?.customerSegments?.map(segment => ({
-    name: segment._id === 'new' ? 'New Customers' : 
-         segment._id === 'regular' ? 'Regular Customers' : 
-         segment._id === 'loyal' ? 'Loyal Customers' : segment._id,
-    value: segment.count,
-    color: segment._id === 'new' ? '#3b82f6' : 
-           segment._id === 'regular' ? '#8b5cf6' : 
-           segment._id === 'loyal' ? '#10b981' : '#6b7280'
-  })) || customerSegmentDataFallback;
+  const orders = useOrderStore((state) => state.orders);
 
-  // Memoize computed values to prevent recalculation on every render
+  const soldVariants = useMemo(() => {
+    const variants = [];
+    orders.forEach((order) => {
+      if (order.status !== "cancelled" && order.items) {
+        order.items.forEach((item) => {
+          variants.push({
+            brand: item.brand || "",
+            size: item.size || "",
+            quantity: item.quantity || 0,
+          });
+        });
+      }
+    });
+    return variants;
+  }, [orders]);
+
   const orderStats = useMemo(() => {
-    // Use dashboard stats if available, otherwise compute from orders
     if (dashboardStats) {
       return {
         total: dashboardStats.orders.total,
-        pending: dashboardStats.orders.pending,
-        completed: dashboardStats.orders.completed,
         totalRevenue: dashboardStats.revenue.total,
-        avgOrderValue: dashboardStats.orders.total > 0 ? 
-          dashboardStats.revenue.total / dashboardStats.orders.total : 0
+        avgOrderValue:
+          dashboardStats.orders.total > 0
+            ? dashboardStats.revenue.total / dashboardStats.orders.total
+            : 0,
       };
     }
-    
-    // Fallback to computed values
     const total = orders.length;
-    const pending = orders.filter(o => o.status === 'pending').length;
-    const shipped = orders.filter(o => o.status === 'shipped').length;
-    const delivered = orders.filter(o => o.status === 'delivered').length;
-    const cancelled = orders.filter(o => o.status === 'cancelled').length;
-    const validOrders = orders.filter(o => o.status !== 'cancelled');
-    const totalRevenue = validOrders.reduce((sum, order) => sum + (order.totalAmount || order.total || 0), 0);
-    const avgOrderValue = validOrders.length > 0 ? totalRevenue / validOrders.length : 0;
-    
+    const validOrders = orders.filter((o) => o.status !== "cancelled");
+    const totalRevenue = validOrders.reduce(
+      (sum, order) => sum + (order.totalAmount || order.total || 0),
+      0
+    );
+    const avgOrderValue =
+      validOrders.length > 0 ? totalRevenue / validOrders.length : 0;
     return {
       total,
-      pending,
-      shipped,
-      delivered,
-      cancelled,
       totalRevenue,
-      avgOrderValue
+      avgOrderValue,
     };
-  }, [orders]);
+  }, [orders, dashboardStats]);
 
-  // Use useMemo for derived data to prevent re-computation
-  const kpis = useMemo(() => [
+  const kpis = [
     {
-      title: 'Total Revenue',
-      value: `₹${orderStats.totalRevenue.toFixed(2)}`,
-      change: revenueAnalytics?.growth ? `${revenueAnalytics.growth > 0 ? '+' : ''}${revenueAnalytics.growth.toFixed(1)}%` : '+12.5%',
-      changeType: revenueAnalytics?.growth ? (revenueAnalytics.growth > 0 ? 'increase' : 'decrease') : 'increase',
+      title: "Total Revenue",
+      value: `₹${orderStats.totalRevenue?.toFixed(2) || "0.00"}`,
+      change: "+12.5%",
+      changeType: "increase",
       icon: DollarSign,
-      color: 'bg-green-500'
+      color: "bg-green-500",
     },
     {
-      title: 'Total Orders',
-      value: orderStats.total,
-      change: '+8.2%',
-      changeType: 'increase',
+      title: "Total Orders",
+      value: orderStats.total || 0,
+      change: "+8.2%",
+      changeType: "increase",
       icon: ShoppingCart,
-      color: 'bg-blue-500'
+      color: "bg-blue-500",
     },
     {
-      title: 'Total Customers',
-      value: customerAnalytics?.totalCustomers || customers.length,
-      change: customerAnalytics?.growth ? `${customerAnalytics.growth > 0 ? '+' : ''}${customerAnalytics.growth.toFixed(1)}%` : '+5.3%',
-      changeType: customerAnalytics?.growth ? (customerAnalytics.growth > 0 ? 'increase' : 'decrease') : 'increase',
-      icon: Users,
-      color: 'bg-purple-500'
-    },
-    {
-      title: 'Avg Order Value',
-      value: `₹${orderStats.avgOrderValue.toFixed(2)}`,
-      change: '-2.1%',
-      changeType: 'decrease',
+      title: "Avg Order Value",
+      value: `₹${orderStats.avgOrderValue?.toFixed(2) || "0.00"}`,
+      change: "-2.1%",
+      changeType: "decrease",
       icon: DollarSign,
-      color: 'bg-orange-500'
-    }
-  ], [orderStats, revenueAnalytics, customerAnalytics, customers.length]);
+      color: "bg-orange-500",
+    },
+  ];
 
-  const handleDateRangeChange = useCallback((value) => {
-    setDateRange(value);
-  }, []);
+  const revenueData =
+    revenueAnalytics?.dailyData?.map((item) => ({
+      date: `${item._id.year}-${String(item._id.month).padStart(
+        2,
+        "0"
+      )}-${String(item._id.day).padStart(2, "0")}`,
+      revenue: item.revenue,
+      orders: item.orders,
+    })) || revenueDataFallback;
+
+  const customerSegmentData =
+    customerAnalytics?.customerSegments?.map((segment) => ({
+      name:
+        segment._id === "new"
+          ? "New Customers"
+          : segment._id === "regular"
+          ? "Regular Customers"
+          : segment._id === "loyal"
+          ? "Loyal Customers"
+          : segment._id,
+      value: segment.count,
+      color:
+        segment._id === "new"
+          ? "#3b82f6"
+          : segment._id === "regular"
+          ? "#8b5cf6"
+          : segment._id === "loyal"
+          ? "#10b981"
+          : "#6b7280",
+    })) || customerSegmentDataFallback;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Analytics & Reports</h1>
-          <p className="text-gray-600 mt-1">Track your business performance and insights</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Analytics & Reports
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Track your business performance and insights
+          </p>
         </div>
         <div className="flex space-x-3">
-          <Select value={dateRange} onValueChange={handleDateRangeChange}>
+          <Select value={dateRange} onValueChange={setDateRange}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>
@@ -562,72 +540,47 @@ const Analytics = () => {
           </Button>
         </div>
       </div>
-
-      {/* KPI Cards */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="p-6">
-              <div className="animate-pulse">
-                <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-                <div className="h-8 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/3"></div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      ) : error ? (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-          <p className="text-red-600">Failed to load analytics data: {error}</p>
-          <Button 
-            variant="outline" 
-            className="mt-4"
-            onClick={() => {
-              initialize();
-              loadRecentActivities();
-            }}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {kpis.map((kpi, index) => (
+          <motion.div
+            key={kpi.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1, duration: 0.5 }}
           >
-            Retry
-          </Button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {kpis.map((kpi, index) => (
-            <motion.div
-              key={kpi.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.5 }}
-            >
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{kpi.title}</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">{kpi.value}</p>
-                    <div className={`flex items-center mt-2 text-sm ${
-                      kpi.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {kpi.changeType === 'increase' ? (
-                        <TrendingUp className="w-4 h-4 mr-1" />
-                      ) : (
-                        <TrendingDown className="w-4 h-4 mr-1" />
-                      )}
-                      {kpi.change}
-                    </div>
-                  </div>
-                  <div className={`${kpi.color} p-3 rounded-lg`}>
-                    <kpi.icon className="w-6 h-6 text-white" />
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    {kpi.title}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                    {kpi.value}
+                  </p>
+                  <div
+                    className={`flex items-center mt-2 text-sm ${
+                      kpi.changeType === "increase"
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {kpi.changeType === "increase" ? (
+                      <TrendingUp className="w-4 h-4 mr-1" />
+                    ) : (
+                      <TrendingDown className="w-4 h-4 mr-1" />
+                    )}
+                    {kpi.change}
                   </div>
                 </div>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      )}
-
-      {/* Charts Row 1 */}
+                <div className={`${kpi.color} p-3 rounded-lg`}>
+                  <kpi.icon className="w-6 h-6 text-white" />
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue Chart */}
         <motion.div
           key="revenue-chart"
           initial={{ opacity: 0, x: -20 }}
@@ -636,17 +589,49 @@ const Analytics = () => {
         >
           <Card className="p-6">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Revenue Trend</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Revenue Trend
+              </h3>
               <Button variant="outline" size="sm">
                 <Eye className="w-3 h-3 mr-1" />
                 View Details
               </Button>
             </div>
-            <RevenueChart data={revenueData} />
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={revenueData}>
+                <defs>
+                  <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={(date) =>
+                    new Date(date).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })
+                  }
+                />
+                <YAxis />
+                <Tooltip
+                  formatter={(value, name) => [`₹${value}`, "Revenue"]}
+                  labelFormatter={(date) => new Date(date).toLocaleDateString()}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#3b82f6"
+                  fillOpacity={1}
+                  fill="url(#revenueGradient)"
+                  strokeWidth={2}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </Card>
         </motion.div>
-
-        {/* Customer Segments */}
         <motion.div
           key="customer-segments-chart"
           initial={{ opacity: 0, x: 20 }}
@@ -655,58 +640,43 @@ const Analytics = () => {
         >
           <Card className="p-6">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Customer Segments</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Customer Segments
+              </h3>
               <Button variant="outline" size="sm">
                 <Users className="w-3 h-3 mr-1" />
                 Manage Segments
               </Button>
             </div>
-            <CustomerSegmentChart data={customerSegmentData} />
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={customerSegmentData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, percent }) =>
+                    `${name}: ${(percent * 100).toFixed(0)}%`
+                  }
+                >
+                  {customerSegmentData?.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
           </Card>
         </motion.div>
       </div>
-
-      {/* Sales Analytics by Variants - Manufacturing Intelligence */}
-      <motion.div
-        key="variant-analytics"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.5 }}
-      >
-        <Card className="p-6 mb-6">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">Manufacturing Intelligence</h3>
-              <p className="text-sm text-gray-600">Sales data by product variants to optimize production</p>
-            </div>
-            <Button variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-2" />
-              Export Manufacturing Report
-            </Button>
-          </div>
-          <VariantAnalyticsSection />
-        </Card>
-      </motion.div>
-
-      {/* Charts Row 2 */}
+      <ManualVendorEntryTable
+        vendorEntries={vendorEntries}
+        setVendorEntries={setVendorEntries}
+        soldVariants={soldVariants}
+      />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Products */}
-        <motion.div
-          key="top-products-chart"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-        >
-          <Card className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Top Performing Products</h3>
-              <Button variant="outline" size="sm">View All</Button>
-            </div>
-            <TopProductsChart data={topProductsData} />
-          </Card>
-        </motion.div>
-
-        {/* Traffic Sources */}
         <motion.div
           key="traffic-sources"
           initial={{ opacity: 0, y: 20 }}
@@ -715,21 +685,36 @@ const Analytics = () => {
         >
           <Card className="p-6">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Traffic Sources</h3>
-              <Button variant="outline" size="sm">Optimize</Button>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Traffic Sources
+              </h3>
+              <Button variant="outline" size="sm">
+                Optimize
+              </Button>
             </div>
             <div className="space-y-4">
               {trafficSourceData.map((source, index) => (
-                <div key={source.source} className="flex items-center justify-between">
+                <div
+                  key={source.source}
+                  className="flex items-center justify-between"
+                >
                   <div className="flex-1">
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-sm font-medium text-gray-900">{source.source}</span>
-                      <span className="text-sm text-gray-600">{source.visitors} visitors</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {source.source}
+                      </span>
+                      <span className="text-sm text-gray-600">
+                        {source.visitors} visitors
+                      </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${(source.conversions / source.visitors) * 100}%` }}
+                        style={{
+                          width: `${
+                            (source.conversions / source.visitors) * 100
+                          }%`,
+                        }}
                       />
                     </div>
                   </div>
@@ -742,89 +727,8 @@ const Analytics = () => {
           </Card>
         </motion.div>
       </div>
-
-      {/* Detailed Tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Activity */}
-        <motion.div
-          key="recent-activity"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.5 }}
-        >
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-            <div className="space-y-4">
-              {recentActivities.map((activity, index) => (
-                <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className={`w-2 h-2 rounded-full ${
-                    activity.type === 'order' ? 'bg-green-500' :
-                    activity.type === 'alert' ? 'bg-red-500' :
-                    activity.type === 'customer' ? 'bg-blue-500' : 'bg-purple-500'
-                  }`} />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{activity.action}</p>
-                    <p className="text-xs text-gray-600">{activity.details}</p>
-                  </div>
-                  <span className="text-xs text-gray-500">{activity.time}</span>
-                </div>
-              ))}
-              {recentActivities.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  <p>No recent activities found</p>
-                </div>
-              )}
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* Performance Summary */}
-        <motion.div
-          key="performance-summary"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.5 }}
-        >
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Summary</h3>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                <div>
-                  <p className="text-sm font-medium text-green-900">Revenue Growth</p>
-                  <p className="text-xs text-green-700">Compared to last period</p>
-                </div>
-                <span className="text-lg font-bold text-green-600">+12.5%</span>
-              </div>
-              
-              <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                <div>
-                  <p className="text-sm font-medium text-blue-900">Order Volume</p>
-                  <p className="text-xs text-blue-700">Total orders this period</p>
-                </div>
-                <span className="text-lg font-bold text-blue-600">+8.2%</span>
-              </div>
-              
-              <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                <div>
-                  <p className="text-sm font-medium text-purple-900">Customer Acquisition</p>
-                  <p className="text-xs text-purple-700">New customers acquired</p>
-                </div>
-                <span className="text-lg font-bold text-purple-600">+15.3%</span>
-              </div>
-              
-              <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
-                <div>
-                  <p className="text-sm font-medium text-orange-900">Product Performance</p>
-                  <p className="text-xs text-orange-700">Best selling categories</p>
-                </div>
-                <span className="text-lg font-bold text-orange-600">T-Shirts</span>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-      </div>
     </div>
   );
 };
 
-export default Analytics; 
+export default Analytics;

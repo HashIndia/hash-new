@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Upload } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
-import { productsAPI, uploadAPI } from '../services/api';
+import { adminProductsAPI, uploadAPI } from '../services/api';
 import FileUpload from './FileUpload';
 import toast from 'react-hot-toast';
 
@@ -23,10 +23,14 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
     name: '',
     description: '',
     price: '',
+    discount: '',
     category: '',
     stock: '',
     sku: '',
-    variants: [], // New unified variant system
+    brand: '',
+    isTrending: false,
+    isHero: false,
+    variants: [],
     sizeChart: {
       hasChart: false,
       chartType: 'clothing',
@@ -36,20 +40,35 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
     images: []
   });
 
-  const categories = ['clothing', 'accessories', 'shoes', 'bags', 'electronics', 'home', 'beauty', 'sports'];
-  const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '28', '30', '32', '34', '36', '38', '40', '42', '6', '7', '8', '9', '10', '11', '12', 'ONE_SIZE'];
+  const categories = [
+    'clothing',
+    'accessories',
+    'shoes',
+    'bags',
+    'electronics',
+    'home',
+    'beauty',
+    'sports',
+  ];
+  const availableSizes = [
+    'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL',
+    'OVER_SIZE'
+  ];
 
-  // Populate form data when editing
   useEffect(() => {
     if (editProduct) {
       setFormData({
         name: editProduct.name || '',
         description: editProduct.description || '',
         price: editProduct.price?.toString() || '',
+        discount: editProduct.discount?.toString() || '',
         category: editProduct.category || '',
         stock: editProduct.stock?.toString() || '',
         sku: editProduct.sku || '',
-        variants: editProduct.variants || [], // New variants system
+        brand: editProduct.brand || '',
+        isTrending: editProduct.isTrending || false,
+        isHero: editProduct.isHero || false,
+        variants: editProduct.variants || [],
         sizeChart: editProduct.sizeChart || {
           hasChart: false,
           chartType: 'clothing',
@@ -63,10 +82,14 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
         name: '',
         description: '',
         price: '',
+        discount: '',
         category: '',
         stock: '',
         sku: '',
-        variants: [], // New variants system
+        brand: '',
+        isTrending: false,
+        isHero: false,
+        variants: [],
         sizeChart: {
           hasChart: false,
           chartType: 'clothing',
@@ -79,25 +102,36 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
   }, [editProduct, isOpen]);
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // New variant management functions
+  const handleTrendingChange = (e) => {
+    setFormData((prev) => ({ ...prev, isTrending: e.target.checked }));
+  };
+
+  const handleHeroChange = (e) => {
+    setFormData((prev) => ({ ...prev, isHero: e.target.checked }));
+  };
+
   const handleVariantAdd = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      variants: [...prev.variants, { 
-        size: '', 
-        color: { name: '', hex: '#000000' }, 
-        stock: 0, 
-        price: '',
-        sku: '' 
-      }]
+      variants: [
+        ...prev.variants,
+        {
+          size: '',
+          color: { name: '', hex: '#000000' },
+          stock: 0,
+          price: '',
+          sku: '',
+          brand: ''
+        }
+      ]
     }));
   };
 
   const handleVariantChange = (index, field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       variants: prev.variants.map((variant, i) => {
         if (i === index) {
@@ -116,66 +150,46 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
   };
 
   const handleVariantRemove = (index) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       variants: prev.variants.filter((_, i) => i !== index)
     }));
   };
 
-  // Calculate total stock from variants
   const calculateTotalStock = () => {
-    console.log('calculateTotalStock called:');
-    console.log('formData.variants.length:', formData.variants.length);
-    console.log('formData.variants:', formData.variants);
-    
     if (formData.variants.length > 0) {
-      const total = formData.variants.reduce((total, variant) => {
+      return formData.variants.reduce((total, variant) => {
         const variantStock = parseInt(variant.stock) || 0;
-        console.log(`Variant ${variant.size}-${variant.color?.name}: stock = ${variantStock}`);
         return total + variantStock;
       }, 0);
-      console.log('Total from variants:', total);
-      return total;
     }
-    
-    const baseStock = parseInt(formData.stock) || 0;
-    console.log('Using base stock:', baseStock);
-    return baseStock;
+    return parseInt(formData.stock) || 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    console.log('Form submission started...');
-    
+
     const totalStock = calculateTotalStock();
-    console.log('Total stock calculated:', totalStock);
-    
-    // Validation
+
     if (!formData.name || !formData.price || !formData.category) {
       const missingFields = [];
       if (!formData.name) missingFields.push('Product Name');
       if (!formData.price) missingFields.push('Price');
       if (!formData.category) missingFields.push('Category');
-      
       toast.error(`Please fill in: ${missingFields.join(', ')}`);
       return;
     }
 
-    // Check if stock is provided either via variants or base stock
     if (totalStock === 0) {
       toast.error('Please add stock either through variants or base stock field');
       return;
     }
 
-    console.log('Validation passed, proceeding with submission...');
-
     try {
       setLoading(true);
-      
+
       let uploadedFiles = [];
-      
-      // Upload files if any are selected
+
       if (selectedFiles.length > 0) {
         setUploading(true);
         try {
@@ -183,7 +197,6 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
           uploadedFiles = uploadResponse.data.files;
           toast.success(`${uploadedFiles.length} files uploaded successfully`);
         } catch (uploadError) {
-          console.error('File upload error:', uploadError);
           toast.error('Failed to upload files');
           setUploading(false);
           setLoading(false);
@@ -191,14 +204,17 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
         }
         setUploading(false);
       }
-      
+
       const productData = {
         ...formData,
         price: parseFloat(formData.price),
+        discount: formData.discount ? parseFloat(formData.discount) : 0,
         stock: formData.variants.length > 0 ? calculateTotalStock() : parseInt(formData.stock),
         sku: formData.sku || `SKU-${Date.now()}`,
-        // Process variants with proper data types
-        variants: formData.variants.map(variant => ({
+        brand: formData.brand || '',
+        isTrending: formData.isTrending,
+        isHero: formData.isHero,
+        variants: formData.variants.map((variant) => ({
           size: variant.size,
           color: {
             name: variant.color.name || '',
@@ -206,51 +222,47 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
           },
           stock: parseInt(variant.stock) || 0,
           price: variant.price ? parseFloat(variant.price) : undefined,
-          sku: variant.sku || ''
+          sku: variant.sku || '',
+          brand: variant.brand || formData.brand || ''
         })),
-        images: uploadedFiles.length > 0 
-          ? uploadedFiles.map((file, index) => ({
-              url: file.url,
-              publicId: file.publicId,
-              alt: formData.name || '',
-              isPrimary: index === 0,
-              type: file.type,
-              format: file.format
-            }))
-          : formData.images.length > 0 && formData.images[0] 
-            ? [{ url: formData.images[0], alt: formData.name || '', isPrimary: true }]
-            : [{ url: 'https://via.placeholder.com/400x500', alt: 'Product image', isPrimary: true }]
+        images:
+          uploadedFiles.length > 0
+            ? uploadedFiles.map((file, index) => ({
+                url: file.url,
+                publicId: file.publicId,
+                alt: formData.name || '',
+                isPrimary: index === 0,
+                type: file.type,
+                format: file.format
+              }))
+            : formData.images.length > 0 && formData.images[0]
+            ? [
+                { url: formData.images[0], alt: formData.name || '', isPrimary: true }
+              ]
+            : [
+                {
+                  url: 'https://via.placeholder.com/400x500?text=No+Image',
+                  alt: 'Product image',
+                  isPrimary: true
+                }
+              ]
       };
-
-      console.log('=== ADMIN PANEL - SENDING DATA ===');
-      console.log('Product Data Structure:', JSON.stringify(productData, null, 2));
-      console.log('Variants Array:', productData.variants);
-      console.log('Variants Length:', productData.variants.length);
-      console.log('Individual Variants:');
-      productData.variants.forEach((variant, index) => {
-        console.log(`Variant ${index}:`, variant);
-      });
 
       let response;
       if (editProduct) {
-        // Update existing product
-        response = await productsAPI.updateProduct(editProduct._id, productData);
-        console.log('Product update response:', response);
+        response = await adminProductsAPI.updateProduct(editProduct._id, productData);
         toast.success('Product updated successfully');
       } else {
-        // Create new product
-        response = await productsAPI.createProduct(productData);
-        console.log('Product creation response:', response);
+        response = await adminProductsAPI.createProduct(productData);
         toast.success('Product added successfully');
       }
-      
+
       if (onProductAdded) {
         onProductAdded(response.data?.product || response.data);
       }
-      
+
       handleClose();
     } catch (error) {
-      console.error('Error saving product:', error);
       toast.error(editProduct ? 'Failed to update product' : 'Failed to add product');
     } finally {
       setLoading(false);
@@ -262,9 +274,13 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
       name: '',
       description: '',
       price: '',
+      discount: '',
       category: '',
       stock: '',
       sku: '',
+      brand: '',
+      isTrending: false,
+      isHero: false,
       variants: [],
       sizeChart: {
         hasChart: false,
@@ -291,7 +307,6 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
           className="absolute inset-0 bg-black bg-opacity-50"
           onClick={handleClose}
         />
-        
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -310,263 +325,177 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
                 <X className="w-5 h-5" />
               </button>
             </div>
-
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Product Name *
-                  </label>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    placeholder="Enter product name"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    SKU
-                  </label>
-                  <Input
-                    value={formData.sku}
-                    onChange={(e) => handleInputChange('sku', e.target.value)}
-                    placeholder="Auto-generated if empty"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  placeholder="Enter product description"
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Product Name"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  required
+                  placeholder="Enter product name"
                 />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Price (₹) *
-                  </label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={(e) => handleInputChange('price', e.target.value)}
-                    placeholder="0.00"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category *
-                  </label>
-                  <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map(category => (
-                        <SelectItem key={category} value={category}>{category}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Stock Quantity *
-                  </label>
-                  <Input
-                    type="number"
-                    value={formData.variants.length > 0 ? calculateTotalStock() : formData.stock}
-                    onChange={(e) => handleInputChange('stock', e.target.value)}
-                    placeholder="0"
-                    required={formData.variants.length === 0}
-                    disabled={formData.variants.length > 0}
-                    className={formData.variants.length > 0 ? 'bg-gray-100' : ''}
-                  />
-                  {formData.variants.length > 0 && (
-                    <div className="mt-1 text-xs text-blue-600">
-                      Stock is automatically calculated from variants: {calculateTotalStock()} units
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* New Product Variants System - Size + Color + Stock */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Variants (Size + Color + Stock)
-                </label>
-                <div className="space-y-3">
-                  {formData.variants.map((variant, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-2 p-3 border border-gray-200 rounded-lg">
-                      {/* Size Selection */}
-                      <div className="col-span-2">
-                        <Select 
-                          value={variant.size} 
-                          onValueChange={(value) => handleVariantChange(index, 'size', value)}
-                        >
-                          <SelectTrigger className="h-9">
-                            <SelectValue placeholder="Size" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {availableSizes.map(size => (
-                              <SelectItem key={size} value={size}>{size}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      {/* Color Name */}
-                      <div className="col-span-3">
-                        <Input
-                          placeholder="Color name"
-                          value={variant.color.name}
-                          onChange={(e) => handleVariantChange(index, 'color.name', e.target.value)}
-                          className="h-9"
-                        />
-                      </div>
-                      
-                      {/* Color Picker */}
-                      <div className="col-span-1">
-                        <Input
-                          type="color"
-                          value={variant.color.hex}
-                          onChange={(e) => handleVariantChange(index, 'color.hex', e.target.value)}
-                          className="w-full h-9 p-1 border border-gray-300 rounded"
-                        />
-                      </div>
-                      
-                      {/* Stock */}
-                      <div className="col-span-2">
-                        <Input
-                          type="number"
-                          placeholder="Stock"
-                          value={variant.stock}
-                          onChange={(e) => handleVariantChange(index, 'stock', parseInt(e.target.value) || 0)}
-                          className="h-9"
-                        />
-                      </div>
-                      
-                      {/* Price (optional) */}
-                      <div className="col-span-2">
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="Price"
-                          value={variant.price}
-                          onChange={(e) => handleVariantChange(index, 'price', e.target.value)}
-                          className="h-9"
-                        />
-                      </div>
-                      
-                      {/* SKU (optional) */}
-                      <div className="col-span-1">
-                        <Input
-                          placeholder="SKU"
-                          value={variant.sku}
-                          onChange={(e) => handleVariantChange(index, 'sku', e.target.value)}
-                          className="h-9"
-                        />
-                      </div>
-                      
-                      {/* Remove Button */}
-                      <div className="col-span-1">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleVariantRemove(index)}
-                          className="text-red-600 hover:text-red-700 w-full h-9"
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleVariantAdd}
-                    className="w-full"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Size-Color-Stock Combination
-                  </Button>
-                </div>
-                
-                <div className="mt-3 text-xs text-gray-500">
-                  <div className="grid grid-cols-12 gap-2 text-xs font-medium text-gray-400 mb-1">
-                    <div className="col-span-2">Size</div>
-                    <div className="col-span-3">Color Name</div>
-                    <div className="col-span-1">Hex</div>
-                    <div className="col-span-2">Stock</div>
-                    <div className="col-span-2">Price</div>
-                    <div className="col-span-1">SKU</div>
-                    <div className="col-span-1"></div>
-                  </div>
-                  Create specific combinations of size and color with individual stock levels. Total stock will be calculated automatically.
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Images & Videos
-                </label>
-                <FileUpload
-                  onFilesSelected={setSelectedFiles}
-                  maxFiles={6}
-                  acceptedTypes={['image/*', 'video/*']}
+                <Input
+                  label="SKU"
+                  value={formData.sku}
+                  onChange={(e) => handleInputChange('sku', e.target.value)}
+                  placeholder="SKU (auto-generated if empty)"
                 />
-                {formData.images.length > 0 && formData.images[0] && (
-                  <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-sm text-blue-700 font-medium">Current image:</p>
-                    <p className="text-xs text-blue-600 break-all">{formData.images[0]}</p>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-6 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleClose}
-                  disabled={loading || uploading}
+                <Input
+                  label="Brand"
+                  value={formData.brand}
+                  onChange={(e) => handleInputChange('brand', e.target.value)}
+                  placeholder="Brand"
+                />
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => handleInputChange('category', value)}
+                  required
                 >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  label="Price"
+                  type="number"
+                  value={formData.price}
+                  onChange={(e) => handleInputChange('price', e.target.value)}
+                  required
+                  placeholder="Price"
+                  min={0}
+                />
+                <Input
+                  label="Discount (%)"
+                  type="number"
+                  value={formData.discount}
+                  onChange={(e) => handleInputChange('discount', e.target.value)}
+                  placeholder="Discount percentage"
+                  min={0}
+                  max={100}
+                />
+                <Input
+                  label="Stock"
+                  type="number"
+                  value={formData.stock}
+                  onChange={(e) => handleInputChange('stock', e.target.value)}
+                  placeholder="Stock (auto-calculated from variants)"
+                  min={0}
+                />
+              </div>
+              <Input
+                label="Description"
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                required
+                placeholder="Product description"
+              />
+              <div className="flex items-center gap-6">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.isTrending}
+                    onChange={handleTrendingChange}
+                  />
+                  <span>Trending</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.isHero}
+                    onChange={handleHeroChange}
+                  />
+                  <span>Hero Section</span>
+                </label>
+              </div>
+              {/* Variants and Images logic remains same */}
+              <div>
+                <h4 className="font-semibold mb-2">Variants</h4>
+                {formData.variants.map((variant, idx) => (
+                  <div key={idx} className="grid grid-cols-6 gap-2 mb-2">
+                    <Select
+                      value={variant.size}
+                      onValueChange={(value) => handleVariantChange(idx, 'size', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableSizes.map((size) => (
+                          <SelectItem key={size} value={size}>
+                            {size}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      value={variant.color.name}
+                      onChange={(e) => handleVariantChange(idx, 'color.name', e.target.value)}
+                      placeholder="Color Name"
+                    />
+                    <Input
+                      type="color"
+                      value={variant.color.hex}
+                      onChange={(e) => handleVariantChange(idx, 'color.hex', e.target.value)}
+                    />
+                    <Input
+                      type="number"
+                      value={variant.stock}
+                      onChange={(e) => handleVariantChange(idx, 'stock', e.target.value)}
+                      placeholder="Stock"
+                      min={0}
+                    />
+                    <Input
+                      type="number"
+                      value={variant.price}
+                      onChange={(e) => handleVariantChange(idx, 'price', e.target.value)}
+                      placeholder="Price"
+                      min={0}
+                    />
+                    <Input
+                      value={variant.sku}
+                      onChange={(e) => handleVariantChange(idx, 'sku', e.target.value)}
+                      placeholder="SKU"
+                    />
+                    <Input
+                      value={variant.brand}
+                      onChange={(e) => handleVariantChange(idx, 'brand', e.target.value)}
+                      placeholder="Brand"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={() => handleVariantRemove(idx)}
+                      className="ml-2"
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))}
+                <Button type="button" onClick={handleVariantAdd} className="mt-2">
+                  <Plus className="w-4 h-4 mr-1" /> Add Variant
+                </Button>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">Images</h4>
+                <FileUpload
+                  files={selectedFiles}
+                  setFiles={setSelectedFiles}
+                  uploading={uploading}
+                />
+              </div>
+              <div className="flex justify-end gap-4 mt-6">
+                <Button type="button" variant="secondary" onClick={handleClose}>
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={loading || uploading}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {uploading ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Uploading files...
-                    </div>
-                  ) : loading ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      {editProduct ? 'Updating...' : 'Adding...'}
-                    </div>
-                  ) : (
-                    <div className="flex items-center">
-                      <Plus className="w-4 h-4 mr-2" />
-                      {editProduct ? 'Update Product' : 'Add Product'}
-                    </div>
-                  )}
+                <Button type="submit" disabled={loading}>
+                  {loading ? (editProduct ? 'Updating...' : 'Adding...') : editProduct ? 'Update Product' : 'Add Product'}
                 </Button>
               </div>
             </form>

@@ -1,18 +1,256 @@
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Package, Tag, Layers, Star, Eye, Image as ImageIcon, Video } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 import { Button } from './ui/button';
+import { Input } from './ui/input';
 import { Card } from './ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
+import { adminProductsAPI, uploadAPI } from '../services/api';
+import FileUpload from './FileUpload';
+import toast from 'react-hot-toast';
 
-const ProductViewModal = ({ isOpen, onClose, product }) => {
-  if (!isOpen || !product) return null;
+const ProductViewModal = ({ isOpen, onClose, onProductAdded, editProduct = null }) => {
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    price: '',
+    category: '',
+    stock: '',
+    isTrending: false,
+    sku: '',
+    variants: [],
+    sizeChart: {
+      hasChart: false,
+      chartType: 'clothing',
+      measurements: [],
+      guidelines: []
+    },
+    images: []
+  });
 
-  const getStockStatus = (stock) => {
-    if (stock === 0) return { label: 'Out of Stock', color: 'bg-red-100 text-red-800' };
-    if (stock <= 10) return { label: 'Low Stock', color: 'bg-yellow-100 text-yellow-800' };
-    return { label: 'In Stock', color: 'bg-green-100 text-green-800' };
+  const categories = ['clothing', 'accessories', 'shoes', 'bags', 'electronics', 'home', 'beauty', 'sports'];
+  const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '28', '30', '32', '34', '36', '38', '40', '42', '6', '7', '8', '9', '10', '11', '12', 'ONE_SIZE'];
+
+  useEffect(() => {
+    if (editProduct) {
+      setFormData({
+        name: editProduct.name || '',
+        description: editProduct.description || '',
+        price: editProduct.price?.toString() || '',
+        category: editProduct.category || '',
+        stock: editProduct.stock?.toString() || '',
+        isTrending: editProduct.isTrending || false,
+        sku: editProduct.sku || '',
+        variants: editProduct.variants || [],
+        sizeChart: editProduct.sizeChart || {
+          hasChart: false,
+          chartType: 'clothing',
+          measurements: [],
+          guidelines: []
+        },
+        images: editProduct.images?.length > 0 ? [editProduct.images[0].url] : []
+      });
+    } else {
+      setFormData({
+        name: '',
+        description: '',
+        price: '',
+        category: '',
+        stock: '',
+        isTrending: false,
+        sku: '',
+        variants: [],
+        sizeChart: {
+          hasChart: false,
+          chartType: 'clothing',
+          measurements: [],
+          guidelines: []
+        },
+        images: []
+      });
+    }
+  }, [editProduct, isOpen]);
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const stockStatus = getStockStatus(product.stock || 0);
+  const handleTrendingChange = (e) => {
+    setFormData(prev => ({ ...prev, isTrending: e.target.checked }));
+  };
+
+  const handleVariantAdd = () => {
+    setFormData(prev => ({
+      ...prev,
+      variants: [...prev.variants, { 
+        size: '', 
+        color: { name: '', hex: '#000000' }, 
+        stock: 0, 
+        price: '',
+        sku: '' 
+      }]
+    }));
+  };
+
+  const handleVariantChange = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      variants: prev.variants.map((variant, i) => {
+        if (i === index) {
+          if (field.startsWith('color.')) {
+            const colorField = field.split('.')[1];
+            return {
+              ...variant,
+              color: { ...variant.color, [colorField]: value }
+            };
+          }
+          return { ...variant, [field]: value };
+        }
+        return variant;
+      })
+    }));
+  };
+
+  const handleVariantRemove = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      variants: prev.variants.filter((_, i) => i !== index)
+    }));
+  };
+
+  const calculateTotalStock = () => {
+    if (formData.variants.length > 0) {
+      return formData.variants.reduce((total, variant) => {
+        const variantStock = parseInt(variant.stock) || 0;
+        return total + variantStock;
+      }, 0);
+    }
+    return parseInt(formData.stock) || 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const totalStock = calculateTotalStock();
+
+    if (!formData.name || !formData.price || !formData.category) {
+      const missingFields = [];
+      if (!formData.name) missingFields.push('Product Name');
+      if (!formData.price) missingFields.push('Price');
+      if (!formData.category) missingFields.push('Category');
+      toast.error(`Please fill in: ${missingFields.join(', ')}`);
+      return;
+    }
+
+    if (totalStock === 0) {
+      toast.error('Please add stock either through variants or base stock field');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      let uploadedFiles = [];
+
+      if (selectedFiles.length > 0) {
+        setUploading(true);
+        try {
+          const uploadResponse = await uploadAPI.uploadProductFiles(selectedFiles);
+          uploadedFiles = uploadResponse.data.files;
+          toast.success(`${uploadedFiles.length} files uploaded successfully`);
+        } catch (uploadError) {
+          toast.error('Failed to upload files');
+          setUploading(false);
+          setLoading(false);
+          return;
+        }
+        setUploading(false);
+      }
+
+      const productData = {
+        ...formData,
+        price: parseFloat(formData.price),
+        stock: formData.variants.length > 0 ? calculateTotalStock() : parseInt(formData.stock),
+        sku: formData.sku || `SKU-${Date.now()}`,
+        isTrending: formData.isTrending,
+        variants: formData.variants.map(variant => ({
+          size: variant.size,
+          color: {
+            name: variant.color.name || '',
+            hex: variant.color.hex || '#000000'
+          },
+          stock: parseInt(variant.stock) || 0,
+          price: variant.price ? parseFloat(variant.price) : undefined,
+          sku: variant.sku || ''
+        })),
+        images: uploadedFiles.length > 0 
+          ? uploadedFiles.map((file, index) => ({
+              url: file.url,
+              publicId: file.publicId,
+              alt: formData.name || '',
+              isPrimary: index === 0,
+              type: file.type,
+              format: file.format
+            }))
+          : formData.images.length > 0 && formData.images[0] 
+            ? [{ url: formData.images[0], alt: formData.name || '', isPrimary: true }]
+            : [{ url: '/fallback-image.png', alt: 'Product image', isPrimary: true }] // ✅ local fallback
+      };
+
+      let response;
+      if (editProduct) {
+        response = await adminProductsAPI.updateProduct(editProduct._id, productData);
+        toast.success('Product updated successfully');
+      } else {
+        response = await adminProductsAPI.createProduct(productData);
+        toast.success('Product added successfully');
+      }
+
+      if (onProductAdded) {
+        onProductAdded(response.data?.product || response.data);
+      }
+
+      handleClose();
+    } catch (error) {
+      toast.error(editProduct ? 'Failed to update product' : 'Failed to add product');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    setFormData({
+      name: '',
+      description: '',
+      price: '',
+      category: '',
+      stock: '',
+      isTrending: false,
+      sku: '',
+      variants: [],
+      sizeChart: {
+        hasChart: false,
+        chartType: 'clothing',
+        measurements: [],
+        guidelines: []
+      },
+      images: []
+    });
+    setSelectedFiles([]);
+    setUploading(false);
+    onClose();
+  };
+
+  if (!isOpen) return null;
 
   return (
     <AnimatePresence>
@@ -22,171 +260,275 @@ const ProductViewModal = ({ isOpen, onClose, product }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="absolute inset-0 bg-black bg-opacity-50"
-          onClick={onClose}
+          onClick={handleClose}
         />
-        
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="relative bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden"
+          className="relative w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto"
         >
-          {/* Header */}
-          <div className="flex justify-between items-center p-6 border-b border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-900">Product Details</h2>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Content */}
-          <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-              {/* Images Section - Smaller column */}
-              <div className="lg:col-span-2 space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5" />
-                  Product Media ({product.images?.length || 0})
-                </h3>
-                
-                {product.images && product.images.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-3">
-                    {product.images.map((image, index) => (
-                      <div key={index} className="relative group">
-                        {image.type === 'video' ? (
-                          <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                            <video
-                              src={image.url || image}
-                              controls
-                              className="w-full h-full object-cover"
-                              poster={`${image.url || image}?resource_type=video&format=jpg`}
-                            >
-                              Your browser does not support the video tag.
-                            </video>
-                            <div className="absolute top-1 left-1">
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
-                                <Video className="w-2 h-2 mr-1" />
-                                Video
-                              </span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity">
-                            <img
-                              src={image.url || image}
-                              alt={`${product.name} - ${index + 1}`}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.target.src = 'https://via.placeholder.com/200x200?text=Image+Not+Found';
-                              }}
-                            />
-                            {image.isPrimary && (
-                              <div className="absolute top-1 left-1">
-                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                  <Star className="w-2 h-2 mr-1" />
-                                  Primary
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-                    <div className="text-center text-gray-500">
-                      <ImageIcon className="w-8 h-8 mx-auto mb-2" />
-                      <p className="text-sm">No images available</p>
-                    </div>
-                  </div>
-                )}
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-gray-900">
+                {editProduct ? 'Edit Product' : 'Add New Product'}
+              </h3>
+              <button
+                onClick={handleClose}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Product name + SKU */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Product Name *
+                  </label>
+                  <Input
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    placeholder="Enter product name"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    SKU
+                  </label>
+                  <Input
+                    value={formData.sku}
+                    onChange={(e) => handleInputChange('sku', e.target.value)}
+                    placeholder="Auto-generated if empty"
+                  />
+                </div>
               </div>
 
-              {/* Product Details - Larger column */}
-              <div className="lg:col-span-3 space-y-4">
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  placeholder="Enter product description"
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Price, Category, Stock */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className={`px-3 py-1 text-sm font-medium rounded-full ${stockStatus.color}`}>
-                      {stockStatus.label}
-                    </span>
-                    <span className="px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-800 capitalize">
-                      {product.category}
-                    </span>
-                  </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Price (₹) *
+                  </label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={(e) => handleInputChange('price', e.target.value)}
+                    placeholder="0.00"
+                    required
+                  />
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <Card className="p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Tag className="w-4 h-4" />
-                      <h3 className="font-semibold text-sm">Pricing</h3>
-                    </div>
-                    <p className="text-2xl font-bold text-green-600">₹{product.price}</p>
-                  </Card>
-
-                  <Card className="p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Package className="w-4 h-4" />
-                      <h3 className="font-semibold text-sm">Stock</h3>
-                    </div>
-                    <p className="text-2xl font-bold text-blue-600">{product.stock || 0}</p>
-                    <p className="text-xs text-gray-500">units available</p>
-                  </Card>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Category *
+                  </label>
+                  <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(category => (
+                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-
-                {product.description && (
-                  <Card className="p-3">
-                    <h3 className="font-semibold text-sm mb-2">Description</h3>
-                    <p className="text-gray-700 leading-relaxed text-sm">{product.description}</p>
-                  </Card>
-                )}
-
-                <div className="space-y-2">
-                  <div className="flex justify-between py-1.5 border-b border-gray-100">
-                    <span className="font-medium text-gray-700 text-sm">SKU:</span>
-                    <span className="text-gray-900 font-mono text-sm">{product.sku}</span>
-                  </div>
-                  
-                  {product.sizes && product.sizes.length > 0 && (
-                    <div className="flex justify-between py-1.5 border-b border-gray-100">
-                      <span className="font-medium text-gray-700 text-sm">Available Sizes:</span>
-                      <div className="flex gap-1">
-                        {product.sizes.map((size, index) => (
-                          <span key={index} className="px-1.5 py-0.5 text-xs border rounded">{size}</span>
-                        ))}
-                      </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Stock Quantity *
+                  </label>
+                  <Input
+                    type="number"
+                    value={formData.variants.length > 0 ? calculateTotalStock() : formData.stock}
+                    onChange={(e) => handleInputChange('stock', e.target.value)}
+                    placeholder="0"
+                    required={formData.variants.length === 0}
+                    disabled={formData.variants.length > 0}
+                    className={formData.variants.length > 0 ? 'bg-gray-100' : ''}
+                  />
+                  {formData.variants.length > 0 && (
+                    <div className="mt-1 text-xs text-blue-600">
+                      Stock is automatically calculated from variants: {calculateTotalStock()} units
                     </div>
                   )}
-                  
-                  <div className="flex justify-between py-1.5 border-b border-gray-100">
-                    <span className="font-medium text-gray-700 text-sm">Created:</span>
-                    <span className="text-gray-900 text-sm">
-                      {new Date(product.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  
-                  <div className="flex justify-between py-1.5">
-                    <span className="font-medium text-gray-700 text-sm">Last Updated:</span>
-                    <span className="text-gray-900 text-sm">
-                      {new Date(product.updatedAt).toLocaleDateString()}
-                    </span>
-                  </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Footer */}
-          <div className="flex justify-end p-6 border-t border-gray-200 bg-gray-50">
-            <Button variant="outline" onClick={onClose}>
-              Close
-            </Button>
-          </div>
+              {/* Trending */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.isTrending}
+                    onChange={handleTrendingChange}
+                  />
+                  Show in Trending
+                </label>
+              </div>
+
+              {/* Variants */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Variants (Size + Color + Stock)
+                </label>
+                <div className="space-y-3">
+                  {formData.variants.map((variant, index) => (
+                    <div key={index} className="grid grid-cols-12 gap-2 p-3 border border-gray-200 rounded-lg">
+                      <div className="col-span-2">
+                        <Select 
+                          value={variant.size} 
+                          onValueChange={(value) => handleVariantChange(index, 'size', value)}
+                        >
+                          <SelectTrigger className="h-9">
+                            <SelectValue placeholder="Size" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableSizes.map(size => (
+                              <SelectItem key={size} value={size}>{size}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="col-span-3">
+                        <Input
+                          placeholder="Color name"
+                          value={variant.color.name}
+                          onChange={(e) => handleVariantChange(index, 'color.name', e.target.value)}
+                          className="h-9"
+                        />
+                      </div>
+                      <div className="col-span-1">
+                        <Input
+                          type="color"
+                          value={variant.color.hex}
+                          onChange={(e) => handleVariantChange(index, 'color.hex', e.target.value)}
+                          className="w-full h-9 p-1 border border-gray-300 rounded"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Input
+                          type="number"
+                          placeholder="Stock"
+                          value={variant.stock}
+                          onChange={(e) => handleVariantChange(index, 'stock', parseInt(e.target.value) || 0)}
+                          className="h-9"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="Price"
+                          value={variant.price}
+                          onChange={(e) => handleVariantChange(index, 'price', e.target.value)}
+                          className="h-9"
+                        />
+                      </div>
+                      <div className="col-span-1">
+                        <Input
+                          placeholder="SKU"
+                          value={variant.sku}
+                          onChange={(e) => handleVariantChange(index, 'sku', e.target.value)}
+                          className="h-9"
+                        />
+                      </div>
+                      <div className="col-span-1">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleVariantRemove(index)}
+                          className="text-red-600 hover:text-red-700 w-full h-9"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleVariantAdd}
+                    className="w-full"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Size-Color-Stock Combination
+                  </Button>
+                </div>
+              </div>
+
+              {/* File upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Images & Videos
+                </label>
+                <FileUpload
+                  files={selectedFiles}
+                  setFiles={setSelectedFiles}
+                  uploading={uploading}
+                  maxFiles={6}
+                  acceptedTypes={['image/*', 'video/*']}
+                />
+                {formData.images.length > 0 && formData.images[0] && (
+                  <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-sm text-blue-700 font-medium">Current image:</p>
+                    <p className="text-xs text-blue-600 break-all">{formData.images[0]}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="flex justify-end space-x-3 pt-6 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleClose}
+                  disabled={loading || uploading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading || uploading}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {uploading ? (
+                    <div className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Uploading files...
+                    </div>
+                  ) : loading ? (
+                    <div className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      {editProduct ? 'Updating...' : 'Adding...'}
+                    </div>
+                  ) : (
+                    <div className="flex items-center">
+                      <Plus className="w-4 h-4 mr-2" />
+                      {editProduct ? 'Update Product' : 'Add Product'}
+                    </div>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Card>
         </motion.div>
       </div>
     </AnimatePresence>

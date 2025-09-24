@@ -13,7 +13,7 @@ const isSafariOrIOS = () => {
 const adminApi = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   timeout: 10000,
-  withCredentials: true, // Include cookies in requests
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
     'Cache-Control': 'no-cache',
@@ -22,11 +22,11 @@ const adminApi = axios.create({
   },
 });
 
-// Response interceptor with token refresh and Safari/iOS support
 let isRefreshing = false;
 let failedQueue = [];
-let adminAuthToken = null; // Fallback token storage for Safari/iOS
+let adminAuthToken = null;
 
+// Token queue processor
 const processQueue = (error, token = null) => {
   failedQueue.forEach(prom => {
     if (error) {
@@ -41,7 +41,6 @@ const processQueue = (error, token = null) => {
 // Request interceptor for Safari/iOS fallback
 adminApi.interceptors.request.use(
   (config) => {
-    // For Safari/iOS, also send token in Authorization header as fallback
     if (isSafariOrIOS() && adminAuthToken) {
       config.headers.Authorization = `Bearer ${adminAuthToken}`;
     }
@@ -50,9 +49,9 @@ adminApi.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Response interceptor with Safari/iOS token extraction
 adminApi.interceptors.response.use(
   (response) => {
-    // Extract token from response headers for Safari/iOS fallback
     if (isSafariOrIOS() && response.headers['x-auth-token']) {
       adminAuthToken = response.headers['x-auth-token'];
       localStorage.setItem('safari_admin_auth_token', adminAuthToken);
@@ -60,7 +59,6 @@ adminApi.interceptors.response.use(
     return response.data;
   },
   async (error) => {
-    // For now, just redirect on 401 with Safari token cleanup
     if (error.response?.status === 401) {
       adminAuthToken = null;
       localStorage.removeItem('admin-auth');
@@ -69,7 +67,6 @@ adminApi.interceptors.response.use(
         window.location.href = '/login';
       }
     }
-    
     return Promise.reject(error.response?.data || error);
   }
 );
@@ -90,7 +87,7 @@ export const adminAuthAPI = {
   refreshToken: () => adminApi.post('/admin/auth/refresh'),
 };
 
-// Export the token management functions for Safari/iOS
+// Safari/iOS token management
 export const setAdminSafariAuthToken = (token) => {
   if (isSafariOrIOS()) {
     adminAuthToken = token;
@@ -105,8 +102,8 @@ export const clearAdminSafariAuthToken = () => {
   }
 };
 
-// Products API for admin
-export const productsAPI = {
+// Products API for admin (updated with discount support)
+export const adminProductsAPI = {
   getProducts: (params) => adminApi.get('/admin/products', { params }),
   getProduct: (id) => adminApi.get(`/admin/products/${id}`),
   createProduct: (productData) => adminApi.post('/admin/products', productData),
@@ -121,12 +118,11 @@ export const uploadAPI = {
     files.forEach(file => {
       formData.append('files', file);
     });
-    
     return adminApi.post('/upload/product-files', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-      timeout: 60000, // 60 seconds for file uploads
+      timeout: 60000,
     });
   },
   deleteFile: (publicId) => adminApi.delete('/upload/images', { data: { publicId } }),

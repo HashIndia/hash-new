@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
-import { productsAPI } from '../services/api';
+import { adminProductsAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import AddProductModal from '../components/AddProductModal';
 import ProductViewModal from '../components/ProductViewModal';
@@ -33,13 +33,11 @@ const Inventory = () => {
   const [viewMode, setViewMode] = useState('grid');
   const [loading, setLoading] = useState(true);
 
-  // Real state from API
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('name');
 
-  // Fetch products from API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -49,8 +47,7 @@ const Inventory = () => {
           category: selectedCategory !== 'all' ? selectedCategory : undefined,
           sort: sortBy
         };
-        
-        const response = await productsAPI.getProducts(params);
+        const response = await adminProductsAPI.getProducts(params);
         setProducts(response?.data?.products || []);
       } catch (error) {
         toast.error('Failed to fetch products');
@@ -59,11 +56,9 @@ const Inventory = () => {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, [searchTerm, selectedCategory, sortBy]);
 
-  // Memoize categories from real products
   const categories = useMemo(() => {
     const uniqueCategories = [...new Set(products.map(product => product.category))];
     return uniqueCategories.filter(Boolean);
@@ -72,11 +67,10 @@ const Inventory = () => {
   const handleDeleteProduct = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        await productsAPI.deleteProduct(id);
+        await adminProductsAPI.deleteProduct(id);
         setProducts(prev => prev.filter(p => p._id !== id));
         toast.success('Product deleted successfully');
       } catch (error) {
-        console.error('Error deleting product:', error);
         toast.error('Failed to delete product');
       }
     }
@@ -111,6 +105,62 @@ const Inventory = () => {
     setSelectedProduct(null);
   };
 
+  const handleToggleTrending = async (product) => {
+    try {
+      await adminProductsAPI.updateProduct(product._id, {
+        isTrending: !product.isTrending,
+      });
+      setProducts(prev =>
+        prev.map(p =>
+          p._id === product._id ? { ...p, isTrending: !p.isTrending } : p
+        )
+      );
+      toast.success(
+        `Product marked as ${!product.isTrending ? "Trending" : "Not Trending"}`
+      );
+    } catch (error) {
+      toast.error("Failed to update trending status");
+    }
+  };
+
+  const handleToggleHero = async (product) => {
+    try {
+      await adminProductsAPI.updateProduct(product._id, {
+        isHero: !product.isHero,
+      });
+      setProducts(prev =>
+        prev.map(p =>
+          p._id === product._id ? { ...p, isHero: !p.isHero } : p
+        )
+      );
+      toast.success(
+        `Product marked as ${!product.isHero ? "Hero" : "Not Hero"}`
+      );
+    } catch (error) {
+      toast.error("Failed to update hero status");
+    }
+  };
+
+  const getProductImage = (product) => {
+    if (product.images && product.images.length > 0) {
+      const primary = product.images.find(img => img.isPrimary);
+      return primary?.url || product.images[0].url || 'https://via.placeholder.com/200';
+    }
+    return 'https://via.placeholder.com/200';
+  };
+
+  // NEW: Calculate discounted price and percentage
+  const calculateDiscountedPrice = (product) => {
+  if (!product.discount || !product.discountValue) return product.price;
+  return (product.price - (product.price * product.discountValue / 100)).toFixed(2);
+};
+
+
+  const calculateDiscountPercent = (product) => {
+    if (!product.discount || !product.discountValue) return 0;
+    return Math.round(product.discountValue);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -124,7 +174,6 @@ const Inventory = () => {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Inventory Management</h1>
@@ -139,7 +188,6 @@ const Inventory = () => {
         </Button>
       </div>
 
-      {/* Filters and Search */}
       <Card className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="relative">
@@ -151,7 +199,6 @@ const Inventory = () => {
               className="pl-10"
             />
           </div>
-          
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger>
               <SelectValue placeholder="All Categories" />
@@ -163,7 +210,6 @@ const Inventory = () => {
               ))}
             </SelectContent>
           </Select>
-
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger>
               <SelectValue placeholder="Sort by" />
@@ -175,7 +221,6 @@ const Inventory = () => {
               <SelectItem value="createdAt">Date Added</SelectItem>
             </SelectContent>
           </Select>
-
           <div className="flex space-x-2">
             <Button
               variant={viewMode === 'grid' ? 'default' : 'outline'}
@@ -195,7 +240,6 @@ const Inventory = () => {
         </div>
       </Card>
 
-      {/* Products Grid/Table */}
       {products.length === 0 ? (
         <div className="text-center py-12">
           <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -211,6 +255,8 @@ const Inventory = () => {
           <AnimatePresence>
             {products.map((product, index) => {
               const stockStatus = getStockStatus(product.stock || 0);
+              const discountedPrice = calculateDiscountedPrice(product);
+              const discountPercent = calculateDiscountPercent(product);
               return (
                 <motion.div
                   key={product._id}
@@ -222,12 +268,10 @@ const Inventory = () => {
                   <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                     <div className="aspect-w-1 aspect-h-1 bg-gray-200">
                       <img
-                        src={product.images?.[0]?.url || product.images?.[0] || 'https://via.placeholder.com/200'}
-                        alt={product.name}
+                        src={getProductImage(product)}
+                        alt={product.name || 'Product Image'}
                         className="w-full h-48 object-cover"
-                        onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/200';
-                        }}
+                        onError={(e) => { e.target.src = 'https://via.placeholder.com/200'; }}
                       />
                     </div>
                     <div className="p-4">
@@ -238,9 +282,46 @@ const Inventory = () => {
                         </span>
                       </div>
                       <p className="text-xs text-gray-600 mb-2">{product.category} • {product.sku}</p>
-                      <p className="text-lg font-bold text-gray-900 mb-2">₹{product.price}</p>
+                      <p className="text-xs text-gray-600 mb-2">Brand: {product.brand || '-'}</p>
+                      {/* NEW: Discount display */}
+                      {discountPercent > 0 ? (
+                        <div className="text-lg font-bold mb-2">
+                          <span className="line-through text-gray-400">₹{product.price}</span>
+                          <span className="ml-2 font-semibold text-green-600">₹{discountedPrice}</span>
+                          <span className="ml-1 text-red-600 text-xs">{discountPercent}% OFF</span>
+                        </div>
+                      ) : (
+                        <span className="text-lg font-bold text-gray-900 mb-2">₹{product.price}</span>
+                      )}
                       <p className="text-sm text-gray-600 mb-3">Stock: {product.stock || 0} units</p>
-                      
+                      <div className="flex space-x-2 mb-2">
+                        {product.isTrending && (
+                          <span className="px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-700">
+                            Trending
+                          </span>
+                        )}
+                        {product.isHero && (
+                          <span className="px-2 py-1 text-xs font-semibold rounded bg-purple-100 text-purple-700">
+                            Hero Section
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex space-x-2 mb-2">
+                        <Button
+                          size="sm"
+                          variant={product.isTrending ? "default" : "outline"}
+                          onClick={() => handleToggleTrending(product)}
+                        >
+                          {product.isTrending ? "Remove Trending" : "Mark Trending"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={product.isHero ? "default" : "outline"}
+                          onClick={() => handleToggleHero(product)}
+                        >
+                          {product.isHero ? "Remove Hero" : "Mark Hero"}
+                        </Button>
+                      </div>
                       <div className="flex space-x-2">
                         <Button
                           size="sm"
@@ -280,40 +361,31 @@ const Inventory = () => {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Product
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Price
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Stock
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brand</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trending</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hero</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {products.map((product) => {
                   const stockStatus = getStockStatus(product.stock || 0);
+                  const discountedPrice = calculateDiscountedPrice(product);
+                  const discountPercent = calculateDiscountPercent(product);
                   return (
                     <tr key={product._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <img
-                            src={product.images?.[0]?.url || product.images?.[0] || 'https://via.placeholder.com/40'}
-                            alt={product.name}
+                            src={getProductImage(product)}
+                            alt={product.name || 'Product Image'}
                             className="w-10 h-10 rounded-lg object-cover mr-3"
-                            onError={(e) => {
-                              e.target.src = 'https://via.placeholder.com/40';
-                            }}
+                            onError={(e) => { e.target.src = 'https://via.placeholder.com/40'; }}
                           />
                           <div>
                             <div className="text-sm font-medium text-gray-900">{product.name}</div>
@@ -321,33 +393,49 @@ const Inventory = () => {
                           </div>
                         </div>
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.category}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.brand || '-'}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {product.category}
+                        {/* NEW: Discount display for table */}
+                        {discountPercent > 0 ? (
+                          <div>
+                            <span className="line-through text-gray-400">₹{product.price}</span>
+                            <span className="ml-2 font-semibold text-green-600">₹{discountedPrice}</span>
+                            <span className="ml-1 text-red-600 text-xs">{discountPercent}% OFF</span>
+                          </div>
+                        ) : (
+                          <span className="font-semibold text-gray-900">₹{product.price}</span>
+                        )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ₹{product.price}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {product.stock || 0}
-                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.stock || 0}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${stockStatus.color}`}>
                           {stockStatus.label}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <Button
                           size="sm"
-                          variant="outline"
-                          onClick={() => handleViewProduct(product)}
+                          variant={product.isTrending ? "default" : "outline"}
+                          onClick={() => handleToggleTrending(product)}
                         >
+                          {product.isTrending ? "Remove Trending" : "Mark Trending"}
+                        </Button>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <Button
+                          size="sm"
+                          variant={product.isHero ? "default" : "outline"}
+                          onClick={() => handleToggleHero(product)}
+                        >
+                          {product.isHero ? "Remove Hero" : "Mark Hero"}
+                        </Button>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        <Button size="sm" variant="outline" onClick={() => handleViewProduct(product)}>
                           <Eye className="w-3 h-3" />
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEditProduct(product)}
-                        >
+                        <Button size="sm" variant="outline" onClick={() => handleEditProduct(product)}>
                           <Edit className="w-3 h-3" />
                         </Button>
                         <Button
@@ -368,14 +456,11 @@ const Inventory = () => {
         </Card>
       )}
 
-      {/* Add Product Modal */}
       <AddProductModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onProductAdded={handleProductAdded}
       />
-
-      {/* Edit Product Modal */}
       <AddProductModal
         isOpen={showEditModal}
         onClose={() => {
@@ -385,8 +470,6 @@ const Inventory = () => {
         onProductAdded={handleProductUpdated}
         editProduct={selectedProduct}
       />
-
-      {/* View Product Modal */}
       <ProductViewModal
         isOpen={showViewModal}
         onClose={() => {
