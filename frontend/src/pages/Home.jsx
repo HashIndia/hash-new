@@ -1,8 +1,5 @@
 import { Button } from "../components/ui/button";
-import {
-  Card,
-  CardContent,
-} from "../components/ui/card";
+import { Card, CardContent } from "../components/ui/card";
 import useProductStore from "../stores/useProductStore";
 import HomePageSkeleton from "../components/HomePageSkeleton";
 import SEO from "../components/SEO";
@@ -10,7 +7,6 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import HeroSlider from "../components/common/HeroSlider";
-
 import {
   TrendingUp,
   ShoppingCart,
@@ -25,6 +21,23 @@ import {
   Award,
   CheckCircle,
 } from "lucide-react";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5 },
+  },
+};
 
 export default function Home() {
   const { products, initialize, isLoading } = useProductStore();
@@ -50,8 +63,10 @@ export default function Home() {
     return <HomePageSkeleton />;
   }
 
-  // Trending Now: 4 custom shirt cards + 2 from products if available
-  const trendingShirts = [
+  const trendingProducts = products.filter((p) => p.isTrending).slice(0, 6);
+  const heroProducts = products.filter((p) => p.isHero).slice(0, 6);
+
+  const trendingShirtsFallback = [
     {
       _id: "shirt1",
       name: "Classic White Shirt",
@@ -94,11 +109,9 @@ export default function Home() {
     },
   ];
 
-  // Optionally add up to 2 more products from your store if available
-  const featured = [
-    ...trendingShirts,
-    ...products.slice(0, Math.max(0, 6 - trendingShirts.length)),
-  ];
+  const featuredTrending = trendingProducts.length > 0
+    ? trendingProducts
+    : trendingShirtsFallback;
 
   const stats = [
     {
@@ -173,24 +186,6 @@ export default function Home() {
     },
   ];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5 },
-    },
-  };
-
-  // Core team data
   const coreTeam = [
     {
       name: "Sutirth",
@@ -233,13 +228,43 @@ export default function Home() {
         url="https://hashindia.com/"
         canonicalUrl="https://hashindia.com/"
       />
-      {/* Hero Section */}
       <div className="bg-white shadow-lg rounded-b-3xl">
         <HeroSlider />
+        {heroProducts.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-8 px-6">
+            {heroProducts.map((product) => (
+              <Card key={product._id} className="group overflow-hidden bg-white border border-neutral-100 hover:border-black/10 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300">
+                <div className="relative overflow-hidden bg-neutral-100">
+                  <img
+                    src={product.images?.[0]?.url || product.images?.[0] || "https://placehold.co/400x500/f8fafc/222?text=HASH+Product"}
+                    alt={product.name}
+                    className="w-full h-80 object-cover transition-transform duration-500 group-hover:scale-105 brightness-110"
+                  />
+                </div>
+                <CardContent className="p-6">
+                  <h3 className="font-bold text-lg text-neutral-900 mb-2 line-clamp-1">
+                    {product.name}
+                  </h3>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="text-xl font-bold text-neutral-900">
+                      ₹{product.price}
+                    </div>
+                  </div>
+                  <p className="text-neutral-500 mb-4 line-clamp-2">
+                    {product.description}
+                  </p>
+                  <Button
+                    asChild
+                    className="w-full bg-black text-white py-3 rounded-xl font-semibold text-base shadow hover:bg-neutral-800 transition-all"
+                  >
+                    <Link to={`/product/${product._id}`}>View Details</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
-      {/* End Hero Section */}
-
-      {/* Trending Now Section (Shirts) */}
       <section className="py-20 bg-gradient-to-b from-white to-neutral-50 border-b border-neutral-100 shadow-sm rounded-3xl my-12 mx-auto max-w-7xl">
         <div className="container mx-auto px-6">
           <motion.div
@@ -255,7 +280,6 @@ export default function Home() {
               Discover our most popular pieces loved by thousands of customers worldwide.
             </p>
           </motion.div>
-
           <motion.div
             variants={containerVariants}
             initial="hidden"
@@ -263,7 +287,7 @@ export default function Home() {
             viewport={{ once: true }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
           >
-            {featured.map((product, index) => (
+            {featuredTrending.map((product, index) => (
               <motion.div
                 key={product._id}
                 variants={itemVariants}
@@ -275,6 +299,7 @@ export default function Home() {
                     <img
                       src={
                         product.img ||
+                        product.images?.[0]?.url ||
                         product.images?.[0] ||
                         "https://placehold.co/400x500/f8fafc/222?text=HASH+Product"
                       }
@@ -282,7 +307,6 @@ export default function Home() {
                       className="w-full h-80 object-cover transition-transform duration-500 group-hover:scale-105 brightness-110"
                     />
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300" />
-                    {/* Actions */}
                     <div className="absolute top-4 right-4 space-y-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
                       <motion.button
                         className="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-xl shadow flex items-center justify-center hover:bg-neutral-100 transition-colors border border-neutral-200"
@@ -299,7 +323,6 @@ export default function Home() {
                         <Eye className="w-5 h-5 text-neutral-700" />
                       </motion.button>
                     </div>
-                    {/* Sale Badge */}
                     {product.sale && (
                       <div className="absolute top-4 left-4">
                         <span className="bg-black text-white px-3 py-1 rounded-xl text-xs font-bold shadow">
@@ -384,7 +407,6 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
-
       {/* Stats Section */}
       <section className="py-20 bg-white border-b border-neutral-100 shadow-md rounded-3xl my-12 mx-auto max-w-7xl">
         <div className="container mx-auto px-6">
