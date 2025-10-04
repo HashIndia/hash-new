@@ -82,21 +82,39 @@ export const createOrder = catchAsync(async (req, res, next) => {
       return next(new AppError(`Product ${item.product} not found`, 404));
     }
     
-    if (product.stock < item.quantity) {
-      return next(new AppError(`Insufficient stock for ${product.name}`, 400));
+    // Check stock availability
+    if (item.size && item.color) {
+      // Check variant-specific stock
+      const variant = product.variants.find(v => 
+        v.size === item.size && v.color.hex === item.color
+      );
+      if (!variant) {
+        return next(new AppError(`Variant ${item.size} - ${item.color} not found for ${product.name}`, 404));
+      }
+      if (variant.stock < item.quantity) {
+        return next(new AppError(`Insufficient stock for ${product.name} (${item.size} - ${item.color}). Available: ${variant.stock}`, 400));
+      }
+    } else {
+      // Check overall stock
+      if (product.stock < item.quantity) {
+        return next(new AppError(`Insufficient stock for ${product.name}`, 400));
+      }
     }
     
-    const itemTotal = product.price * item.quantity;
+    const itemTotal = product.getEffectivePrice() * item.quantity;
     subtotal += itemTotal;
     
     orderItems.push({
       product: product._id,
       name: product.name,
-      price: product.price,
+      price: product.getEffectivePrice(), // Use effective price (includes offers)
+      originalPrice: product.price, // Keep original price for reference
       quantity: item.quantity,
       size: item.size,
       color: item.color,
-      image: product.images[0]
+      brand: product.brand,
+      image: product.images[0],
+      appliedOffer: null // Will be set later if offer is applied
     });
   }
   
@@ -113,11 +131,57 @@ export const createOrder = catchAsync(async (req, res, next) => {
     status: 'pending'
   });
   
-  // Update product stock
+  // Update product stock (both overall and variant-specific) and track limited offers
   for (const item of items) {
-    await Product.findByIdAndUpdate(item.product, {
-      $inc: { stock: -item.quantity }
-    });
+    const product = await Product.findById(item.product);
+    if (product) {
+      // Check if this product has an active limited offer
+      if (product.limitedOffer?.isActive && product.isOfferValid()) {
+        // Check if we can fulfill the order with offer units
+        const remainingOfferUnits = product.getRemainingOfferUnits();
+        const orderQuantity = item.quantity;
+        
+        if (remainingOfferUnits >= orderQuantity) {
+          // Update limited offer units sold
+          await Product.findByIdAndUpdate(item.product, {
+            $inc: { 'limitedOffer.unitsSold': orderQuantity }
+          });
+          
+          // Add offer information to order item
+          const offerIndex = orderItems.findIndex(orderItem => orderItem.product.toString() === item.product);
+          if (offerIndex !== -1) {
+            orderItems[offerIndex].appliedOffer = {
+              type: 'limited',
+              originalPrice: product.price,
+              offerPrice: product.limitedOffer.specialPrice,
+              discountAmount: (product.price - product.limitedOffer.specialPrice) * orderQuantity,
+              offerTitle: product.limitedOffer.offerTitle
+            };
+          }
+        }
+      }
+      
+      // Update overall stock
+      await Product.findByIdAndUpdate(item.product, {
+        $inc: { stock: -item.quantity }
+      });
+      
+      // Update variant-specific stock if size and color are specified
+      if (item.size && item.color) {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { 
+            'variants.$[elem].stock': -item.quantity 
+          }
+        }, {
+          arrayFilters: [
+            { 
+              'elem.size': item.size, 
+              'elem.color.hex': item.color 
+            }
+          ]
+        });
+      }
+    }
   }
   
   // Send order confirmation email

@@ -11,6 +11,7 @@ export const getAllProducts = catchAsync(async (req, res, next) => {
     category,
     subcategory,
     brand,
+    size,
     minPrice,
     maxPrice,
     search,
@@ -25,6 +26,10 @@ export const getAllProducts = catchAsync(async (req, res, next) => {
   if (category) filter.category = category;
   if (subcategory) filter.subcategory = subcategory;
   if (brand) filter.brand = new RegExp(brand, 'i');
+  if (size) {
+    // Filter products that have the specified size in their variants
+    filter['variants.size'] = size;
+  }
   if (minPrice || maxPrice) {
     filter.price = {};
     if (minPrice) filter.price.$gte = parseFloat(minPrice);
@@ -35,7 +40,7 @@ export const getAllProducts = catchAsync(async (req, res, next) => {
   }
 
   const skip = (page - 1) * actualLimit;
-  const productFields = 'name price category images stock rating numReviews createdAt status brand isTrending isHero';
+  const productFields = 'name price category images stock rating numReviews createdAt status brand isTrending isHero limitedOffer salePrice saleStartDate saleEndDate';
 
   const products = await Product.find(filter)
     .select(productFields)

@@ -394,17 +394,22 @@ export const getAddresses = catchAsync(async (req, res, next) => {
 // Add new address
 export const addAddress = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id);
-  const newAddress = { ...req.body, _id: new Date().getTime().toString() };
+  // const newAddress = { ...req.body, _id: new Date().getTime().toString() };
   
-  if (!user.addresses) user.addresses = [];
-  user.addresses.push(newAddress);
-  
-  await user.save();
-  
+  // if (!user.addresses) user.addresses = [];
+  // user.addresses.push(newAddress);
+  //console.log("XXXXXXXXX")
+  const oldaddress=user.addresses;
+  const newAddress = req.body;
+   // console.log("XXXXXXXXX")
+  await User.findByIdAndUpdate(req.user.id, { addresses: [...oldaddress, newAddress] });
+  //console.log("Address added:", newAddress);
   res.status(201).json({
     status: 'success',
     data: { address: newAddress }
   });
+ 
+
 });
 
 // Update address

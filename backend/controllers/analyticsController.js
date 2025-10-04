@@ -376,6 +376,91 @@ export const getProductAnalytics = catchAsync(async (req, res, next) => {
   });
 });
 
+// Brand and Size Analytics for Admin Table
+export const getBrandSizeAnalytics = catchAsync(async (req, res, next) => {
+  try {
+    // Get all products with their variants
+    const products = await Product.find({ status: 'active' })
+      .select('name brand variants stock price')
+      .lean();
+
+    // Get all orders with items
+    const orders = await Order.find({ status: { $ne: 'cancelled' } })
+      .select('items')
+      .lean();
+
+    // Process products to get vendor purchases (initial stock)
+    const vendorData = {};
+    products.forEach(product => {
+      if (product.variants && product.variants.length > 0) {
+        product.variants.forEach(variant => {
+          const key = `${product.brand || 'Unknown'}-${variant.size}`;
+          if (!vendorData[key]) {
+            vendorData[key] = {
+              brand: product.brand || 'Unknown',
+              size: variant.size,
+              pricePerUnit: variant.price || product.price,
+              boughtFromVendor: variant.stock || 0,
+              soldToCustomer: 0,
+              remainingStock: variant.stock || 0
+            };
+          } else {
+            vendorData[key].boughtFromVendor += variant.stock || 0;
+            vendorData[key].remainingStock += variant.stock || 0;
+          }
+        });
+      } else {
+        // For products without variants, use overall stock
+        const key = `${product.brand || 'Unknown'}-ONE_SIZE`;
+        if (!vendorData[key]) {
+          vendorData[key] = {
+            brand: product.brand || 'Unknown',
+            size: 'ONE_SIZE',
+            pricePerUnit: product.price,
+            boughtFromVendor: product.stock || 0,
+            soldToCustomer: 0,
+            remainingStock: product.stock || 0
+          };
+        } else {
+          vendorData[key].boughtFromVendor += product.stock || 0;
+          vendorData[key].remainingStock += product.stock || 0;
+        }
+      }
+    });
+
+    // Process orders to get customer sales
+    orders.forEach(order => {
+      if (order.items) {
+        order.items.forEach(item => {
+          const key = `${item.brand || 'Unknown'}-${item.size || 'ONE_SIZE'}`;
+          if (vendorData[key]) {
+            vendorData[key].soldToCustomer += item.quantity || 0;
+            vendorData[key].remainingStock -= item.quantity || 0;
+          }
+        });
+      }
+    });
+
+    // Convert to array and sort by brand
+    const analyticsData = Object.values(vendorData).sort((a, b) => 
+      a.brand.localeCompare(b.brand) || a.size.localeCompare(b.size)
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        analytics: analyticsData
+      }
+    });
+  } catch (error) {
+    console.error('Brand Size Analytics Error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch brand size analytics'
+    });
+  }
+});
+
 // Dashboard Stats
 export const getDashboardStats = catchAsync(async (req, res, next) => {
   const today = new Date();

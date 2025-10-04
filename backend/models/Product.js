@@ -99,12 +99,17 @@ const productSchema = new mongoose.Schema({
   saleStartDate: Date,
   saleEndDate: Date,
 
-  // ✅ New: Limited stock offer
+  // ✅ Enhanced: Limited stock offer with better tracking
   limitedOffer: {
     isActive: { type: Boolean, default: false },
     specialPrice: { type: Number, min: 0 },
     maxUnits: { type: Number, default: 0 }, // e.g. first 100 units
-    unitsSold: { type: Number, default: 0 }
+    unitsSold: { type: Number, default: 0 },
+    offerTitle: { type: String, default: 'Limited Time Offer' },
+    offerDescription: { type: String, default: 'Special price for first customers' },
+    startDate: { type: Date, default: Date.now },
+    endDate: { type: Date },
+    discountPercentage: { type: Number, min: 0, max: 100 }
   },
 
   // ✅ New: Bundle offer (variety discount)
@@ -148,12 +153,41 @@ productSchema.virtual('currentPrice').get(function() {
   return this.price;
 });
 
-// ✅ Effective price considering limited offer
+// ✅ Enhanced effective price considering limited offer
 productSchema.methods.getEffectivePrice = function() {
-  if (this.limitedOffer?.isActive && this.limitedOffer.unitsSold < this.limitedOffer.maxUnits) {
+  // Check if limited offer is active and still has units available
+  if (this.limitedOffer?.isActive && 
+      this.limitedOffer.unitsSold < this.limitedOffer.maxUnits &&
+      (!this.limitedOffer.endDate || new Date() <= this.limitedOffer.endDate)) {
     return this.limitedOffer.specialPrice;
   }
-  return this.currentPrice;
+  
+  // Check regular sale price
+  if (this.salePrice && this.saleStartDate && this.saleEndDate) {
+    const now = new Date();
+    if (now >= this.saleStartDate && now <= this.saleEndDate) {
+      return this.salePrice;
+    }
+  }
+  
+  return this.price;
+};
+
+// ✅ Get remaining offer units
+productSchema.methods.getRemainingOfferUnits = function() {
+  if (!this.limitedOffer?.isActive) return 0;
+  return Math.max(0, this.limitedOffer.maxUnits - this.limitedOffer.unitsSold);
+};
+
+// ✅ Check if offer is still valid
+productSchema.methods.isOfferValid = function() {
+  if (!this.limitedOffer?.isActive) return false;
+  
+  const now = new Date();
+  const hasUnitsLeft = this.limitedOffer.unitsSold < this.limitedOffer.maxUnits;
+  const isWithinDateRange = !this.limitedOffer.endDate || now <= this.limitedOffer.endDate;
+  
+  return hasUnitsLeft && isWithinDateRange;
 };
 
 productSchema.virtual('totalStock').get(function() {

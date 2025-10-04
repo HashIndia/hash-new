@@ -13,6 +13,7 @@ router.get('/revenue', analyticsController.getRevenueAnalytics);
 router.get('/customers', analyticsController.getCustomerAnalytics);
 router.get('/products', analyticsController.getProductAnalytics);
 router.get('/size', getSizeAnalytics);
+router.get('/brand-size', analyticsController.getBrandSizeAnalytics);
 router.get('/dashboard', analyticsController.getDashboardStats);
 
 export default router;
