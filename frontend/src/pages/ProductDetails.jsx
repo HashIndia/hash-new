@@ -29,16 +29,42 @@ export default function ProductDetails() {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [showSizeChart, setShowSizeChart] = useState(false);
   const [totalReviews, setTotalReviews] = useState(0);
+  const [remainingOfferUnits, setRemainingOfferUnits] = useState(0);
 
-  // Load product on mount
+  // Update remaining offer units when product changes
   useEffect(() => {
-    if (id) {
-      loadProduct(id);
+    if (product?.limitedOffer?.isActive) {
+      const remaining = product.limitedOffer.maxUnits - (product.limitedOffer.unitsSold || 0);
+      setRemainingOfferUnits(Math.max(0, remaining));
+    } else {
+      setRemainingOfferUnits(0);
     }
-  }, [id]); // Removed loadProduct from dependencies
+  }, [product]);
 
-  // Try to get product from store or use current product
-  const product = currentProduct || products.find(p => p._id === id);
+  // Helper functions for limited offer
+  const getEffectivePrice = () => {
+    if (product?.limitedOffer?.isActive && remainingOfferUnits > 0) {
+      return product.limitedOffer.specialPrice;
+    }
+    return product?.price || 0;
+  };
+
+  const getDiscountPercentage = () => {
+    if (product?.limitedOffer?.isActive && remainingOfferUnits > 0) {
+      const discount = ((product.price - product.limitedOffer.specialPrice) / product.price) * 100;
+      return Math.round(discount);
+    }
+    return 0;
+  };
+
+  const isOfferValid = () => {
+    if (!product?.limitedOffer?.isActive) return false;
+    
+    const hasUnitsLeft = remainingOfferUnits > 0;
+    const isWithinDateRange = !product.limitedOffer.endDate || new Date() <= new Date(product.limitedOffer.endDate);
+    
+    return hasUnitsLeft && isWithinDateRange;
+  };
 
   // Check if product is in wishlist
   useEffect(() => {
@@ -213,9 +239,9 @@ export default function ProductDetails() {
     }
   };
 
-  const currentPrice = safeProduct.salePrice || safeProduct.price;
-  const originalPrice = safeProduct.salePrice ? safeProduct.price : null;
-  const discount = originalPrice ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0;
+  const currentPrice = isOfferValid() ? getEffectivePrice() : (safeProduct.salePrice || safeProduct.price);
+  const originalPrice = isOfferValid() ? safeProduct.price : (safeProduct.salePrice ? safeProduct.price : null);
+  const discount = isOfferValid() ? getDiscountPercentage() : (originalPrice ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -382,7 +408,39 @@ export default function ProductDetails() {
                     ₹{originalPrice.toLocaleString()}
                   </span>
                 )}
+                {discount > 0 && (
+                  <span className="px-3 py-1 bg-red-100 text-red-600 text-sm font-semibold rounded-full">
+                    {discount}% OFF
+                  </span>
+                )}
               </div>
+
+              {/* Limited Offer Banner */}
+              {isOfferValid() && (
+                <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white p-4 rounded-lg mb-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-bold text-lg">{safeProduct.limitedOffer.offerTitle}</h3>
+                      <p className="text-sm opacity-90">{safeProduct.limitedOffer.offerDescription}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold">{remainingOfferUnits}</div>
+                      <div className="text-xs opacity-90">units left</div>
+                    </div>
+                  </div>
+                  <div className="mt-3 bg-white/20 rounded-full h-2">
+                    <div 
+                      className="bg-white rounded-full h-2 transition-all duration-300"
+                      style={{ 
+                        width: `${Math.max(5, (remainingOfferUnits / safeProduct.limitedOffer.maxUnits) * 100)}%` 
+                      }}
+                    ></div>
+                  </div>
+                  <p className="text-xs mt-2 opacity-90">
+                    Hurry! Only {remainingOfferUnits} units available at this special price
+                  </p>
+                </div>
+              )}
 
               {/* Rating */}
               <div className="flex items-center gap-2 mb-6">
@@ -432,7 +490,10 @@ export default function ProductDetails() {
                 <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                   {getAvailableSizes().map((size) => {
                     const availableColors = getColorsForSize(size);
-                    const isAvailable = availableColors.length > 0;
+                    const totalStockForSize = safeProduct.variants
+                      .filter(v => v.size === size)
+                      .reduce((total, variant) => total + (variant.stock || 0), 0);
+                    const isAvailable = totalStockForSize > 0;
                     const isSelected = selectedSize === size;
                     
                     return (
@@ -460,7 +521,15 @@ export default function ProductDetails() {
                       >
                         <div>{size}</div>
                         <div className="text-xs opacity-75">
-                          {isAvailable ? `${availableColors.length} color${availableColors.length > 1 ? 's' : ''}` : 'Out'}
+                          {isAvailable ? (
+                            <span className={`font-medium ${
+                              totalStockForSize <= 5 ? 'text-red-500' : 
+                              totalStockForSize <= 10 ? 'text-yellow-500' : 
+                              'text-green-500'
+                            }`}>
+                              {totalStockForSize} left
+                            </span>
+                          ) : 'Out'}
                         </div>
                       </button>
                     );
@@ -578,16 +647,32 @@ export default function ProductDetails() {
                   onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                   className="w-20 text-center bg-background border-border"
                   min="1"
-                  max={safeProduct.stock}
+                  max={selectedSize && selectedColor ? getVariantStock(selectedSize, selectedColor) : safeProduct.stock}
                 />
                 <button
-                  onClick={() => setQuantity(Math.min(safeProduct.stock, quantity + 1))}
+                  onClick={() => {
+                    const maxStock = selectedSize && selectedColor ? getVariantStock(selectedSize, selectedColor) : safeProduct.stock;
+                    setQuantity(Math.min(maxStock, quantity + 1));
+                  }}
                   className="w-10 h-10 rounded-lg border border-border flex items-center justify-center hover:bg-accent transition-colors"
                 >
                   +
                 </button>
-                <span className="text-sm text-muted-foreground">Max: {safeProduct.stock}</span>
+                <span className="text-sm text-muted-foreground">
+                  Max: {selectedSize && selectedColor ? getVariantStock(selectedSize, selectedColor) : safeProduct.stock}
+                </span>
               </div>
+              {selectedSize && selectedColor && (
+                <div className="mt-2 text-sm text-muted-foreground">
+                  <span className={`font-medium ${
+                    getVariantStock(selectedSize, selectedColor) <= 5 ? 'text-red-500' : 
+                    getVariantStock(selectedSize, selectedColor) <= 10 ? 'text-yellow-500' : 
+                    'text-green-500'
+                  }`}>
+                    {getVariantStock(selectedSize, selectedColor)} units available for {selectedSize} - {safeProduct.variants.find(v => v.size === selectedSize && v.color.hex === selectedColor)?.color.name}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Actions */}

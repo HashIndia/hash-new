@@ -26,6 +26,8 @@ export default function Shop() {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedSize, setSelectedSize] = useState('all');
+  const [selectedBrand, setSelectedBrand] = useState('all');
   const [priceRange, setPriceRange] = useState('all');
   const [sortBy, setSortBy] = useState('createdAt');
   const [viewMode, setViewMode] = useState('grid');
@@ -39,6 +41,8 @@ export default function Shop() {
           limit: 12,
           search: searchTerm,
           category: selectedCategory,
+          brand: selectedBrand,
+          size: selectedSize,
           sort: sortBy.split('-')[0],
           order: sortBy.split('-')[1] || 'desc',
         };
@@ -58,6 +62,8 @@ export default function Shop() {
         }
         
         if (params.category === 'all') delete params.category;
+        if (params.brand === 'all') delete params.brand;
+        if (params.size === 'all') delete params.size;
 
         const response = await productsAPI.getProducts(params);
         setProducts(response.data.products);
@@ -79,7 +85,7 @@ export default function Shop() {
     }, 300); // Debounce search input
 
     return () => clearTimeout(debounceFetch);
-  }, [searchTerm, selectedCategory, priceRange, sortBy, pagination.page]);
+  }, [searchTerm, selectedCategory, selectedSize, selectedBrand, priceRange, sortBy, pagination.page]);
 
   // Filter and sort products - This is now handled by the backend
   const filteredProducts = products;
@@ -176,6 +182,36 @@ export default function Shop() {
                   <SelectItem value="jeans" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Jeans</SelectItem>
                   <SelectItem value="dresses" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Dresses</SelectItem>
                   <SelectItem value="accessories" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Accessories</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedSize} onValueChange={setSelectedSize}>
+                <SelectTrigger className="w-full sm:w-40 bg-white border-neutral-300 text-neutral-800 text-sm md:text-base shadow-sm">
+                  <SelectValue placeholder="Size" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border border-neutral-200 shadow-lg z-50">
+                  <SelectItem value="all" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">All Sizes</SelectItem>
+                  <SelectItem value="XS" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">XS</SelectItem>
+                  <SelectItem value="S" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">S</SelectItem>
+                  <SelectItem value="M" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">M</SelectItem>
+                  <SelectItem value="L" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">L</SelectItem>
+                  <SelectItem value="XL" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">XL</SelectItem>
+                  <SelectItem value="XXL" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">XXL</SelectItem>
+                  <SelectItem value="XXXL" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">XXXL</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedBrand} onValueChange={setSelectedBrand}>
+                <SelectTrigger className="w-full sm:w-40 bg-white border-neutral-300 text-neutral-800 text-sm md:text-base shadow-sm">
+                  <SelectValue placeholder="Brand" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border border-neutral-200 shadow-lg z-50">
+                  <SelectItem value="all" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">All Brands</SelectItem>
+                  <SelectItem value="HASH" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">HASH</SelectItem>
+                  <SelectItem value="Nike" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Nike</SelectItem>
+                  <SelectItem value="Adidas" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Adidas</SelectItem>
+                  <SelectItem value="Puma" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Puma</SelectItem>
+                  <SelectItem value="Levi's" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Levi's</SelectItem>
                 </SelectContent>
               </Select>
               

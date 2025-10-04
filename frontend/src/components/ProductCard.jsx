@@ -77,13 +77,36 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
     }
   };
 
-  // Calculate discount and pricing
-  const currentPrice = product.salePrice && product.saleStartDate && product.saleEndDate ? 
-    (new Date() >= new Date(product.saleStartDate) && new Date() <= new Date(product.saleEndDate) ? product.salePrice : product.price) : 
-    product.price;
-  
-  const discountPercentage = product.salePrice && currentPrice < product.price ? 
+  // Calculate discount and pricing with limited offer support
+  const getEffectivePrice = () => {
+    // Check for limited offer first
+    if (product.limitedOffer?.isActive) {
+      const remainingUnits = product.limitedOffer.maxUnits - (product.limitedOffer.unitsSold || 0);
+      const isExpired = product.limitedOffer.endDate && new Date() > new Date(product.limitedOffer.endDate);
+      
+      if (remainingUnits > 0 && !isExpired) {
+        return product.limitedOffer.specialPrice;
+      }
+    }
+    
+    // Fall back to regular sale price
+    if (product.salePrice && product.saleStartDate && product.saleEndDate) {
+      const now = new Date();
+      if (now >= new Date(product.saleStartDate) && now <= new Date(product.saleEndDate)) {
+        return product.salePrice;
+      }
+    }
+    
+    return product.price;
+  };
+
+  const currentPrice = getEffectivePrice();
+  const discountPercentage = currentPrice < product.price ? 
     Math.round(((product.price - currentPrice) / product.price) * 100) : 0;
+  
+  const isLimitedOfferActive = product.limitedOffer?.isActive && 
+    (product.limitedOffer.maxUnits - (product.limitedOffer.unitsSold || 0)) > 0 &&
+    (!product.limitedOffer.endDate || new Date() <= new Date(product.limitedOffer.endDate));
   
   const isNewProduct = product.isFeatures || (new Date() - new Date(product.createdAt)) < (7 * 24 * 60 * 60 * 1000); // 7 days
   const isBestSeller = product.isFeatures;
@@ -155,12 +178,28 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
                     {discountPercentage > 0 && (
                       <>
                         <div className="text-lg text-gray-500 line-through">₹{product.price}</div>
-                        <span className="badge badge-success text-xs">
-                          Save ₹{product.price - currentPrice}
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          isLimitedOfferActive ? 'bg-red-100 text-red-600' : 'badge badge-success'
+                        }`}>
+                          {isLimitedOfferActive ? `${discountPercentage}% OFF` : `Save ₹${product.price - currentPrice}`}
                         </span>
                       </>
                     )}
                   </div>
+                  
+                  {/* Limited Offer Badge */}
+                  {isLimitedOfferActive && (
+                    <div className="mb-4 p-2 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-red-700">
+                          {product.limitedOffer.offerTitle}
+                        </span>
+                        <span className="text-xs text-red-600 font-bold">
+                          {product.limitedOffer.maxUnits - (product.limitedOffer.unitsSold || 0)} left
+                        </span>
+                      </div>
+                    </div>
+                  )}
                   
                   <div className="flex items-center gap-3 mb-4">
                     <div className="flex text-yellow-400">
@@ -376,12 +415,28 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
             {discountPercentage > 0 && (
               <>
                 <div className="text-lg text-gray-500 line-through">₹{product.price}</div>
-                <span className="badge badge-success text-xs">
-                  Save ₹{product.price - currentPrice}
+                <span className={`text-xs px-2 py-1 rounded ${
+                  isLimitedOfferActive ? 'bg-red-100 text-red-600' : 'badge badge-success'
+                }`}>
+                  {isLimitedOfferActive ? `${discountPercentage}% OFF` : `Save ₹${product.price - currentPrice}`}
                 </span>
               </>
             )}
           </div>
+          
+          {/* Limited Offer Badge */}
+          {isLimitedOfferActive && (
+            <div className="mb-4 p-2 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-red-700">
+                  {product.limitedOffer.offerTitle}
+                </span>
+                <span className="text-xs text-red-600 font-bold">
+                  {product.limitedOffer.maxUnits - (product.limitedOffer.unitsSold || 0)} left
+                </span>
+              </div>
+            </div>
+          )}
           
           <div className="flex items-center gap-3 mb-4">
             <div className="flex text-yellow-400">

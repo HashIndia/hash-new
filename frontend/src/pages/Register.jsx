@@ -1,16 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
-import OTPModal from "../components/OTPModal";
-import useUserStore from "../utils/useUserStore";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authAPI } from "../services/api";
-import toast from "react-hot-toast";
+import { authAPI, setSafariAuthToken } from "../services/api";
+import useUserStore from "../utils/useUserStore";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
+import OTPModal from "../components/OTPModal";
 import { AlertCircle } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function Register() {
-  const { setUser } = useUserStore();
+  const setUser = useUserStore((state) => state.setUser);
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirmPassword: "" });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -21,85 +21,58 @@ export default function Register() {
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
-    // Clear error when user starts typing
     if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: "" });
+      setErrors({ ...errors, [e.target.name]: null });
     }
   }
 
   function getPasswordStrength(password) {
-    if (password.length < 6) return { strength: 0, text: "Too short", color: "bg-red-500" };
-    if (password.length < 8) return { strength: 1, text: "Weak", color: "bg-orange-500" };
-    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) return { strength: 2, text: "Medium", color: "bg-yellow-500" };
+    if (password.length < 6) return { strength: 0, text: "Too Short", color: "bg-red-500" };
+    if (password.length < 8) return { strength: 1, text: "Weak", color: "bg-yellow-500" };
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) return { strength: 2, text: "Medium", color: "bg-orange-500" };
     return { strength: 3, text: "Strong", color: "bg-green-500" };
   }
 
   function validateForm() {
     const newErrors = {};
-    
-    if (!form.name.trim()) {
-      newErrors.name = "Full name is required";
-    } else if (form.name.trim().length < 2) {
-      newErrors.name = "Name must be at least 2 characters";
-    }
-    
-    if (!form.email) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-      newErrors.email = "Enter a valid email address";
-    }
-    
-    if (!form.phone) {
-      newErrors.phone = "Phone number is required";
-    } else if (!/^\d{10}$/.test(form.phone.replace(/\D/g, ''))) {
-      newErrors.phone = "Enter a valid 10-digit phone number";
-    }
-    
-    if (!form.password) {
-      newErrors.password = "Password is required";
-    } else if (form.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
-    
-    if (!form.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password";
-    } else if (form.password !== form.confirmPassword) {
+    if (!form.name.trim()) newErrors.name = "Name is required";
+    if (!form.email) newErrors.email = "Email is required";
+    if (!form.phone) newErrors.phone = "Phone number is required";
+    if (!form.password) newErrors.password = "Password is required";
+    if (!form.confirmPassword) newErrors.confirmPassword = "Please confirm your password";
+    if (form.password && form.confirmPassword && form.password !== form.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
-    
     return newErrors;
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     const newErrors = validateForm();
-    
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-    
     setIsLoading(true);
     setErrors({});
-    
     try {
       const response = await authAPI.register(form);
-      
-      toast.success(response.message || 'OTP sent to your email!');
-      // Store the token and navigate to the OTP verification page
-      navigate('/verify-otp', { state: { registrationToken: response.data.registrationToken } });
-
+      toast.success("Registration successful! Please verify OTP.");
+      if (response.token) {
+        setSafariAuthToken(response.token);
+      }
+      setShowOTP(true);
     } catch (error) {
-      if (error.status === 400 && error.data?.errors) {
-        // Handle validation errors from the backend
+      if (error.data?.errors) {
         const newErrors = {};
-        error.data.errors.forEach(err => {
-          newErrors[err.path] = err.msg;
+        error.data.errors.forEach((e) => {
+          newErrors[e.path] = e.msg;
         });
         setErrors(newErrors);
-        toast.error('Please fix the errors in the form.');
+        toast.error("Please fix the errors below.");
       } else {
-        toast.error(error.message || 'Registration failed. Please try again.');
+        setErrors({ form: error.message || "Registration failed. Please try again." });
+        toast.error(error.message || "Registration failed. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -107,40 +80,32 @@ export default function Register() {
   }
 
   function handleVerifyOTP(otp) {
-    // Placeholder OTP verification
+    // Implement OTP verification logic here
     setOtpVerified(true);
     setShowOTP(false);
-    setUser({ 
-      name: form.name, 
-      email: form.email, 
-      phone: form.phone,
-      avatar: `https://placehold.co/100x100/64748b/fff?text=${form.name.split(' ').map(n => n[0]).join('')}`
-    });
-    window.location.href = "/";
+    toast.success("OTP verified! Account created.");
+    // Optionally fetch user data and set in store
+    setUser({ ...form, verified: true });
+    navigate("/");
   }
 
   const passwordStrength = getPasswordStrength(form.password);
 
   return (
     <div className="min-h-screen bg-white text-neutral-900 flex items-center justify-center p-4 md:p-6 relative">
-      {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_80%_20%,hsl(var(--hash-blue))_0%,transparent_50%),radial-gradient(circle_at_40%_40%,hsl(var(--hash-pink))_0%,transparent_50%)] opacity-5"></div>
-      
       <div className="w-full max-w-md relative z-10">
-        {/* Header */}
         <div className="text-center mb-6 md:mb-8">
-          {/* Logo */}
           <div className="mx-auto mb-3 md:mb-4 w-14 h-14 md:w-16 md:h-16 rounded-2xl overflow-hidden shadow-lg">
-            <img 
-              src="/hash-logo.jpg" 
-              alt="Hash Logo" 
+            <img
+              src="/hash-logo.jpg"
+              alt="Hash Logo"
               className="w-full h-full object-cover"
             />
           </div>
           <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-2 font-space">Join HASH</h1>
           <p className="text-sm md:text-base text-neutral-600">Start your style journey with us</p>
         </div>
-
         <Card className="bg-white border border-neutral-200 shadow-2xl shadow-hash-purple/10">
           <CardHeader className="space-y-1 pb-4 md:pb-6">
             <CardTitle className="text-xl md:text-2xl font-semibold text-center text-neutral-900 font-space">
@@ -152,7 +117,11 @@ export default function Register() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
-              {/* Name Field */}
+              {errors.form && (
+                <div className="p-3 md:p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                  <p className="text-destructive text-xs md:text-sm">{errors.form}</p>
+                </div>
+              )}
               <div className="space-y-2">
                 <label className="text-xs md:text-sm font-medium text-neutral-700 ">
                   Full Name
@@ -171,8 +140,6 @@ export default function Register() {
                   </p>
                 )}
               </div>
-
-              {/* Email Field */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-neutral-700 ">
                   Email Address
@@ -191,8 +158,6 @@ export default function Register() {
                   </p>
                 )}
               </div>
-
-              {/* Phone Field */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-neutral-700">
                   Phone Number
@@ -211,8 +176,6 @@ export default function Register() {
                   </p>
                 )}
               </div>
-
-              {/* Password Field */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-neutral-700">
                   Password
@@ -238,7 +201,7 @@ export default function Register() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <div className="flex-1 bg-muted rounded-full h-2">
-                        <div 
+                        <div
                           className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
                           style={{ width: `${(passwordStrength.strength + 1) * 25}%` }}
                         ></div>
@@ -253,8 +216,6 @@ export default function Register() {
                   </p>
                 )}
               </div>
-
-              {/* Confirm Password Field */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-neutral-700">
                   Confirm Password
@@ -273,8 +234,6 @@ export default function Register() {
                   </p>
                 )}
               </div>
-
-              {/* Terms Checkbox */}
               <div className="flex items-start gap-3">
                 <input
                   type="checkbox"
@@ -293,10 +252,8 @@ export default function Register() {
                   </a>
                 </label>
               </div>
-
-              {/* Submit Button */}
-              <Button 
-                className="w-full h-12 text-base font-semibold bg-hash-purple hover:bg-hash-purple/90 text-white transition-all duration-300 shadow-lg hover:shadow-xl shadow-hash-purple/25" 
+              <Button
+                className="w-full h-12 text-base font-semibold bg-hash-purple hover:bg-hash-purple/90 text-white transition-all duration-300 shadow-lg hover:shadow-xl shadow-hash-purple/25"
                 type="submit"
                 disabled={isLoading}
               >
@@ -310,8 +267,6 @@ export default function Register() {
                 )}
               </Button>
             </form>
-
-            {/* Sign In Link */}
             <div className="text-center mt-6 pt-4 border-t border-border">
               <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
@@ -322,19 +277,16 @@ export default function Register() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-xs text-muted-foreground">
             By creating an account, you agree to receive marketing emails from us.
           </p>
         </div>
       </div>
-
-      <OTPModal 
-        open={showOTP} 
-        onClose={() => setShowOTP(false)} 
-        onVerify={handleVerifyOTP} 
+      <OTPModal
+        open={showOTP}
+        onClose={() => setShowOTP(false)}
+        onVerify={handleVerifyOTP}
       />
     </div>
   );

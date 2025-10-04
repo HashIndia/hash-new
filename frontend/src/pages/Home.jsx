@@ -229,7 +229,7 @@ export default function Home() {
         canonicalUrl="https://hashindia.com/"
       />
       <div className="bg-white shadow-lg rounded-b-3xl">
-        <HeroSlider />
+        <HeroSlider heroProducts={heroProducts} />
         {heroProducts.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-8 px-6">
             {heroProducts.map((product) => (

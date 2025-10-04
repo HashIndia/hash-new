@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 import useUserStore from '../utils/useUserStore';
 
@@ -11,9 +12,9 @@ const isSafariOrIOS = () => {
 };
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
-  withCredentials: true, // Essential for cookies
-  timeout: 10000, // 10 second timeout
+  baseURL: import.meta.env.VITE_API_URL || 'https://hash-backend-production.up.railway.app/api',
+  withCredentials: true,
+  timeout: 15000, // Increased timeout for slow networks
   headers: {
     'Content-Type': 'application/json',
   },
@@ -22,8 +23,8 @@ const api = axios.create({
 let isRefreshing = false;
 let failedQueue = [];
 let refreshAttempts = 0;
-const MAX_REFRESH_ATTEMPTS = 1; // Reduced to 1 to prevent loops
-let authToken = null; // Fallback token storage for Safari/iOS
+const MAX_REFRESH_ATTEMPTS = 1;
+let authToken = null;
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach(prom => {
@@ -36,10 +37,8 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// Add request interceptor to handle Safari/iOS token fallback
 api.interceptors.request.use(
   (config) => {
-    // For Safari/iOS, also send token in Authorization header as fallback
     if (isSafariOrIOS() && authToken) {
       config.headers.Authorization = `Bearer ${authToken}`;
     }
@@ -48,13 +47,10 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Simple response interceptor with Safari/iOS handling
 api.interceptors.response.use(
   (response) => {
-    // Extract token from response headers for Safari/iOS fallback
     if (isSafariOrIOS() && response.headers['x-auth-token']) {
       authToken = response.headers['x-auth-token'];
-      // Store in localStorage as additional fallback for Safari/iOS
       localStorage.setItem('safari_auth_token', authToken);
     }
     return response.data;
@@ -62,18 +58,14 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Reset refresh attempts on successful requests
     if (error.response?.status !== 401) {
       refreshAttempts = 0;
     }
 
-    // Only try to refresh on 401 errors that aren't already retries
     if (error.response?.status === 401 && !originalRequest._retry && refreshAttempts < MAX_REFRESH_ATTEMPTS) {
-      
-      // Never try to refresh these endpoints
       const noRefreshEndpoints = ['/auth/refresh-token', '/auth/login', '/auth/register', '/auth/verify-otp'];
       const shouldSkipRefresh = noRefreshEndpoints.some(endpoint => originalRequest.url?.includes(endpoint));
-      
+
       if (shouldSkipRefresh) {
         refreshAttempts = 0;
         authToken = null;
@@ -98,13 +90,12 @@ api.interceptors.response.use(
       try {
         const refreshResponse = await api.post('/auth/refresh-token');
         refreshAttempts = 0;
-        
-        // Update Safari/iOS fallback token
+
         if (isSafariOrIOS() && refreshResponse.headers?.['x-auth-token']) {
           authToken = refreshResponse.headers['x-auth-token'];
           localStorage.setItem('safari_auth_token', authToken);
         }
-        
+
         processQueue(null);
         return api(originalRequest);
       } catch (refreshError) {
@@ -122,7 +113,6 @@ api.interceptors.response.use(
       }
     }
 
-    // If we've hit the refresh limit, logout immediately
     if (refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
       refreshAttempts = 0;
       authToken = null;
@@ -137,7 +127,6 @@ api.interceptors.response.use(
   }
 );
 
-// Initialize Safari/iOS fallback token on app start
 if (isSafariOrIOS()) {
   const storedToken = localStorage.getItem('safari_auth_token');
   if (storedToken) {
@@ -145,7 +134,6 @@ if (isSafariOrIOS()) {
   }
 }
 
-// Export the token management functions for Safari/iOS
 export const setSafariAuthToken = (token) => {
   if (isSafariOrIOS()) {
     authToken = token;
@@ -160,7 +148,6 @@ export const clearSafariAuthToken = () => {
   }
 };
 
-// API endpoints
 export const authAPI = {
   register: (userData) => api.post('/auth/register', userData),
   login: (credentials) => api.post('/auth/login', credentials),

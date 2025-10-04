@@ -56,7 +56,7 @@ export default function Header() {
         <Link to="/" className="flex items-center gap-3 group">
           <div className="w-10 h-10 rounded-xl overflow-hidden shadow group-hover:shadow-lg transition-all duration-300 group-hover:scale-105 bg-neutral-100">
             <img
-              src="/hash-logo.jpg"
+              src="/"
               alt="Hash Logo"
               className="w-full h-full object-cover"
             />
