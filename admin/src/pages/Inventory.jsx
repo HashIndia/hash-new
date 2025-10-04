@@ -149,16 +149,39 @@ const Inventory = () => {
     return 'https://via.placeholder.com/200';
   };
 
-  // NEW: Calculate discounted price and percentage
+  // Enhanced: Calculate discounted price and percentage for limited offers
   const calculateDiscountedPrice = (product) => {
-  if (!product.discount || !product.discountValue) return product.price;
-  return (product.price - (product.price * product.discountValue / 100)).toFixed(2);
-};
-
+    if (product.limitedOffer?.isActive && product.limitedOffer.specialPrice) {
+      return product.limitedOffer.specialPrice;
+    }
+    if (!product.discount || !product.discountValue) return product.price;
+    return (product.price - (product.price * product.discountValue / 100)).toFixed(2);
+  };
 
   const calculateDiscountPercent = (product) => {
+    if (product.limitedOffer?.isActive && product.limitedOffer.specialPrice) {
+      const discount = ((product.price - product.limitedOffer.specialPrice) / product.price) * 100;
+      return Math.round(discount);
+    }
     if (!product.discount || !product.discountValue) return 0;
     return Math.round(product.discountValue);
+  };
+
+  const getOfferStatus = (product) => {
+    if (!product.limitedOffer?.isActive) return null;
+    
+    const remainingUnits = product.limitedOffer.maxUnits - (product.limitedOffer.unitsSold || 0);
+    const isExpired = product.limitedOffer.endDate && new Date() > new Date(product.limitedOffer.endDate);
+    
+    if (isExpired || remainingUnits <= 0) {
+      return { status: 'expired', text: 'Offer Ended', color: 'bg-gray-500' };
+    }
+    
+    if (remainingUnits <= 10) {
+      return { status: 'low', text: `${remainingUnits} left`, color: 'bg-red-500' };
+    }
+    
+    return { status: 'active', text: `${remainingUnits} left`, color: 'bg-green-500' };
   };
 
   if (loading) {
@@ -283,8 +306,24 @@ const Inventory = () => {
                       </div>
                       <p className="text-xs text-gray-600 mb-2">{product.category} • {product.sku}</p>
                       <p className="text-xs text-gray-600 mb-2">Brand: {product.brand || '-'}</p>
-                      {/* NEW: Discount display */}
-                      {discountPercent > 0 ? (
+                      {/* Enhanced: Limited Offer display */}
+                      {product.limitedOffer?.isActive ? (
+                        <div className="mb-2">
+                          <div className="text-lg font-bold">
+                            <span className="line-through text-gray-400">₹{product.price}</span>
+                            <span className="ml-2 font-semibold text-green-600">₹{discountedPrice}</span>
+                            <span className="ml-1 text-red-600 text-xs">{discountPercent}% OFF</span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs font-medium text-blue-600">{product.limitedOffer.offerTitle}</span>
+                            {getOfferStatus(product) && (
+                              <span className={`px-2 py-1 text-xs text-white rounded-full ${getOfferStatus(product).color}`}>
+                                {getOfferStatus(product).text}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ) : discountPercent > 0 ? (
                         <div className="text-lg font-bold mb-2">
                           <span className="line-through text-gray-400">₹{product.price}</span>
                           <span className="ml-2 font-semibold text-green-600">₹{discountedPrice}</span>

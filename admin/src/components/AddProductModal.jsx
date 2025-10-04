@@ -37,7 +37,16 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
       measurements: [],
       guidelines: []
     },
-    images: []
+    images: [],
+    limitedOffer: {
+      isActive: false,
+      specialPrice: '',
+      maxUnits: '',
+      offerTitle: 'Limited Time Offer',
+      offerDescription: 'Special price for first customers',
+      endDate: '',
+      discountPercentage: ''
+    }
   });
 
   const categories = [
@@ -75,7 +84,16 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
           measurements: [],
           guidelines: []
         },
-        images: editProduct.images?.length > 0 ? [editProduct.images[0].url] : []
+        images: editProduct.images?.length > 0 ? [editProduct.images[0].url] : [],
+        limitedOffer: editProduct.limitedOffer || {
+          isActive: false,
+          specialPrice: '',
+          maxUnits: '',
+          offerTitle: 'Limited Time Offer',
+          offerDescription: 'Special price for first customers',
+          endDate: '',
+          discountPercentage: ''
+        }
       });
     } else {
       setFormData({
@@ -96,7 +114,16 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
           measurements: [],
           guidelines: []
         },
-        images: []
+        images: [],
+        limitedOffer: {
+          isActive: false,
+          specialPrice: '',
+          maxUnits: '',
+          offerTitle: 'Limited Time Offer',
+          offerDescription: 'Special price for first customers',
+          endDate: '',
+          discountPercentage: ''
+        }
       });
     }
   }, [editProduct, isOpen]);
@@ -111,6 +138,26 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
 
   const handleHeroChange = (e) => {
     setFormData((prev) => ({ ...prev, isHero: e.target.checked }));
+  };
+
+  const handleLimitedOfferChange = (field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      limitedOffer: {
+        ...prev.limitedOffer,
+        [field]: value
+      }
+    }));
+  };
+
+  const calculateDiscountPercentage = () => {
+    if (formData.price && formData.limitedOffer.specialPrice) {
+      const originalPrice = parseFloat(formData.price);
+      const offerPrice = parseFloat(formData.limitedOffer.specialPrice);
+      const discount = ((originalPrice - offerPrice) / originalPrice) * 100;
+      return Math.round(discount);
+    }
+    return 0;
   };
 
   const handleVariantAdd = () => {
@@ -214,6 +261,15 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
         brand: formData.brand || '',
         isTrending: formData.isTrending,
         isHero: formData.isHero,
+        limitedOffer: {
+          isActive: formData.limitedOffer.isActive,
+          specialPrice: formData.limitedOffer.specialPrice ? parseFloat(formData.limitedOffer.specialPrice) : 0,
+          maxUnits: formData.limitedOffer.maxUnits ? parseInt(formData.limitedOffer.maxUnits) : 0,
+          offerTitle: formData.limitedOffer.offerTitle,
+          offerDescription: formData.limitedOffer.offerDescription,
+          endDate: formData.limitedOffer.endDate ? new Date(formData.limitedOffer.endDate) : null,
+          discountPercentage: calculateDiscountPercentage()
+        },
         variants: formData.variants.map((variant) => ({
           size: variant.size,
           color: {
@@ -413,6 +469,68 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
                   />
                   <span>Hero Section</span>
                 </label>
+              </div>
+
+              {/* Limited Offer Section */}
+              <div className="border rounded-lg p-4 bg-gray-50">
+                <h4 className="font-semibold mb-4 text-gray-800">Limited Time Offer</h4>
+                <div className="flex items-center gap-2 mb-4">
+                  <input
+                    type="checkbox"
+                    checked={formData.limitedOffer.isActive}
+                    onChange={(e) => handleLimitedOfferChange('isActive', e.target.checked)}
+                  />
+                  <span className="font-medium">Enable Limited Offer</span>
+                </div>
+                
+                {formData.limitedOffer.isActive && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      label="Offer Title"
+                      value={formData.limitedOffer.offerTitle}
+                      onChange={(e) => handleLimitedOfferChange('offerTitle', e.target.value)}
+                      placeholder="e.g., Flash Sale - First 100 Customers"
+                    />
+                    <Input
+                      label="Special Price"
+                      type="number"
+                      value={formData.limitedOffer.specialPrice}
+                      onChange={(e) => handleLimitedOfferChange('specialPrice', e.target.value)}
+                      placeholder="Offer price"
+                      min={0}
+                    />
+                    <Input
+                      label="Max Units for Offer"
+                      type="number"
+                      value={formData.limitedOffer.maxUnits}
+                      onChange={(e) => handleLimitedOfferChange('maxUnits', e.target.value)}
+                      placeholder="e.g., 100"
+                      min={1}
+                    />
+                    <Input
+                      label="Offer End Date"
+                      type="datetime-local"
+                      value={formData.limitedOffer.endDate}
+                      onChange={(e) => handleLimitedOfferChange('endDate', e.target.value)}
+                    />
+                    <div className="col-span-2">
+                      <Input
+                        label="Offer Description"
+                        value={formData.limitedOffer.offerDescription}
+                        onChange={(e) => handleLimitedOfferChange('offerDescription', e.target.value)}
+                        placeholder="Describe the offer for customers"
+                      />
+                    </div>
+                    {formData.price && formData.limitedOffer.specialPrice && (
+                      <div className="col-span-2 p-3 bg-green-100 rounded-lg">
+                        <p className="text-sm text-green-800">
+                          <strong>Discount:</strong> {calculateDiscountPercentage()}% OFF 
+                          (₹{formData.price} → ₹{formData.limitedOffer.specialPrice})
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               {/* Variants and Images logic remains same */}
               <div>

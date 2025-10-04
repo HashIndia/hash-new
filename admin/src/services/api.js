@@ -167,6 +167,7 @@ export const analyticsAPI = {
   getRevenueAnalytics: (params) => adminApi.get('/admin/analytics/revenue', { params }),
   getCustomerAnalytics: (params) => adminApi.get('/admin/analytics/customers', { params }),
   getProductAnalytics: (params) => adminApi.get('/admin/analytics/products', { params }),
+  getBrandSizeAnalytics: () => adminApi.get('/admin/analytics/brand-size'),
   getSalesData: (params) => adminApi.get('/admin/analytics/revenue', { params }),
 };
 

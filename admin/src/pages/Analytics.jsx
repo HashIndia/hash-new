@@ -12,6 +12,7 @@ import {
   Trash2,
   Save,
   X,
+  RefreshCw,
 } from "lucide-react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -380,11 +381,13 @@ const Analytics = () => {
     dashboardStats,
     revenueAnalytics,
     customerAnalytics,
+    brandSizeAnalytics,
     isLoading,
     error,
     initialize,
     loadRevenueAnalytics,
     loadCustomerAnalytics,
+    loadBrandSizeAnalytics,
   } = useAnalyticsStore();
 
   useEffect(() => {
@@ -401,12 +404,14 @@ const Analytics = () => {
       Promise.all([
         loadRevenueAnalytics(params),
         loadCustomerAnalytics(params),
+        loadBrandSizeAnalytics(),
       ]);
     }
   }, [
     dateRange,
     loadRevenueAnalytics,
     loadCustomerAnalytics,
+    loadBrandSizeAnalytics,
   ]);
 
   const orders = useOrderStore((state) => state.orders);
@@ -671,11 +676,108 @@ const Analytics = () => {
           </Card>
         </motion.div>
       </div>
-      <ManualVendorEntryTable
-        vendorEntries={vendorEntries}
-        setVendorEntries={setVendorEntries}
-        soldVariants={soldVariants}
-      />
+      {/* Real-time Brand & Size Analytics Table */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900">Brand & Size Analytics</h3>
+            <p className="text-sm text-gray-500 mt-1">
+              Real-time data from product inventory and customer orders
+            </p>
+          </div>
+          <Button
+            onClick={() => loadBrandSizeAnalytics()}
+            variant="outline"
+            size="sm"
+            disabled={isLoading}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
+        
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        ) : brandSizeAnalytics?.analytics ? (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-200 rounded-lg">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="border px-4 py-3 text-left text-sm font-semibold text-gray-900">
+                    Brand
+                  </th>
+                  <th className="border px-4 py-3 text-left text-sm font-semibold text-gray-900">
+                    Size
+                  </th>
+                  <th className="border px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                    Price/Unit
+                  </th>
+                  <th className="border px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                    Initial Stock
+                  </th>
+                  <th className="border px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                    Sold to Customer
+                  </th>
+                  <th className="border px-4 py-3 text-right text-sm font-semibold text-gray-900">
+                    Remaining Stock
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {brandSizeAnalytics.analytics.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="border px-4 py-8 text-center text-gray-500">
+                      No analytics data available. Add products to see analytics.
+                    </td>
+                  </tr>
+                ) : (
+                  brandSizeAnalytics.analytics.map((item, index) => (
+                    <tr key={index} className="hover:bg-gray-50">
+                      <td className="border px-4 py-3 text-sm font-medium text-gray-900">
+                        {item.brand}
+                      </td>
+                      <td className="border px-4 py-3 text-sm text-gray-900">
+                        {item.size}
+                      </td>
+                      <td className="border px-4 py-3 text-sm text-gray-900 text-right">
+                        ₹{item.pricePerUnit}
+                      </td>
+                      <td className="border px-4 py-3 text-sm text-gray-900 text-right">
+                        {item.boughtFromVendor}
+                      </td>
+                      <td className="border px-4 py-3 text-sm text-gray-900 text-right">
+                        <span className="text-green-600 font-medium">
+                          {item.soldToCustomer}
+                        </span>
+                      </td>
+                      <td className="border px-4 py-3 text-sm text-gray-900 text-right">
+                        <span className={`font-medium ${
+                          item.remainingStock <= 5 ? 'text-red-600' : 
+                          item.remainingStock <= 10 ? 'text-yellow-600' : 
+                          'text-green-600'
+                        }`}>
+                          {item.remainingStock}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            Failed to load analytics data. Please try again.
+          </div>
+        )}
+      </motion.div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <motion.div
           key="traffic-sources"

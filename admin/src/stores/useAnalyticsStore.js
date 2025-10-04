@@ -7,6 +7,7 @@ const useAnalyticsStore = create((set, get) => ({
   revenueAnalytics: null,
   customerAnalytics: null,
   productAnalytics: null,
+  brandSizeAnalytics: null,
   isLoading: false,
   error: null,
 
@@ -73,30 +74,30 @@ const useAnalyticsStore = create((set, get) => ({
 
   // Initialize store by loading all analytics data
 
-  loadSizeAnalytics: async () => {
+  loadBrandSizeAnalytics: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await analyticsAPI.getSizeAnalytics();
+      const response = await analyticsAPI.getBrandSizeAnalytics();
       set({
-        sizeAnalytics: response.data,
+        brandSizeAnalytics: response.data,
         isLoading: false
       });
     } catch (error) {
       const errorMessage = handleAPIError(error);
-      console.error('Failed to load size analytics:', error);
+      console.error('Failed to load brand size analytics:', error);
       set({ isLoading: false, error: errorMessage });
     }
   },
 
   // Initialize store by loading all analytics data
   initialize: async () => {
-    const { loadDashboardStats, loadRevenueAnalytics, loadCustomerAnalytics, loadProductAnalytics, loadSizeAnalytics } = get();
+    const { loadDashboardStats, loadRevenueAnalytics, loadCustomerAnalytics, loadProductAnalytics, loadBrandSizeAnalytics } = get();
     await Promise.all([
       loadDashboardStats(),
       loadRevenueAnalytics(),
       loadCustomerAnalytics(),
       loadProductAnalytics(),
-      loadSizeAnalytics() // <-- Added
+      loadBrandSizeAnalytics()
     ]);
   },
 
