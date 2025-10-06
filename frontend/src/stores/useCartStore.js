@@ -142,11 +142,18 @@ const useCartStore = create(
         return parseFloat(tax.toFixed(2));
       },
 
+      getDiscount: () => {
+        const total = get().getCartTotal();
+        const discount = Math.floor(total / 1000) * 100;
+        return parseFloat(discount.toFixed(2));
+      },
+
       getGrandTotal: () => {
         const subtotal = get().getCartTotal();
         const shipping = get().getShippingCost();
         const tax = get().getTax();
-        const total = subtotal + shipping + tax;
+        const discount = get().getDiscount();
+        const total = subtotal + shipping + tax - discount;
         return parseFloat(total.toFixed(2));
       },
 
@@ -204,4 +211,4 @@ const useCartStore = create(
   )
 );
 
-export default useCartStore; 
+export default useCartStore;

@@ -59,10 +59,7 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
     'beauty',
     'sports',
   ];
-  const availableSizes = [
-    'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL',
-    'OVER_SIZE'
-  ];
+  const availableSizes = ['s', 'm', 'l', 'xl', 'xxl', 'xxxl'];
 
   useEffect(() => {
     if (editProduct) {
@@ -396,12 +393,21 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
                   onChange={(e) => handleInputChange('sku', e.target.value)}
                   placeholder="SKU (auto-generated if empty)"
                 />
-                <Input
-                  label="Brand"
-                  value={formData.brand}
-                  onChange={(e) => handleInputChange('brand', e.target.value)}
-                  placeholder="Brand"
-                />
+                <Select
+                    value={formData.brand}
+                    onValueChange={(value) => handleInputChange('brand', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Brand" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {['Polo', 'Regular fit', 'Oversized tees', 'Vest', 'Hoodie', 'Varsity', 'Croptop'].map((brand) => (
+                        <SelectItem key={brand} value={brand}>
+                          {brand}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 <Select
                   value={formData.category}
                   onValueChange={(value) => handleInputChange('category', value)}

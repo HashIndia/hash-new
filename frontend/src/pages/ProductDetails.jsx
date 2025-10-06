@@ -15,6 +15,7 @@ import useCartStore from '../stores/useCartStore';
 import useUserStore from '../utils/useUserStore';
 import { authAPI } from '../services/api';
 import toast from 'react-hot-toast';
+import PoloVarsityForm from '@/components/PoloVarsityForm';
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -189,19 +190,19 @@ export default function ProductDetails() {
         toast.error('Please select a size');
         return;
       }
-      
+
       if (!selectedColor) {
         toast.error('Please select a color');
         return;
       }
-      
+
       // Check stock for selected variant
       const variantStock = getVariantStock(selectedSize, selectedColor);
       if (variantStock === 0) {
         toast.error('Selected combination is out of stock');
         return;
       }
-      
+
       if (quantity > variantStock) {
         toast.error(`Only ${variantStock} items available for this combination`);
         return;
@@ -211,12 +212,31 @@ export default function ProductDetails() {
       return;
     }
 
+    if (safeProduct.brand === 'Polo' || safeProduct.brand === 'Varsity') {
+      setShowPoloVarsityForm(true);
+    } else {
+      addToCart(safeProduct, quantity, {
+        size: selectedSize,
+        color: selectedColor,
+        variantId: selectedVariant?._id,
+      });
+      toast.success('Added to cart successfully!');
+    }
+  };
+
+  const handlePoloVarsityFormSubmit = (formData) => {
     addToCart(safeProduct, quantity, {
       size: selectedSize,
-      color: selectedColor
+      color: selectedColor,
+      variantId: selectedVariant?._id,
+      customFields: formData,
     });
+    toast.success('Product added to cart!');
+    setShowPoloVarsityForm(false);
+  };
 
-    toast.success('Added to cart successfully!');
+  const handlePoloVarsityFormCancel = () => {
+    setShowPoloVarsityForm(false);
   };
 
   const handleShare = async () => {
@@ -695,21 +715,12 @@ export default function ProductDetails() {
               </Button>
             </div>
 
-            {/* Features */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-border">
-              <div className="flex items-center gap-3">
-                <Truck className="h-5 w-5 text-hash-purple" />
-                <span className="text-sm text-muted-foreground">Free Shipping</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <ShieldCheck className="h-5 w-5 text-hash-purple" />
-                <span className="text-sm text-muted-foreground">Secure Payment</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <RotateCcw className="h-5 w-5 text-hash-purple" />
-                <span className="text-sm text-muted-foreground">Easy Returns</span>
-              </div>
-            </div>
+            {showPoloVarsityForm && (
+              <PoloVarsityForm
+                onSubmit={handlePoloVarsityFormSubmit}
+                onCancel={handlePoloVarsityFormCancel}
+              />
+            )}
           </div>
         </div>
 

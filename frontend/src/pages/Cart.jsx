@@ -18,7 +18,8 @@ export default function Cart() {
     getCartTotal,
     getShippingCost,
     getTax,
-    getGrandTotal
+    getGrandTotal,
+    getDiscount
   } = useCartStore();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -54,6 +55,7 @@ export default function Cart() {
   const subtotal = getCartTotal();
   const shipping = getShippingCost();
   const tax = getTax();
+  const discount = getDiscount();
   const total = getGrandTotal();
 
   const containerVariants = {
@@ -233,11 +235,23 @@ export default function Cart() {
                   <span>Gateway Charges (2%)</span>
                   <span>₹{Math.round(tax)}</span>
                 </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-green-600 font-semibold">
+                    <span>Discount</span>
+                    <span>-₹{Math.round(discount)}</span>
+                  </div>
+                )}
                 <hr className="border-neutral-200" />
                 <div className="flex justify-between text-xl font-bold text-neutral-900">
                   <span>Total</span>
                   <span>₹{Math.round(total)}</span>
                 </div>
+
+                {subtotal > 500 && discount === 0 && (
+                  <div className="text-red-500 text-sm mt-4">
+                    Spend ₹{1000 - subtotal} more to get ₹100 off, or ₹{2000 - subtotal} more to get ₹200 off!
+                  </div>
+                )}
                 
                 <div className="space-y-3 pt-4">
                   <Button asChild
