@@ -40,13 +40,16 @@ const processQueue = (error, token = null) => {
 
 // Request interceptor for Safari/iOS fallback
 adminApi.interceptors.request.use(
-  (config) => {
-    if (isSafariOrIOS() && adminAuthToken) {
+  async (config) => {
+    // Always attach the adminAuthToken if it exists
+    if (adminAuthToken) {
       config.headers.Authorization = `Bearer ${adminAuthToken}`;
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
 // Response interceptor with Safari/iOS token extraction

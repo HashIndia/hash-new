@@ -14,11 +14,17 @@ import {
 import { adminProductsAPI, uploadAPI } from '../services/api';
 import FileUpload from './FileUpload';
 import toast from 'react-hot-toast';
+import useProductStore from '../../../frontend/src/stores/useProductStore';
 
 const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }) => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // const availableSizes = ['s', 'm', 'l', 'xl', 'xxl', 'xxxl'];
+  // const availableColors = ['Red', 'Blue', 'Green', 'Black', 'White', 'Gray', 'Yellow', 'Purple', 'Pink', 'Orange'];
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -60,6 +66,7 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
     'sports',
   ];
   const availableSizes = ['s', 'm', 'l', 'xl', 'xxl', 'xxxl'];
+  const availableColors = ['Red', 'Blue', 'Green', 'Black', 'White', 'Gray', 'Yellow', 'Purple', 'Pink', 'Orange'];
 
   useEffect(() => {
     if (editProduct) {
@@ -213,6 +220,8 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    console.log('formData.name before validation:', formData.name); // Debugging line
+
     const totalStock = calculateTotalStock();
 
     if (!formData.name || !formData.price || !formData.category) {
@@ -235,27 +244,29 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
       let uploadedFiles = [];
 
       if (selectedFiles.length > 0) {
-        setUploading(true);
+        setIsUploading(true);
         try {
           const uploadResponse = await uploadAPI.uploadProductFiles(selectedFiles);
           uploadedFiles = uploadResponse.data.files;
           toast.success(`${uploadedFiles.length} files uploaded successfully`);
         } catch (uploadError) {
           toast.error('Failed to upload files');
-          setUploading(false);
+          setIsUploading(false);
           setLoading(false);
           return;
         }
-        setUploading(false);
+        setIsUploading(false);
       }
 
       const productData = {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
         price: parseFloat(formData.price),
-        discount: formData.discount ? parseFloat(formData.discount) : 0,
-        stock: formData.variants.length > 0 ? calculateTotalStock() : parseInt(formData.stock),
-        sku: formData.sku || `SKU-${Date.now()}`,
-        brand: formData.brand || '',
+        discount: parseFloat(formData.discount) || 0,
+        category: formData.category,
+        stock: totalStock,
+        sku: formData.sku || undefined,
+        brand: formData.brand,
         isTrending: formData.isTrending,
         isHero: formData.isHero,
         limitedOffer: {
@@ -267,39 +278,18 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
           endDate: formData.limitedOffer.endDate ? new Date(formData.limitedOffer.endDate) : null,
           discountPercentage: calculateDiscountPercentage()
         },
-        variants: formData.variants.map((variant) => ({
-          size: variant.size,
-          color: {
-            name: variant.color.name || '',
-            hex: variant.color.hex || '#000000'
-          },
-          stock: parseInt(variant.stock) || 0,
-          price: variant.price ? parseFloat(variant.price) : undefined,
-          sku: variant.sku || '',
-          brand: variant.brand || formData.brand || ''
+        variants: formData.variants.map(variant => ({
+          size: variant.size.toUpperCase(),
+          color: variant.color,
+          stock: parseInt(variant.stock),
+          price: parseFloat(variant.price),
+          sku: variant.sku || undefined,
+          images: variant.images || [],
         })),
-        images:
-          uploadedFiles.length > 0
-            ? uploadedFiles.map((file, index) => ({
-                url: file.url,
-                publicId: file.publicId,
-                alt: formData.name || '',
-                isPrimary: index === 0,
-                type: file.type,
-                format: file.format
-              }))
-            : formData.images.length > 0 && formData.images[0]
-            ? [
-                { url: formData.images[0], alt: formData.name || '', isPrimary: true }
-              ]
-            : [
-                {
-                  url: 'https://via.placeholder.com/400x500?text=No+Image',
-                  alt: 'Product image',
-                  isPrimary: true
-                }
-              ]
+        images: uploadedFiles.length > 0 ? uploadedFiles : formData.images,
       };
+
+      console.log('Product Data being sent:', productData); // Add this line
 
       let response;
       if (editProduct) {
@@ -313,6 +303,9 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
       if (onProductAdded) {
         onProductAdded(response.data?.product || response.data);
       }
+
+      // Refresh products in the frontend store
+      useProductStore.getState().loadProducts();
 
       handleClose();
     } catch (error) {
@@ -384,8 +377,7 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
                   label="Product Name"
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  required
-                  placeholder="Enter product name"
+                  placeholder="Product Name"
                 />
                 <Input
                   label="SKU"
@@ -467,15 +459,16 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
                   />
                   <span>Trending</span>
                 </label>
-                <label className="flex items-center gap-2">
+              </div>
+                {/* <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={formData.isHero}
                     onChange={handleHeroChange}
                   />
                   <span>Hero Section</span>
-                </label>
-              </div>
+                </label> */}
+              {/* </div> */}
 
               {/* Limited Offer Section */}
               <div className="border rounded-lg p-4 bg-gray-50">
