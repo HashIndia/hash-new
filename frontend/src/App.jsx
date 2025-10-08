@@ -34,7 +34,7 @@ import PrivateRoute from "./components/PrivateRoute";
 export default function App() {
   return (
     <HelmetProvider>
-      <div className="min-h-screen flex flex-col font-inter bg-background text-foreground dark">
+      <div className="min-h-screen flex flex-col font-inter bg-white text-black dark">
         <AuthInitializer />
         <BackgroundLoadingIndicator />
         <Toaster

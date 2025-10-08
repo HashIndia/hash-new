@@ -285,7 +285,7 @@ export default function Home() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-2 xl:grid-cols-4 gap-6 md:gap-8"
+            className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8"
           >
             {featuredTrending.map((product, index) => (
               <motion.div
@@ -294,8 +294,8 @@ export default function Home() {
                 whileHover={{ y: -8, scale: 1.02 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card className="group overflow-hidden bg-white border border-neutral-100 hover:border-black/10 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300">
-                  <div className="relative overflow-hidden bg-neutral-100">
+                <Card className="group overflow-hidden bg-white border border-neutral-100 hover:border-black/10 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+                  <div className="relative overflow-hidden bg-neutral-100 aspect-[3/4]">
                     <img
                       src={
                         product.img ||
@@ -304,86 +304,92 @@ export default function Home() {
                         "https://placehold.co/400x500/f8fafc/222?text=HASH+Product"
                       }
                       alt={product.name}
-                      className="w-full h-64 sm:h-72 md:h-80 object-cover transition-transform duration-500 group-hover:scale-105 brightness-110"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 brightness-110"
                     />
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300" />
-                    <div className="absolute top-4 right-4 space-y-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                    <div className="absolute top-3 right-3 space-y-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
                       <motion.button
-                        className="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-xl shadow flex items-center justify-center hover:bg-neutral-100 transition-colors border border-neutral-200"
+                        className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-lg shadow-md flex items-center justify-center hover:bg-white transition-colors border border-white/20"
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                       >
-                        <Heart className="w-5 h-5 text-neutral-700" />
+                        <Heart className="w-4 h-4 text-neutral-700" />
                       </motion.button>
                       <motion.button
-                        className="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-xl shadow flex items-center justify-center hover:bg-neutral-100 transition-colors border border-neutral-200"
+                        className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-lg shadow-md flex items-center justify-center hover:bg-white transition-colors border border-white/20"
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                       >
-                        <Eye className="w-5 h-5 text-neutral-700" />
+                        <Eye className="w-4 h-4 text-neutral-700" />
                       </motion.button>
                     </div>
                     {product.sale && (
-                      <div className="absolute top-4 left-4">
-                        <span className="bg-black text-white px-3 py-1 rounded-xl text-xs font-bold shadow">
-                          Sale
+                      <div className="absolute top-3 left-3">
+                        <span className="bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-md">
+                          SALE
                         </span>
                       </div>
                     )}
                   </div>
-                  <CardContent className="p-5 md:p-6">
-                    <h3 className="font-bold text-base sm:text-lg text-neutral-900 mb-2 sm:line-clamp-1">
+                  <CardContent className="p-4 flex-1 flex flex-col">
+                    <h3 className="font-bold text-sm lg:text-base text-neutral-900 mb-2 line-clamp-2 leading-tight">
                       {product.name}
                     </h3>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="text-xl font-bold text-neutral-900">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="text-lg font-bold text-neutral-900">
                         ₹{product.price}
                       </div>
                       {product.price && (
-                        <div className="text-base text-neutral-400 line-through">
-                          ₹{Math.round(product.price * 1.3)}
-                        </div>
-                      )}
-                      {product.price && (
-                        <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-1 rounded">
-                          {Math.round(
-                            ((product.price * 1.3 - product.price) /
-                              (product.price * 1.3)) *
-                              100
-                          )}
-                          % OFF
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-neutral-500 mb-4 sm:line-clamp-2">
-                      {product.description}
-                    </p>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex gap-2">
-                        {(product.sizes || product.sizes?.length > 0
-                          ? product.sizes
-                          : ["M", "L", "XL"]
-                        ).slice(0, 3).map((size) => (
-                          <span
-                            key={size}
-                            className="text-xs bg-neutral-100 text-neutral-700 px-3 py-1 rounded-lg font-medium"
-                          >
-                            {size}
+                        <>
+                          <div className="text-sm text-neutral-400 line-through">
+                            ₹{Math.round(product.price * 1.3)}
+                          </div>
+                          <span className="bg-green-100 text-green-700 text-xs font-semibold px-1.5 py-0.5 rounded">
+                            {Math.round(
+                              ((product.price * 1.3 - product.price) /
+                                (product.price * 1.3)) *
+                                100
+                            )}
+                            % OFF
                           </span>
-                        ))}
-                      </div>
-                      <div className="flex text-yellow-400">
-                        {[...Array(product.rating || 5)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-current" />
-                        ))}
-                      </div>
+                        </>
+                      )}
                     </div>
-                    <Button
-                      asChild
-                      className="w-full bg-black text-white py-3 rounded-xl font-semibold text-base shadow hover:bg-neutral-800 transition-all"
-                    >
-                      <Link to={`/product/${product._id}`}>View Details</Link>
-                    </Button>
+                    
+                    {/* Rating */}
+                    <div className="flex items-center gap-1 mb-3">
+                      <div className="flex text-yellow-400">
+                        {[...Array(Math.min(product.rating || 5, 5))].map((_, i) => (
+                          <Star key={i} className="w-3 h-3 fill-current" />
+                        ))}
+                      </div>
+                      <span className="text-xs text-neutral-500 ml-1">({product.rating || 5})</span>
+                    </div>
+
+                    {/* Sizes */}
+                    <div className="flex gap-1 mb-3">
+                      {(product.sizes || product.sizes?.length > 0
+                        ? product.sizes
+                        : ["M", "L", "XL"]
+                      ).slice(0, 4).map((size) => (
+                        <span
+                          key={size}
+                          className="text-xs bg-neutral-100 text-neutral-600 px-2 py-1 rounded font-medium"
+                        >
+                          {size}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* View Details Button */}
+                    <div className="mt-auto">
+                      <Button
+                        asChild
+                        className="w-full bg-black text-white py-2 rounded-lg font-semibold text-sm shadow hover:bg-neutral-800 transition-all"
+                      >
+                        <Link to={`/product/${product._id}`}>View Details</Link>
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -415,7 +421,7 @@ export default function Home() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-2 xl:grid-cols-4 gap-8"
+            className="grid grid-cols-2 lg:grid-cols-4 gap-8"
           >
             {stats.map((stat, index) => (
               <motion.div

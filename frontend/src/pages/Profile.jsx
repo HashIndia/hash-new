@@ -100,13 +100,13 @@ export default function Profile() {
 
   return (
     <motion.div 
-      className="min-h-screen bg-background py-8"
+      className="min-h-screen bg-white py-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
     >
       <div className="container mx-auto px-4">
-        <h1 className="text-4xl font-bold text-foreground mb-8 text-center font-space">My Profile</h1>
+        <h1 className="text-4xl font-bold text-black mb-8 text-center font-space">My Profile</h1>
 
         {(showAddressForm || editingAddress) && (
           <motion.div 
@@ -133,23 +133,23 @@ export default function Profile() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            <Card className="bg-card border border-border shadow-sm">
-              <CardHeader className="bg-card border-b border-border">
-                <CardTitle className="font-space text-foreground">My Details</CardTitle>
+            <Card className="bg-white border border-gray-200 shadow-sm">
+              <CardHeader className="bg-white border-b border-gray-200">
+                <CardTitle className="font-space text-black">My Details</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <strong className="text-foreground">Name:</strong> 
-                    <span className="text-muted-foreground">{user.name}</span>
+                    <strong className="text-black">Name:</strong> 
+                    <span className="text-black">{user.name}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <strong className="text-foreground">Email:</strong> 
-                    <span className="text-muted-foreground">{user.email}</span>
+                    <strong className="text-black">Email:</strong> 
+                    <span className="text-black">{user.email}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <strong className="text-foreground">Phone:</strong> 
-                    <span className="text-muted-foreground">{user.phone}</span>
+                    <strong className="text-black">Phone:</strong> 
+                    <span className="text-black">{user.phone}</span>
                   </div>
                 </div>
               </CardContent>
@@ -162,12 +162,12 @@ export default function Profile() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <Card className="bg-card border border-border shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between bg-card border-b border-border">
-                <CardTitle className="font-space text-foreground">My Addresses</CardTitle>
+            <Card className="bg-white border border-gray-200 shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between bg-white border-b border-gray-200">
+                <CardTitle className="font-space text-black">My Addresses</CardTitle>
                 <Button 
                   onClick={() => setShowAddressForm(true)}
-                  className="bg-hash-purple hover:bg-hash-purple/90 text-white"
+                  className="bg-black hover:bg-gray-800 text-white"
                 >
                   Add Address
                 </Button>
@@ -176,18 +176,18 @@ export default function Profile() {
                 {addresses.length > 0 ? (
                   <div className="space-y-4">
                     {addresses.map((addr) => (
-                      <div key={addr._id} className="border border-border rounded-lg p-4 bg-muted/30">
+                      <div key={addr._id} className="border border-neutral-200 rounded-lg p-4 bg-neutral-50">
                         <div className="flex justify-between items-start">
                           <div>
-                            <p className="font-medium text-foreground">{addr.name}</p>
-                            <p className="text-muted-foreground">
+                            <p className="font-medium text-black">{addr.name}</p>
+                            <p className="text-black">
                               {addr.line1}, {addr.line2 && `${addr.line2},`}{" "}
                               {addr.city}
                             </p>
-                            <p className="text-muted-foreground">
+                            <p className="text-black">
                               {addr.state} - {addr.pincode}
                             </p>
-                            <p className="text-muted-foreground">Phone: {addr.phone}</p>
+                            <p className="text-black">Phone: {addr.phone}</p>
                           </div>
                           <div className="flex gap-2">
                             <Button
@@ -211,7 +211,7 @@ export default function Profile() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground">No addresses found.</p>
+                  <p className="text-black">No addresses found.</p>
                 )}
               </CardContent>
             </Card>
@@ -223,21 +223,21 @@ export default function Profile() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <Card className="bg-card border border-border shadow-lg">
-                            <CardHeader className="bg-card border-b border-border">
-                <CardTitle className="text-foreground">Order History</CardTitle>
+            <Card className="bg-white border border-black shadow-lg">
+                            <CardHeader className="bg-white border-b border-black">
+                <CardTitle className="text-black">Order History</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 {orders.length > 0 ? (
                   <div className="space-y-4">
                     {orders.slice(0, 5).map((order) => (
-                      <div key={order._id} className="border border-border rounded-lg p-4 bg-card hover:bg-muted/30 transition-colors">
+                      <div key={order._id} className="border border-black rounded-lg p-4 bg-white hover:bg-muted/30 transition-colors">
                         <div className="flex justify-between items-start mb-3">
                           <div>
-                            <h4 className="font-semibold text-foreground text-lg">
+                            <h4 className="font-semibold text-black text-lg">
                               Order #{order.orderNumber}
                             </h4>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-black">
                               {new Date(order.createdAt).toLocaleDateString('en-IN', {
                                 year: 'numeric',
                                 month: 'long',
@@ -263,26 +263,26 @@ export default function Profile() {
                         
                         {/* Order Items */}
                         {order.items && order.items.length > 0 && (
-                          <div className="mt-3 pt-3 border-t border-border">
-                            <p className="text-sm font-medium text-foreground mb-2">Items:</p>
+                          <div className="mt-3 pt-3 border-t border-black">
+                            <p className="text-sm font-medium text-black mb-2">Items:</p>
                             <div className="space-y-2">
                               {order.items.slice(0, 3).map((item, index) => (
                                 <div key={index} className="flex justify-between items-center text-sm">
                                   <div className="flex-1">
-                                    <span className="text-foreground">{item.name || 'Product'}</span>
+                                    <span className="text-black">{item.name || 'Product'}</span>
                                     {item.size && item.color && (
-                                      <span className="text-muted-foreground ml-2">
+                                      <span className="text-black ml-2">
                                         ({item.size}, {item.color})
                                       </span>
                                     )}
                                   </div>
-                                  <span className="text-muted-foreground">
+                                  <span className="text-black">
                                     Qty: {item.quantity} × ₹{item.price}
                                   </span>
                                 </div>
                               ))}
                               {order.items.length > 3 && (
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-xs text-black">
                                   +{order.items.length - 3} more items
                                 </p>
                               )}
@@ -292,9 +292,9 @@ export default function Profile() {
                         
                         {/* Shipping Address */}
                         {order.shippingAddress && (
-                          <div className="mt-3 pt-3 border-t border-border">
-                            <p className="text-sm font-medium text-foreground mb-1">Shipping Address:</p>
-                            <p className="text-sm text-muted-foreground">
+                          <div className="mt-3 pt-3 border-t border-black">
+                            <p className="text-sm font-medium text-black mb-1">Shipping Address:</p>
+                            <p className="text-sm text-black">
                               {order.shippingAddress.name}, {order.shippingAddress.line1}
                               {order.shippingAddress.city && `, ${order.shippingAddress.city}`}
                               {order.shippingAddress.state && ` - ${order.shippingAddress.state}`}
@@ -307,7 +307,7 @@ export default function Profile() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-muted-foreground mb-4">No orders found.</p>
+                    <p className="text-black mb-4">No orders found.</p>
                     <Button 
                       onClick={() => window.location.href = '/shop'}
                       className="bg-hash-purple hover:bg-hash-purple/90 text-white"

@@ -25,7 +25,7 @@ export default function CartPageSkeleton() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-6 md:py-8">
+    <div className="min-h-screen bg-white py-6 md:py-8">
       <div className="container mx-auto px-4 md:px-6">
         {/* Title Skeleton */}
         <motion.div
@@ -49,7 +49,7 @@ export default function CartPageSkeleton() {
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className="bg-card rounded-2xl shadow-lg overflow-hidden border border-border"
+                className="bg-white rounded-2xl shadow-lg overflow-hidden border border-black"
               >
                 <div className="p-4 md:p-6">
                   <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
@@ -104,7 +104,7 @@ export default function CartPageSkeleton() {
 
           {/* Order Summary Skeleton */}
           <motion.div variants={itemVariants}>
-            <Card className="bg-card shadow-lg rounded-2xl overflow-hidden sticky top-4 border border-border">
+            <Card className="bg-white shadow-lg rounded-2xl overflow-hidden sticky top-4 border border-black">
               <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600">
                 <CardTitle className="text-xl font-space">
                   <div className="h-6 bg-white/30 rounded w-32 animate-pulse shadow-sm"></div>

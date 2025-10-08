@@ -99,15 +99,15 @@ export default function ReviewModal({ isOpen, onClose, product, orderId, onRevie
               }}
             />
             <div className="min-w-0 flex-1">
-              <h4 className="font-medium text-foreground text-sm sm:text-base truncate">{product?.name || "Product"}</h4>
-              <p className="text-xs sm:text-sm text-muted-foreground">Rate your experience</p>
+              <h4 className="font-medium text-black text-sm sm:text-base truncate">{product?.name || "Product"}</h4>
+              <p className="text-xs sm:text-sm text-black">Rate your experience</p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             {/* Star Rating */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-medium text-black mb-2">
                 Rating *
               </label>
               <div className="flex items-center gap-1">
@@ -129,7 +129,7 @@ export default function ReviewModal({ isOpen, onClose, product, orderId, onRevie
                     />
                   </button>
                 ))}
-                <span className="ml-2 text-xs sm:text-sm text-muted-foreground">
+                <span className="ml-2 text-xs sm:text-sm text-black">
                   {rating > 0 && (
                     <>
                       {rating} star{rating !== 1 ? "s" : ""} - {
@@ -146,7 +146,7 @@ export default function ReviewModal({ isOpen, onClose, product, orderId, onRevie
 
             {/* Review Title */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-medium text-black mb-2">
                 Review Title *
               </label>
               <Input
@@ -157,14 +157,14 @@ export default function ReviewModal({ isOpen, onClose, product, orderId, onRevie
                 maxLength={100}
                 className="text-sm sm:text-base"
               />
-              <div className="text-xs text-muted-foreground mt-1 text-right">
+              <div className="text-xs text-black mt-1 text-right">
                 {title.length}/100 characters
               </div>
             </div>
 
             {/* Review Text */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-medium text-black mb-2">
                 Your Review *
               </label>
               <Textarea
@@ -175,7 +175,7 @@ export default function ReviewModal({ isOpen, onClose, product, orderId, onRevie
                 className="resize-none text-sm sm:text-base"
                 maxLength={500}
               />
-              <div className="text-xs text-muted-foreground mt-1 text-right">
+              <div className="text-xs text-black mt-1 text-right">
                 {comment.length}/500 characters
               </div>
             </div>

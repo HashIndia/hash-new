@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 
 const FilterSkeleton = () => (
-  <div className="bg-card rounded-xl border border-border p-6 animate-pulse">
+  <div className="bg-white rounded-xl border border-black p-6 animate-pulse">
     <div className="bg-gray-200 h-6 rounded w-24 mb-4"></div>
     <div className="space-y-3">
       {[...Array(5)].map((_, i) => (
@@ -22,7 +22,7 @@ const ProductGridSkeleton = () => (
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.05 }}
-        className="bg-card rounded-2xl shadow-sm border border-border p-4 animate-pulse overflow-hidden"
+        className="bg-white rounded-2xl shadow-sm border border-black p-4 animate-pulse overflow-hidden"
       >
         <div className="bg-gray-200 h-48 rounded-xl mb-4"></div>
         <div className="space-y-3">
@@ -37,7 +37,7 @@ const ProductGridSkeleton = () => (
 );
 
 const SearchBarSkeleton = () => (
-  <div className="bg-card rounded-xl border border-border p-4 animate-pulse">
+  <div className="bg-white rounded-xl border border-black p-4 animate-pulse">
     <div className="flex items-center space-x-4">
       <div className="bg-gray-200 h-10 rounded-lg flex-1"></div>
       <div className="bg-gray-200 h-10 w-24 rounded-lg"></div>
@@ -60,7 +60,7 @@ export default function ShopPageSkeleton() {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-background"
+      className="min-h-screen bg-white"
     >
       {/* Hero Section Skeleton */}
       <section className="bg-hash-purple text-white py-16 relative overflow-hidden">
@@ -77,7 +77,7 @@ export default function ShopPageSkeleton() {
       </section>
 
       {/* Search & Filters Section - Top Layout */}
-      <section className="bg-card border-b border-border md:sticky md:top-16 md:z-40 md:backdrop-blur-sm">
+      <section className="bg-white border-b border-black md:sticky md:top-16 md:z-40 md:backdrop-blur-sm">
         <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
           <div className="flex flex-col gap-4">
             {/* Search Bar */}

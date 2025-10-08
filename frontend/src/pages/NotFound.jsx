@@ -5,7 +5,7 @@ import { Home, Search, ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-white flex items-center justify-center relative overflow-hidden">
       <SEO 
         title="Page Not Found - HASH India"
         description="The page you're looking for doesn't exist. Browse our premium fashion collection or return to HASH India homepage."
@@ -43,10 +43,10 @@ export default function NotFound() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.6 }}
           >
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4 font-space">
+            <h2 className="text-2xl md:text-3xl font-bold text-black mb-4 font-space">
               Oops! Page Not Found
             </h2>
-            <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
+            <p className="text-lg text-black mb-8 max-w-md mx-auto">
               The page you're looking for doesn't exist or has been moved. Let's get you back on track!
             </p>
           </motion.div>

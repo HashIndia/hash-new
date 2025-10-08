@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 
 const ProductCardSkeleton = () => (
-  <div className="bg-card rounded-2xl shadow-sm border border-border p-3 animate-pulse overflow-hidden">
+  <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-3 animate-pulse overflow-hidden">
     <div className="bg-gray-200 h-32 rounded-xl mb-3"></div>
     <div className="space-y-2">
       <div className="bg-gray-200 h-4 rounded w-3/4"></div>
@@ -13,7 +13,7 @@ const ProductCardSkeleton = () => (
 );
 
 const HeroSkeleton = () => (
-  <section className="relative bg-background border-b border-border overflow-hidden">
+  <section className="relative bg-white border-b border-neutral-200 overflow-hidden">
     <div className="container mx-auto px-4 sm:px-6 pt-4 sm:pt-8 pb-8 sm:pb-16 relative z-10">
       <div className="lg:hidden">
         {/* Mobile layout skeleton */}
@@ -48,13 +48,13 @@ export default function HomePageSkeleton() {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-background"
+      className="min-h-screen bg-white"
     >
       {/* Hero Section Skeleton */}
       <HeroSkeleton />
 
       {/* Featured Products Section Skeleton */}
-      <section className="py-12 bg-background relative overflow-hidden">
+      <section className="py-12 bg-white relative overflow-hidden">
         <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-10">
             <div className="bg-gray-200 h-10 rounded w-64 mx-auto mb-4 animate-pulse"></div>

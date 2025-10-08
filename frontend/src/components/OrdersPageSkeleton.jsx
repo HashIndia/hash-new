@@ -25,7 +25,7 @@ export default function OrdersPageSkeleton() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-6 md:py-8">
+    <div className="min-h-screen bg-white py-6 md:py-8">
       <div className="container mx-auto px-4 md:px-6">
         {/* Title Skeleton */}
         <motion.div
@@ -46,8 +46,8 @@ export default function OrdersPageSkeleton() {
           {/* Order Cards Skeleton */}
           {[1, 2, 3].map((orderIndex) => (
             <motion.div key={orderIndex} variants={itemVariants}>
-              <Card className="border border-border shadow-lg rounded-2xl overflow-hidden">
-                <CardHeader className="bg-card border-b border-border">
+              <Card className="border border-black shadow-lg rounded-2xl overflow-hidden">
+                <CardHeader className="bg-white border-b border-black">
                   <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
                     <div className="space-y-2">
                       {/* Order ID */}
@@ -106,7 +106,7 @@ export default function OrdersPageSkeleton() {
                   </div>
                   
                   {/* Order Summary */}
-                  <div className="border-t border-border pt-4">
+                  <div className="border-t border-black pt-4">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="space-y-1">
                         <div className="h-3 bg-slate-400 rounded w-12 animate-pulse shadow-sm"></div>

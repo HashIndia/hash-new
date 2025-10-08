@@ -3,8 +3,9 @@ import { Star, ThumbsUp, User, Calendar } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { reviewsAPI } from '../services/api';
+import toast from 'react-hot-toast';
 
-const ReviewsList = ({ productId, onReviewsLoaded }) => {
+const ReviewsList = ({ productId, onReviewsLoaded, userHasReviewed = false }) => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -88,10 +89,10 @@ const ReviewsList = ({ productId, onReviewsLoaded }) => {
     );
   }
 
-  if (reviews.length === 0) {
+  if (reviews.length === 0 && !userHasReviewed) {
     return (
       <Card className="p-8 text-center">
-        <div className="text-muted-foreground">
+        <div className="text-black">
           <User className="w-12 h-12 mx-auto mb-4 opacity-50" />
           <h3 className="text-lg font-medium mb-2">No Reviews Yet</h3>
           <p className="text-sm">Be the first to review this product!</p>
@@ -104,13 +105,13 @@ const ReviewsList = ({ productId, onReviewsLoaded }) => {
     <div className="space-y-6">
       {/* Sort Options */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <h3 className="text-lg font-semibold text-foreground">
+        <h3 className="text-lg font-semibold text-black">
           Customer Reviews ({reviews.length})
         </h3>
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm w-full sm:w-auto"
+          className="px-3 py-2 border border-black rounded-md bg-white text-black text-sm w-full sm:w-auto"
         >
           <option value="-createdAt">Newest First</option>
           <option value="createdAt">Oldest First</option>
@@ -135,12 +136,12 @@ const ReviewsList = ({ productId, onReviewsLoaded }) => {
                 <div className="space-y-2 sm:space-y-0">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                     <div className="flex-1">
-                      <h4 className="font-medium text-foreground text-sm sm:text-base">
+                      <h4 className="font-medium text-black text-sm sm:text-base">
                         {review.user?.name || 'Anonymous'}
                       </h4>
                       <div className="flex flex-wrap items-center gap-2 mt-1">
                         <StarRating rating={review.rating} />
-                        <span className="text-xs sm:text-sm text-muted-foreground">
+                        <span className="text-xs sm:text-sm text-black">
                           {review.rating}/5
                         </span>
                         {review.isVerifiedPurchase && (
@@ -150,7 +151,7 @@ const ReviewsList = ({ productId, onReviewsLoaded }) => {
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
+                    <div className="flex items-center text-xs sm:text-sm text-black">
                       <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                       {formatDate(review.createdAt)}
                     </div>
@@ -158,12 +159,12 @@ const ReviewsList = ({ productId, onReviewsLoaded }) => {
                 </div>
 
                 {/* Review Title */}
-                <h5 className="font-medium text-foreground mb-2 text-sm sm:text-base mt-3 sm:mt-2">
+                <h5 className="font-medium text-black mb-2 text-sm sm:text-base mt-3 sm:mt-2">
                   {review.title}
                 </h5>
 
                 {/* Review Comment */}
-                <p className="text-muted-foreground text-sm leading-relaxed mb-3">
+                <p className="text-black text-sm leading-relaxed mb-3">
                   {review.comment}
                 </p>
 
@@ -175,7 +176,7 @@ const ReviewsList = ({ productId, onReviewsLoaded }) => {
                         key={index}
                         src={image.url}
                         alt={image.alt || 'Review image'}
-                        className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg border border-border"
+                        className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg border border-black"
                       />
                     ))}
                   </div>
@@ -183,7 +184,7 @@ const ReviewsList = ({ productId, onReviewsLoaded }) => {
 
                 {/* Helpful Button */}
                 <div className="flex items-center space-x-4">
-                  <button className="flex items-center space-x-1 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <button className="flex items-center space-x-1 text-xs sm:text-sm text-black hover:text-black transition-colors">
                     <ThumbsUp className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span>Helpful</span>
                     {review.helpfulCount > 0 && (
@@ -232,6 +233,41 @@ const ReviewsList = ({ productId, onReviewsLoaded }) => {
           </Button>
         </div>
       )}
+      
+      {/* Review Submission Info */}
+      <div className="mt-6 p-6 bg-white rounded-2xl border border-neutral-200 shadow-md">
+        <h4 className="font-semibold text-black mb-3 text-lg">Want to write a review?</h4>
+        <p className="text-sm text-neutral-600 mb-4">
+          To maintain review authenticity, you can only review products you've purchased. 
+          Complete your order and you'll be able to share your experience!
+        </p>
+        <div className="flex items-center gap-3 mb-4">
+          <span className="text-sm font-medium text-black">Rate this product:</span>
+          <div className="flex">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                className="w-6 h-6 text-neutral-300 hover:text-yellow-400 cursor-pointer transition-all duration-200 transform hover:scale-110"
+                onClick={() => {
+                  toast.error('Please purchase this product first to leave a review', {
+                    duration: 3000,
+                    style: {
+                      background: '#fee2e2',
+                      color: '#dc2626',
+                      border: '1px solid #fca5a5'
+                    }
+                  });
+                }}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+          <p className="text-xs text-neutral-600 text-center">
+            💡 Purchase this product to unlock the ability to write detailed reviews and help other customers!
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

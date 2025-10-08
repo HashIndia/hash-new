@@ -61,7 +61,7 @@ const NotificationCenter = ({ isOpen, onClose }) => {
       case 'wishlist': return 'text-hash-pink';
       case 'cart': return 'text-hash-green';
       case 'account': return 'text-hash-purple';
-      default: return 'text-muted-foreground';
+      default: return 'text-black';
     }
   };
 
@@ -99,10 +99,10 @@ const NotificationCenter = ({ isOpen, onClose }) => {
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
             className="absolute right-0 top-12 w-80 z-50"
           >
-            <Card className="shadow-lg bg-card/90 backdrop-blur-sm border border-border">
+            <Card className="shadow-lg bg-white/90 backdrop-blur-sm border border-black">
               <CardContent className="p-0">
                 {/* Header */}
-                <div className="p-4 border-b border-border flex justify-between items-center bg-hash-purple text-white rounded-t-lg">
+                <div className="p-4 border-b border-black flex justify-between items-center bg-hash-purple text-white rounded-t-lg">
                   <h3 className="font-semibold font-space">Notifications</h3>
                   <div className="flex items-center gap-2">
                     {unreadCount > 0 && (
@@ -129,8 +129,8 @@ const NotificationCenter = ({ isOpen, onClose }) => {
                 {/* Notifications List */}
                 <div className="max-h-96 overflow-y-auto">
                   {notifications.length === 0 ? (
-                    <div className="p-8 text-center text-muted-foreground">
-                      <Package className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
+                    <div className="p-8 text-center text-black">
+                      <Package className="w-12 h-12 mx-auto mb-3 text-black/50" />
                       <p>No notifications yet</p>
                       <p className="text-xs mt-1">We'll notify you about order updates</p>
                     </div>
@@ -142,7 +142,7 @@ const NotificationCenter = ({ isOpen, onClose }) => {
                           key={notification.id}
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className={`p-4 border-b border-border hover:bg-accent/50 transition-colors ${
+                          className={`p-4 border-b border-black hover:bg-accent/50 transition-colors ${
                             !notification.read ? 'bg-hash-purple/5' : ''
                           }`}
                         >
@@ -152,21 +152,21 @@ const NotificationCenter = ({ isOpen, onClose }) => {
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex justify-between items-start">
-                                <h4 className={`text-sm font-medium ${!notification.read ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                <h4 className={`text-sm font-medium ${!notification.read ? 'text-black' : 'text-black'}`}>
                                   {notification.title}
                                 </h4>
                                 <button
                                   onClick={() => removeNotification(notification.id)}
-                                  className="text-muted-foreground hover:text-foreground ml-2"
+                                  className="text-black hover:text-black ml-2"
                                 >
                                   <X className="w-4 h-4" />
                                 </button>
                               </div>
-                              <p className="text-sm text-muted-foreground mt-1">
+                              <p className="text-sm text-black mt-1">
                                 {notification.message}
                               </p>
                               <div className="flex justify-between items-center mt-2">
-                                <span className="text-xs text-muted-foreground">
+                                <span className="text-xs text-black">
                                   {formatTimeAgo(notification.timestamp)}
                                 </span>
                                 {!notification.read && (

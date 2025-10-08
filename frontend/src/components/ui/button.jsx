@@ -13,9 +13,9 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg hover:shadow-xl",
         outline:
-          "border-2 border-hash-purple/30 bg-card/50 backdrop-blur-sm hover:bg-hash-purple/10 hover:border-hash-purple text-foreground hover:text-hash-purple shadow-md hover:shadow-lg hover:shadow-hash-purple/20",
+          "border-2 border-hash-purple/30 bg-white/50 backdrop-blur-sm hover:bg-hash-purple/10 hover:border-hash-purple text-black hover:text-hash-purple shadow-md hover:shadow-lg hover:shadow-hash-purple/20",
         secondary:
-          "bg-card/50 backdrop-blur-sm text-foreground hover:bg-hash-blue/10 hover:text-hash-blue border border-border hover:border-hash-blue/30 shadow-md hover:shadow-lg",
+          "bg-white/50 backdrop-blur-sm text-black hover:bg-hash-blue/10 hover:text-hash-blue border border-black hover:border-hash-blue/30 shadow-md hover:shadow-lg",
         ghost: "hover:bg-hash-purple/10 hover:text-hash-purple transition-colors",
         link: "text-primary underline-offset-4 hover:underline",
       },

@@ -128,7 +128,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
         transition={{ duration: 0.3 }}
         whileHover={{ y: -2 }}
       >
-        <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 bg-card border border-border rounded-2xl">
+        <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 bg-white border border-black rounded-2xl">
           <div className="flex">
             <div className="relative w-48 h-48 flex-shrink-0 overflow-hidden">
               <motion.img
@@ -327,7 +327,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
       transition={{ duration: 0.3 }}
       whileHover={{ y: -8 }}
     >
-      <Card className="group overflow-hidden hover:shadow-2xl hover:shadow-hash-purple/20 transition-all duration-300 bg-card border border-border hover:border-hash-purple/30 rounded-2xl">
+      <Card className="group overflow-hidden hover:shadow-2xl hover:shadow-hash-purple/20 transition-all duration-300 bg-white border border-black hover:border-hash-purple/30 rounded-2xl">
         <div className="relative overflow-hidden">
           <Link to={`/product/${product._id}`}>
             <motion.img
@@ -348,7 +348,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
               className={`w-12 h-12 rounded-xl shadow-lg flex items-center justify-center transition-all ${
                 isWishlisted 
                   ? 'bg-hash-pink/20 text-hash-pink border border-hash-pink/30' 
-                  : 'bg-card hover:bg-hash-purple/10 text-foreground hover:text-hash-purple'
+                  : 'bg-white hover:bg-hash-purple/10 text-black hover:text-hash-purple'
               }`}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -357,9 +357,9 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
             </motion.button>
             <Link 
               to={`/product/${product._id}`}
-              className="w-12 h-12 bg-card/80 backdrop-blur-sm rounded-xl shadow-lg flex items-center justify-center hover:bg-hash-purple/20 transition-colors group/btn border border-border"
+              className="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg flex items-center justify-center hover:bg-hash-purple/20 transition-colors group/btn border border-black"
             >
-              <Eye className="w-5 h-5 text-foreground group-hover/btn:text-hash-purple" />
+              <Eye className="w-5 h-5 text-black group-hover/btn:text-hash-purple" />
             </Link>
           </div>
 

@@ -91,9 +91,9 @@ export default function Shipping() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       {/* Header Section */}
-      <div className="bg-background text-foreground border-b border-border py-16">
+      <div className="bg-white text-black border-b border-black py-16">
         <motion.div 
           className="container mx-auto px-6 max-w-4xl text-center"
           variants={containerVariants}
@@ -102,7 +102,7 @@ export default function Shipping() {
         >
           <motion.div variants={itemVariants}>
             <h1 className="text-3xl md:text-4xl font-light mb-4">Shipping & Delivery</h1>
-            <p className="text-muted-foreground">Fast, reliable delivery to your doorstep</p>
+            <p className="text-black">Fast, reliable delivery to your doorstep</p>
           </motion.div>
         </motion.div>
       </div>
@@ -116,16 +116,16 @@ export default function Shipping() {
       >
         {/* Shipping Options */}
         <motion.div variants={itemVariants} className="mb-16">
-          <h2 className="text-3xl font-semibold text-foreground mb-8 text-center">Shipping Options</h2>
+          <h2 className="text-3xl font-semibold text-black mb-8 text-center">Shipping Options</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {shippingOptions.map((option, index) => (
-              <Card key={index} className="border border-border shadow-sm hover:shadow-md transition-shadow">
+              <Card key={index} className="border border-black shadow-sm hover:shadow-md transition-shadow">
                 <CardContent className="p-6 text-center">
-                  <option.icon className="w-12 h-12 text-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">{option.title}</h3>
+                  <option.icon className="w-12 h-12 text-black mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-black mb-2">{option.title}</h3>
                   <p className="text-hash-purple font-medium mb-2">{option.time}</p>
-                  <p className="text-foreground font-medium mb-3">{option.cost}</p>
-                  <p className="text-muted-foreground text-sm">{option.description}</p>
+                  <p className="text-black font-medium mb-3">{option.cost}</p>
+                  <p className="text-black text-sm">{option.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -134,24 +134,24 @@ export default function Shipping() {
 
         {/* Delivery Zones */}
         <motion.div variants={itemVariants} className="mb-16">
-          <Card className="border border-border shadow-sm">
+          <Card className="border border-black shadow-sm">
             <CardContent className="p-8 md:p-12">
-              <h2 className="text-3xl font-semibold text-foreground mb-8 text-center">Delivery Zones & Timeline</h2>
+              <h2 className="text-3xl font-semibold text-black mb-8 text-center">Delivery Zones & Timeline</h2>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="border-b border-border">
-                      <th className="text-left py-4 px-4 text-foreground font-semibold">Delivery Zone</th>
-                      <th className="text-left py-4 px-4 text-foreground font-semibold">Locations</th>
-                      <th className="text-center py-4 px-4 text-foreground font-semibold">Standard</th>
-                      <th className="text-center py-4 px-4 text-foreground font-semibold">Express</th>
+                    <tr className="border-b border-black">
+                      <th className="text-left py-4 px-4 text-black font-semibold">Delivery Zone</th>
+                      <th className="text-left py-4 px-4 text-black font-semibold">Locations</th>
+                      <th className="text-center py-4 px-4 text-black font-semibold">Standard</th>
+                      <th className="text-center py-4 px-4 text-black font-semibold">Express</th>
                     </tr>
                   </thead>
                   <tbody>
                     {zones.map((zone, index) => (
-                      <tr key={index} className="border-b border-border">
-                        <td className="py-4 px-4 font-medium text-foreground">{zone.zone}</td>
-                        <td className="py-4 px-4 text-foreground">{zone.cities}</td>
+                      <tr key={index} className="border-b border-black">
+                        <td className="py-4 px-4 font-medium text-black">{zone.zone}</td>
+                        <td className="py-4 px-4 text-black">{zone.cities}</td>
                         <td className="py-4 px-4 text-center text-green-600 font-medium">{zone.standard}</td>
                         <td className="py-4 px-4 text-center text-blue-600 font-medium">{zone.express}</td>
                       </tr>
@@ -167,59 +167,59 @@ export default function Shipping() {
         <motion.div variants={itemVariants} className="mb-16">
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Domestic Shipping */}
-            <Card className="border border-border shadow-sm">
+            <Card className="border border-black shadow-sm">
               <CardContent className="p-8">
                 <div className="flex items-center mb-6">
-                  <MapPin className="w-6 h-6 text-foreground mr-3" />
-                  <h3 className="text-2xl font-semibold text-foreground">Domestic Shipping</h3>
+                  <MapPin className="w-6 h-6 text-black mr-3" />
+                  <h3 className="text-2xl font-semibold text-black">Domestic Shipping</h3>
                 </div>
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center py-3 border-b border-border">
-                    <span className="text-foreground">Orders below ₹999</span>
-                    <span className="font-medium text-foreground">₹99</span>
+                  <div className="flex justify-between items-center py-3 border-b border-black">
+                    <span className="text-black">Orders below ₹999</span>
+                    <span className="font-medium text-black">₹99</span>
                   </div>
-                  <div className="flex justify-between items-center py-3 border-b border-border">
-                    <span className="text-foreground">Orders ₹999 & above</span>
+                  <div className="flex justify-between items-center py-3 border-b border-black">
+                    <span className="text-black">Orders ₹999 & above</span>
                     <span className="font-medium text-green-600">FREE</span>
                   </div>
-                  <div className="flex justify-between items-center py-3 border-b border-border">
-                    <span className="text-foreground">Express Shipping</span>
-                    <span className="font-medium text-foreground">₹199</span>
+                  <div className="flex justify-between items-center py-3 border-b border-black">
+                    <span className="text-black">Express Shipping</span>
+                    <span className="font-medium text-black">₹199</span>
                   </div>
                   <div className="flex justify-between items-center py-3">
-                    <span className="text-foreground">Same Day Delivery</span>
-                    <span className="font-medium text-foreground">₹399</span>
+                    <span className="text-black">Same Day Delivery</span>
+                    <span className="font-medium text-black">₹399</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* International Shipping */}
-            <Card className="border border-border shadow-sm">
+            <Card className="border border-black shadow-sm">
               <CardContent className="p-8">
                 <div className="flex items-center mb-6">
-                  <Globe className="w-6 h-6 text-foreground mr-3" />
-                  <h3 className="text-2xl font-semibold text-foreground">International Shipping</h3>
+                  <Globe className="w-6 h-6 text-black mr-3" />
+                  <h3 className="text-2xl font-semibold text-black">International Shipping</h3>
                 </div>
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center py-3 border-b border-border">
-                    <span className="text-foreground">Asia Pacific</span>
-                    <span className="font-medium text-foreground">₹1,999</span>
+                  <div className="flex justify-between items-center py-3 border-b border-black">
+                    <span className="text-black">Asia Pacific</span>
+                    <span className="font-medium text-black">₹1,999</span>
                   </div>
-                  <div className="flex justify-between items-center py-3 border-b border-border">
-                    <span className="text-foreground">Europe & UK</span>
-                    <span className="font-medium text-foreground">₹2,499</span>
+                  <div className="flex justify-between items-center py-3 border-b border-black">
+                    <span className="text-black">Europe & UK</span>
+                    <span className="font-medium text-black">₹2,499</span>
                   </div>
-                  <div className="flex justify-between items-center py-3 border-b border-border">
-                    <span className="text-foreground">North America</span>
-                    <span className="font-medium text-foreground">₹2,999</span>
+                  <div className="flex justify-between items-center py-3 border-b border-black">
+                    <span className="text-black">North America</span>
+                    <span className="font-medium text-black">₹2,999</span>
                   </div>
                   <div className="flex justify-between items-center py-3">
-                    <span className="text-foreground">Other Countries</span>
-                    <span className="font-medium text-foreground">₹3,499</span>
+                    <span className="text-black">Other Countries</span>
+                    <span className="font-medium text-black">₹3,499</span>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground mt-4">
+                <p className="text-sm text-black mt-4">
                   * Customs duties and taxes are additional and paid by recipient
                 </p>
               </CardContent>
@@ -229,28 +229,28 @@ export default function Shipping() {
 
         {/* Order Tracking */}
         <motion.div variants={itemVariants} className="mb-16">
-          <Card className="border border-border shadow-sm">
+          <Card className="border border-black shadow-sm">
             <CardContent className="p-8 md:p-12">
-              <h2 className="text-3xl font-semibold text-foreground mb-8 text-center">Order Tracking</h2>
+              <h2 className="text-3xl font-semibold text-black mb-8 text-center">Order Tracking</h2>
               <div className="max-w-4xl mx-auto">
                 <div className="grid md:grid-cols-4 gap-6">
                   {trackingSteps.map((step, index) => (
                     <div key={index} className="text-center">
                       <div className="relative">
-                        <div className="w-12 h-12 bg-gradient-to-br from-hash-dark via-background to-card text-foreground border-b border-border rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-hash-dark via-background to-card text-black border-b border-black rounded-full flex items-center justify-center mx-auto mb-4">
                           <span className="text-lg font-semibold">{index + 1}</span>
                         </div>
                         {index < trackingSteps.length - 1 && (
                           <div className="hidden md:block absolute top-6 left-1/2 w-full h-0.5 bg-gray-300 transform translate-x-6"></div>
                         )}
                       </div>
-                      <h3 className="text-lg font-semibold text-foreground mb-2">{step.step}</h3>
-                      <p className="text-muted-foreground text-sm">{step.description}</p>
+                      <h3 className="text-lg font-semibold text-black mb-2">{step.step}</h3>
+                      <p className="text-black text-sm">{step.description}</p>
                     </div>
                   ))}
                 </div>
-                <div className="mt-8 p-6 bg-card rounded-lg">
-                  <p className="text-foreground text-center">
+                <div className="mt-8 p-6 bg-white rounded-lg">
+                  <p className="text-black text-center">
                     Track your order anytime by logging into your account or using the tracking link sent to your email.
                   </p>
                 </div>
@@ -261,16 +261,16 @@ export default function Shipping() {
 
         {/* Important Information */}
         <motion.div variants={itemVariants} className="mb-16">
-          <Card className="border border-border shadow-sm bg-card">
+          <Card className="border border-black shadow-sm bg-white">
             <CardContent className="p-8">
-              <h2 className="text-2xl font-semibold text-foreground mb-6">Important Shipping Information</h2>
+              <h2 className="text-2xl font-semibold text-black mb-6">Important Shipping Information</h2>
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+                  <h3 className="text-lg font-semibold text-black mb-4 flex items-center">
                     <Package className="w-5 h-5 mr-2" />
                     Packaging & Handling
                   </h3>
-                  <ul className="space-y-2 text-foreground">
+                  <ul className="space-y-2 text-black">
                     <li className="flex items-start">
                       <CheckCircle className="w-4 h-4 text-green-600 mr-2 mt-1 flex-shrink-0" />
                       All items are carefully packaged to prevent damage
@@ -290,11 +290,11 @@ export default function Shipping() {
                   </ul>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+                  <h3 className="text-lg font-semibold text-black mb-4 flex items-center">
                     <CreditCard className="w-5 h-5 mr-2" />
                     Payment & Processing
                   </h3>
-                  <ul className="space-y-2 text-foreground">
+                  <ul className="space-y-2 text-black">
                     <li className="flex items-start">
                       <CheckCircle className="w-4 h-4 text-green-600 mr-2 mt-1 flex-shrink-0" />
                       Orders processed within 24 hours of payment
@@ -320,28 +320,28 @@ export default function Shipping() {
 
         {/* Special Services */}
         <motion.div variants={itemVariants} className="mb-16">
-          <Card className="border border-border shadow-sm">
+          <Card className="border border-black shadow-sm">
             <CardContent className="p-8">
-              <h2 className="text-2xl font-semibold text-foreground mb-6">Special Delivery Services</h2>
+              <h2 className="text-2xl font-semibold text-black mb-6">Special Delivery Services</h2>
               <div className="grid md:grid-cols-3 gap-6">
-                <div className="text-center p-4 border border-border rounded-lg">
-                  <Shield className="w-10 h-10 text-foreground mx-auto mb-3" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">Signature Required</h3>
-                  <p className="text-muted-foreground text-sm">
+                <div className="text-center p-4 border border-black rounded-lg">
+                  <Shield className="w-10 h-10 text-black mx-auto mb-3" />
+                  <h3 className="text-lg font-semibold text-black mb-2">Signature Required</h3>
+                  <p className="text-black text-sm">
                     For high-value orders, signature confirmation required for delivery
                   </p>
                 </div>
-                <div className="text-center p-4 border border-border rounded-lg">
-                  <Clock className="w-10 h-10 text-foreground mx-auto mb-3" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">Scheduled Delivery</h3>
-                  <p className="text-muted-foreground text-sm">
+                <div className="text-center p-4 border border-black rounded-lg">
+                  <Clock className="w-10 h-10 text-black mx-auto mb-3" />
+                  <h3 className="text-lg font-semibold text-black mb-2">Scheduled Delivery</h3>
+                  <p className="text-black text-sm">
                     Choose your preferred delivery date and time slot (premium service)
                   </p>
                 </div>
-                <div className="text-center p-4 border border-border rounded-lg">
-                  <Package className="w-10 h-10 text-foreground mx-auto mb-3" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">Gift Wrapping</h3>
-                  <p className="text-muted-foreground text-sm">
+                <div className="text-center p-4 border border-black rounded-lg">
+                  <Package className="w-10 h-10 text-black mx-auto mb-3" />
+                  <h3 className="text-lg font-semibold text-black mb-2">Gift Wrapping</h3>
+                  <p className="text-black text-sm">
                     Professional gift wrapping service available for special occasions
                   </p>
                 </div>

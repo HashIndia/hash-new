@@ -117,7 +117,7 @@ export default function Login() {
             >
               {isLoading ? "Signing In..." : "Sign In"}
             </Button>
-            <div className="text-center text-sm text-muted-foreground">
+            <div className="text-center text-sm text-black">
               Don't have an account?{" "}
               <Link to="/register" className="font-medium text-hash-purple hover:text-hash-blue transition-colors">
                 Create Account

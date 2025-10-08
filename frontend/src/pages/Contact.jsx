@@ -105,9 +105,9 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       {/* Header Section */}
-      <div className="bg-background text-foreground py-16 border-b border-border">
+      <div className="bg-white text-black py-16 border-b border-black">
         <motion.div 
           className="container mx-auto px-6 max-w-4xl text-center"
           variants={containerVariants}
@@ -116,7 +116,7 @@ export default function Contact() {
         >
           <motion.div variants={itemVariants}>
             <h1 className="text-3xl md:text-4xl font-light mb-4">Contact Us</h1>
-            <p className="text-muted-foreground">We're here to help! Reach out to us anytime</p>
+            <p className="text-black">We're here to help! Reach out to us anytime</p>
           </motion.div>
         </motion.div>
       </div>
@@ -132,12 +132,12 @@ export default function Contact() {
         <motion.div variants={itemVariants} className="mb-16">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {contactInfo.map((info, index) => (
-              <Card key={index} className="border border-border shadow-sm hover:shadow-md transition-shadow bg-card">
+              <Card key={index} className="border border-black shadow-sm hover:shadow-md transition-shadow bg-white">
                 <CardContent className="p-6 text-center">
-                  <info.icon className="w-12 h-12 text-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">{info.title}</h3>
-                  <p className="text-foreground font-medium mb-1">{info.info}</p>
-                  <p className="text-muted-foreground text-sm">{info.description}</p>
+                  <info.icon className="w-12 h-12 text-black mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-black mb-2">{info.title}</h3>
+                  <p className="text-black font-medium mb-1">{info.info}</p>
+                  <p className="text-black text-sm">{info.description}</p>
                   {info.action !== "#" && (
                     <Button 
                       variant="outline" 
@@ -158,16 +158,16 @@ export default function Contact() {
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Contact Form */}
           <motion.div variants={itemVariants}>
-            <Card className="border border-border shadow-sm bg-card">
+            <Card className="border border-black shadow-sm bg-white">
               <CardContent className="p-8">
                 <div className="flex items-center mb-6">
-                  <MessageCircle className="w-6 h-6 text-foreground mr-3" />
-                  <h2 className="text-2xl font-semibold text-foreground">Send us a Message</h2>
+                  <MessageCircle className="w-6 h-6 text-black mr-3" />
+                  <h2 className="text-2xl font-semibold text-black">Send us a Message</h2>
                 </div>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">
+                      <label className="block text-sm font-medium text-black mb-2">
                         Full Name *
                       </label>
                       <Input
@@ -181,7 +181,7 @@ export default function Contact() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">
+                      <label className="block text-sm font-medium text-black mb-2">
                         Email Address *
                       </label>
                       <Input
@@ -196,7 +196,7 @@ export default function Contact() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-black mb-2">
                       Subject *
                     </label>
                     <Input
@@ -210,7 +210,7 @@ export default function Contact() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-black mb-2">
                       Message *
                     </label>
                     <Textarea
@@ -247,41 +247,41 @@ export default function Contact() {
 
           {/* FAQ Section */}
           <motion.div variants={itemVariants}>
-            <Card className="border border-border shadow-sm bg-card">
+            <Card className="border border-black shadow-sm bg-white">
               <CardContent className="p-8">
-                <h2 className="text-2xl font-semibold text-foreground mb-6">Frequently Asked Questions</h2>
+                <h2 className="text-2xl font-semibold text-black mb-6">Frequently Asked Questions</h2>
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-medium text-foreground mb-2">How can I place an order?</h3>
-                    <p className="text-muted-foreground">
+                    <h3 className="text-lg font-medium text-black mb-2">How can I place an order?</h3>
+                    <p className="text-black">
                       Browse our collection, add items to cart, and checkout. We primarily serve NITK students 
                       but also deliver across India via postal services.
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-foreground mb-2">Do you make custom club merchandise?</h3>
-                    <p className="text-muted-foreground">
+                    <h3 className="text-lg font-medium text-black mb-2">Do you make custom club merchandise?</h3>
+                    <p className="text-black">
                       Yes! We partner with college clubs and events for custom t-shirts and merchandise. 
                       Contact Ankit for club partnership inquiries.
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-foreground mb-2">How long does delivery take?</h3>
-                    <p className="text-muted-foreground">
+                    <h3 className="text-lg font-medium text-black mb-2">How long does delivery take?</h3>
+                    <p className="text-black">
                       For NITK campus: 1-2 days. For other locations in India: 5-7 business days via post. 
                       Delivery times may vary based on location.
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-foreground mb-2">What payment methods do you accept?</h3>
-                    <p className="text-muted-foreground">
+                    <h3 className="text-lg font-medium text-black mb-2">What payment methods do you accept?</h3>
+                    <p className="text-black">
                       We accept online payments through our website, UPI, and other digital payment methods. 
                       Cash on delivery available for campus orders.
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-foreground mb-2">Can I return/exchange items?</h3>
-                    <p className="text-muted-foreground">
+                    <h3 className="text-lg font-medium text-black mb-2">Can I return/exchange items?</h3>
+                    <p className="text-black">
                       Yes, we have a student-friendly return policy. Items can be returned within 7 days 
                       if unworn and in original condition. Campus returns are especially easy.
                     </p>
@@ -294,10 +294,10 @@ export default function Contact() {
 
         {/* Additional Support */}
         <motion.div variants={itemVariants} className="mt-16">
-          <Card className="border border-border shadow-sm bg-card">
+          <Card className="border border-black shadow-sm bg-white">
             <CardContent className="p-8 text-center">
-              <h2 className="text-2xl font-semibold text-foreground mb-4">Need Immediate Help?</h2>
-              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+              <h2 className="text-2xl font-semibold text-black mb-4">Need Immediate Help?</h2>
+              <p className="text-black mb-6 max-w-2xl mx-auto">
                 Our customer support team is available 24/7 to assist you with any questions or concerns. 
                 We're committed to providing you with the best possible shopping experience.
               </p>
@@ -305,7 +305,7 @@ export default function Contact() {
                 <Button 
                   variant="outline" 
                   onClick={() => window.open('tel:+919876543210')}
-                  className="border border-border text-foreground hover:bg-card"
+                  className="border border-black text-black hover:bg-white"
                 >
                   <Phone className="w-4 h-4 mr-2" />
                   Call Now
@@ -313,7 +313,7 @@ export default function Contact() {
                 <Button 
                   variant="outline"
                   onClick={() => window.open('mailto:support@hash.com')}
-                  className="border border-border text-foreground hover:bg-card"
+                  className="border border-black text-black hover:bg-white"
                 >
                   <Mail className="w-4 h-4 mr-2" />
                   Email Support
@@ -325,26 +325,26 @@ export default function Contact() {
 
         {/* Business Information */}
         <motion.div variants={itemVariants} className="mt-16">
-          <Card className="border border-border shadow-sm bg-card">
+          <Card className="border border-black shadow-sm bg-white">
             <CardContent className="p-8">
-              <h2 className="text-2xl font-semibold text-foreground mb-6 text-center">Business Information</h2>
+              <h2 className="text-2xl font-semibold text-black mb-6 text-center">Business Information</h2>
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold text-foreground mb-4">Company Details</h3>
-                  <div className="space-y-2 text-muted-foreground">
-                    <p><strong className="text-foreground">Business Name:</strong> Hash Clothing</p>
-                    <p><strong className="text-foreground">Business Owner:</strong> Orca Whale INC</p>
-                    <p><strong className="text-foreground">Type:</strong> Registered Enterprise</p>
-                    <p><strong className="text-foreground">Founded:</strong> 2023</p>
+                  <h3 className="text-lg font-semibold text-black mb-4">Company Details</h3>
+                  <div className="space-y-2 text-black">
+                    <p><strong className="text-black">Business Name:</strong> Hash Clothing</p>
+                    <p><strong className="text-black">Business Owner:</strong> Orca Whale INC</p>
+                    <p><strong className="text-black">Type:</strong> Registered Enterprise</p>
+                    <p><strong className="text-black">Founded:</strong> 2023</p>
                   </div>
                 </div>
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold text-foreground mb-4">Location</h3>
-                  <div className="space-y-2 text-muted-foreground">
-                    <p><strong className="text-foreground">Base:</strong> NITK Surathkal Campus</p>
-                    <p><strong className="text-foreground">City:</strong> Surathkal, Karnataka</p>
-                    <p><strong className="text-foreground">Postal Code:</strong> 575025</p>
-                    <p><strong className="text-foreground">Country:</strong> India</p>
+                  <h3 className="text-lg font-semibold text-black mb-4">Location</h3>
+                  <div className="space-y-2 text-black">
+                    <p><strong className="text-black">Base:</strong> NITK Surathkal Campus</p>
+                    <p><strong className="text-black">City:</strong> Surathkal, Karnataka</p>
+                    <p><strong className="text-black">Postal Code:</strong> 575025</p>
+                    <p><strong className="text-black">Country:</strong> India</p>
                   </div>
                 </div>
               </div>

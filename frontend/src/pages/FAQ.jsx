@@ -157,9 +157,9 @@ export default function FAQ() {
   })).filter(category => category.faqs.length > 0);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       {/* Header Section */}
-      <div className="bg-background text-foreground py-16 border-b border-border">
+      <div className="bg-white text-black py-16 border-b border-black">
         <motion.div 
           className="container mx-auto px-6 max-w-4xl text-center"
           variants={containerVariants}
@@ -168,7 +168,7 @@ export default function FAQ() {
         >
           <motion.div variants={itemVariants}>
             <h1 className="text-3xl md:text-4xl font-light mb-4">Frequently Asked Questions</h1>
-            <p className="text-muted-foreground">Find quick answers to common questions</p>
+            <p className="text-black">Find quick answers to common questions</p>
           </motion.div>
         </motion.div>
       </div>
@@ -182,10 +182,10 @@ export default function FAQ() {
       >
         {/* Search Bar */}
         <motion.div variants={itemVariants} className="mb-12">
-          <Card className="border border-border shadow-sm">
+          <Card className="border border-black shadow-sm">
             <CardContent className="p-6">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black w-5 h-5" />
                 <Input
                   type="text"
                   placeholder="Search for answers..."
@@ -202,30 +202,30 @@ export default function FAQ() {
         <motion.div variants={itemVariants} className="space-y-8">
           {filteredFAQs.length > 0 ? (
             filteredFAQs.map((category, categoryIndex) => (
-              <Card key={categoryIndex} className="border border-border shadow-sm">
+              <Card key={categoryIndex} className="border border-black shadow-sm">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-semibold text-foreground mb-6">{category.category}</h2>
+                  <h2 className="text-2xl font-semibold text-black mb-6">{category.category}</h2>
                   <div className="space-y-4">
                     {category.faqs.map((faq, faqIndex) => {
                       const key = `${categoryIndex}-${faqIndex}`;
                       const isOpen = openItems[key];
                       
                       return (
-                        <div key={faqIndex} className="border border-border rounded-lg">
+                        <div key={faqIndex} className="border border-black rounded-lg">
                           <button
                             onClick={() => toggleItem(categoryIndex, faqIndex)}
-                            className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-card transition-colors"
+                            className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-white transition-colors"
                           >
-                            <span className="text-lg font-medium text-foreground pr-4">{faq.question}</span>
+                            <span className="text-lg font-medium text-black pr-4">{faq.question}</span>
                             {isOpen ? (
-                              <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                              <ChevronUp className="w-5 h-5 text-black flex-shrink-0" />
                             ) : (
-                              <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                              <ChevronDown className="w-5 h-5 text-black flex-shrink-0" />
                             )}
                           </button>
                           {isOpen && (
                             <div className="px-6 pb-4">
-                              <p className="text-foreground leading-relaxed">{faq.answer}</p>
+                              <p className="text-black leading-relaxed">{faq.answer}</p>
                             </div>
                           )}
                         </div>
@@ -236,17 +236,17 @@ export default function FAQ() {
               </Card>
             ))
           ) : (
-            <Card className="border border-border shadow-sm">
+            <Card className="border border-black shadow-sm">
               <CardContent className="p-8 text-center">
-                <Search className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-2">No results found</h3>
-                <p className="text-muted-foreground mb-4">
+                <Search className="w-16 h-16 text-black mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-black mb-2">No results found</h3>
+                <p className="text-black mb-4">
                   We couldn't find any FAQs matching your search. Try different keywords or browse all categories.
                 </p>
                 <Button 
                   onClick={() => setSearchTerm('')}
                   variant="outline"
-                  className="border-black text-foreground hover:bg-black hover:text-white"
+                  className="border-black text-black hover:bg-black hover:text-white"
                 >
                   Show All FAQs
                 </Button>
@@ -257,11 +257,11 @@ export default function FAQ() {
 
         {/* Contact Support */}
         <motion.div variants={itemVariants} className="mt-16">
-          <Card className="border border-border shadow-sm bg-card">
+          <Card className="border border-black shadow-sm bg-white">
             <CardContent className="p-8 text-center">
-              <MessageCircle className="w-16 h-16 text-foreground mx-auto mb-4" />
-              <h2 className="text-2xl font-semibold text-foreground mb-4">Still Need Help?</h2>
-              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+              <MessageCircle className="w-16 h-16 text-black mx-auto mb-4" />
+              <h2 className="text-2xl font-semibold text-black mb-4">Still Need Help?</h2>
+              <p className="text-black mb-6 max-w-2xl mx-auto">
                 Can't find the answer you're looking for? Our customer support team is here to help you 24/7.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
@@ -277,7 +277,7 @@ export default function FAQ() {
                 <Button 
                   variant="outline"
                   onClick={() => window.open('tel:+919876543210')}
-                  className="border-black text-foreground hover:bg-black hover:text-white"
+                  className="border-black text-black hover:bg-black hover:text-white"
                 >
                   <Phone className="w-4 h-4 mr-2" />
                   Call Us
@@ -285,7 +285,7 @@ export default function FAQ() {
                 <Button 
                   variant="outline"
                   onClick={() => window.open('mailto:support@hash.com')}
-                  className="border-black text-foreground hover:bg-black hover:text-white"
+                  className="border-black text-black hover:bg-black hover:text-white"
                 >
                   <Mail className="w-4 h-4 mr-2" />
                   Email Us

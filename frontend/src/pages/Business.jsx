@@ -107,9 +107,9 @@ export default function Business() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       {/* Header Section */}
-      <div className="bg-background text-foreground py-16 border-b border-border">
+      <div className="bg-white text-black py-16 border-b border-black">
         <motion.div 
           className="container mx-auto px-6 max-w-4xl text-center"
           variants={containerVariants}
@@ -118,7 +118,7 @@ export default function Business() {
         >
           <motion.div variants={itemVariants}>
             <h1 className="text-3xl md:text-4xl font-light mb-4">Business Information</h1>
-            <p className="text-muted-foreground">Comprehensive business information and compliance details</p>
+            <p className="text-black">Comprehensive business information and compliance details</p>
           </motion.div>
         </motion.div>
       </div>
@@ -134,17 +134,17 @@ export default function Business() {
         <motion.div variants={itemVariants} className="mb-16">
           <div className="grid md:grid-cols-2 gap-8">
             {businessDetails.map((section, index) => (
-              <Card key={index} className="border border-border shadow-sm">
+              <Card key={index} className="border border-black shadow-sm">
                 <CardContent className="p-8">
                   <div className="flex items-center mb-6">
-                    <section.icon className="w-6 h-6 text-foreground mr-3" />
-                    <h3 className="text-xl font-semibold text-foreground">{section.title}</h3>
+                    <section.icon className="w-6 h-6 text-black mr-3" />
+                    <h3 className="text-xl font-semibold text-black">{section.title}</h3>
                   </div>
                   <div className="space-y-3">
                     {section.details.map((detail, idx) => (
-                      <div key={idx} className="flex justify-between items-center py-2 border-b border-border last:border-b-0">
-                        <span className="text-muted-foreground font-medium">{detail.label}:</span>
-                        <span className="text-foreground">{detail.value}</span>
+                      <div key={idx} className="flex justify-between items-center py-2 border-b border-black last:border-b-0">
+                        <span className="text-black font-medium">{detail.label}:</span>
+                        <span className="text-black">{detail.value}</span>
                       </div>
                     ))}
                   </div>
@@ -156,30 +156,30 @@ export default function Business() {
 
         {/* Manufacturer Information */}
         <motion.div variants={itemVariants} className="mb-16">
-          <Card className="border border-border shadow-sm bg-card">
+          <Card className="border border-black shadow-sm bg-white">
             <CardContent className="p-8">
               <div className="text-center mb-8">
-                <Building className="w-12 h-12 text-foreground mx-auto mb-4" />
-                <h3 className="text-2xl font-semibold text-foreground mb-4">Business Operations</h3>
-                <p className="text-muted-foreground max-w-3xl mx-auto">
+                <Building className="w-12 h-12 text-black mx-auto mb-4" />
+                <h3 className="text-2xl font-semibold text-black mb-4">Business Operations</h3>
+                <p className="text-black max-w-3xl mx-auto">
                   Hash Clothing is owned and operated by Orca Whale INC, ensuring quality operations and reliable delivery for all our customers.
                 </p>
               </div>
               <div className="grid md:grid-cols-3 gap-6 text-center">
-                <div className="p-6 border border-border rounded-lg">
-                  <Shield className="w-8 h-8 text-foreground mx-auto mb-3" />
-                  <h4 className="font-semibold text-foreground mb-2">Quality Assurance</h4>
-                  <p className="text-muted-foreground text-sm">All products manufactured under strict quality control standards</p>
+                <div className="p-6 border border-black rounded-lg">
+                  <Shield className="w-8 h-8 text-black mx-auto mb-3" />
+                  <h4 className="font-semibold text-black mb-2">Quality Assurance</h4>
+                  <p className="text-black text-sm">All products manufactured under strict quality control standards</p>
                 </div>
-                <div className="p-6 border border-border rounded-lg">
-                  <Award className="w-8 h-8 text-foreground mx-auto mb-3" />
-                  <h4 className="font-semibold text-foreground mb-2">Business Operations</h4>
-                  <p className="text-muted-foreground text-sm">All operations managed by Orca Whale INC with industry compliance</p>
+                <div className="p-6 border border-black rounded-lg">
+                  <Award className="w-8 h-8 text-black mx-auto mb-3" />
+                  <h4 className="font-semibold text-black mb-2">Business Operations</h4>
+                  <p className="text-black text-sm">All operations managed by Orca Whale INC with industry compliance</p>
                 </div>
-                <div className="p-6 border border-border rounded-lg">
-                  <Globe className="w-8 h-8 text-foreground mx-auto mb-3" />
-                  <h4 className="font-semibold text-foreground mb-2">Business Reliability</h4>
-                  <p className="text-muted-foreground text-sm">Trusted business operations by Orca Whale INC for consistent delivery</p>
+                <div className="p-6 border border-black rounded-lg">
+                  <Globe className="w-8 h-8 text-black mx-auto mb-3" />
+                  <h4 className="font-semibold text-black mb-2">Business Reliability</h4>
+                  <p className="text-black text-sm">Trusted business operations by Orca Whale INC for consistent delivery</p>
                 </div>
               </div>
             </CardContent>
@@ -188,18 +188,18 @@ export default function Business() {
 
         {/* Licenses and Certifications */}
         <motion.div variants={itemVariants} className="mb-16">
-          <h2 className="text-3xl font-semibold text-foreground mb-8 text-center">Business Status & Commitments</h2>
+          <h2 className="text-3xl font-semibold text-black mb-8 text-center">Business Status & Commitments</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {licenses.map((license, index) => (
-              <Card key={index} className="border border-border shadow-sm">
+              <Card key={index} className="border border-black shadow-sm">
                 <CardContent className="p-6 text-center">
-                  <license.icon className="w-12 h-12 text-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground mb-3">{license.title}</h3>
+                  <license.icon className="w-12 h-12 text-black mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-black mb-3">{license.title}</h3>
                   <div className="space-y-2 text-sm">
-                    <p className="text-foreground">
+                    <p className="text-black">
                       <strong>License No:</strong> {license.number}
                     </p>
-                    <p className="text-foreground">
+                    <p className="text-black">
                       <strong>Authority:</strong> {license.authority}
                     </p>
                     <p className="text-green-600 font-medium">{license.validity}</p>
@@ -212,17 +212,17 @@ export default function Business() {
 
         {/* Bank Information */}
         <motion.div variants={itemVariants} className="mb-16">
-          <Card className="border border-border shadow-sm">
+          <Card className="border border-black shadow-sm">
             <CardContent className="p-8">
               <div className="flex items-center mb-6">
-                <Building className="w-6 h-6 text-foreground mr-3" />
-                <h3 className="text-2xl font-semibold text-foreground">Payment & Business Information</h3>
+                <Building className="w-6 h-6 text-black mr-3" />
+                <h3 className="text-2xl font-semibold text-black">Payment & Business Information</h3>
               </div>
               <div className="grid md:grid-cols-2 gap-6">
                 {bankDetails.map((detail, index) => (
-                  <div key={index} className="flex justify-between items-center py-3 border-b border-border">
-                    <span className="text-muted-foreground font-medium">{detail.label}:</span>
-                    <span className="text-foreground font-mono">{detail.value}</span>
+                  <div key={index} className="flex justify-between items-center py-3 border-b border-black">
+                    <span className="text-black font-medium">{detail.label}:</span>
+                    <span className="text-black font-mono">{detail.value}</span>
                   </div>
                 ))}
               </div>
@@ -232,13 +232,13 @@ export default function Business() {
 
         {/* Business Model & Operations */}
         <motion.div variants={itemVariants} className="mb-16">
-          <Card className="border border-border shadow-sm">
+          <Card className="border border-black shadow-sm">
             <CardContent className="p-8">
-              <h3 className="text-2xl font-semibold text-foreground mb-6">Business Model & Operations</h3>
+              <h3 className="text-2xl font-semibold text-black mb-6">Business Model & Operations</h3>
               <div className="grid lg:grid-cols-2 gap-8">
                 <div>
-                  <h4 className="text-lg font-semibold text-foreground mb-4">Business Activities</h4>
-                  <ul className="space-y-2 text-foreground">
+                  <h4 className="text-lg font-semibold text-black mb-4">Business Activities</h4>
+                  <ul className="space-y-2 text-black">
                     <li>• Custom t-shirt design and printing for college clubs</li>
                     <li>• Official merchandise for college festivals (Incident, Engineer)</li>
                     <li>• Original clothing designs and apparel</li>
@@ -247,8 +247,8 @@ export default function Business() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-lg font-semibold text-foreground mb-4">Operational Details</h4>
-                  <ul className="space-y-2 text-foreground">
+                  <h4 className="text-lg font-semibold text-black mb-4">Operational Details</h4>
+                  <ul className="space-y-2 text-black">
                     <li>• Professional business operations with quality focus</li>
                     <li>• Campus delivery within 1-2 days</li>
                     <li>• India-wide delivery via postal services</li>
@@ -263,13 +263,13 @@ export default function Business() {
 
         {/* Compliance & Security */}
         <motion.div variants={itemVariants} className="mb-16">
-          <Card className="border border-border shadow-sm bg-card">
+          <Card className="border border-black shadow-sm bg-white">
             <CardContent className="p-8">
-              <h3 className="text-2xl font-semibold text-foreground mb-6">Compliance & Security</h3>
+              <h3 className="text-2xl font-semibold text-black mb-6">Compliance & Security</h3>
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
-                  <h4 className="text-lg font-semibold text-foreground mb-4">Data Protection</h4>
-                  <ul className="space-y-2 text-foreground">
+                  <h4 className="text-lg font-semibold text-black mb-4">Data Protection</h4>
+                  <ul className="space-y-2 text-black">
                     <li>• GDPR compliant data handling</li>
                     <li>• SSL encryption for all transactions</li>
                     <li>• PCI DSS compliant payment processing</li>
@@ -278,8 +278,8 @@ export default function Business() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-lg font-semibold text-foreground mb-4">Financial Compliance</h4>
-                  <ul className="space-y-2 text-foreground">
+                  <h4 className="text-lg font-semibold text-black mb-4">Financial Compliance</h4>
+                  <ul className="space-y-2 text-black">
                     <li>• RBI guidelines compliance</li>
                     <li>• Anti-money laundering (AML) policies</li>
                     <li>• Know Your Customer (KYC) procedures</li>
@@ -294,27 +294,27 @@ export default function Business() {
 
         {/* Contact for Business Inquiries */}
         <motion.div variants={itemVariants}>
-          <Card className="border border-border shadow-sm">
+          <Card className="border border-black shadow-sm">
             <CardContent className="p-8 text-center">
-              <h3 className="text-2xl font-semibold text-foreground mb-4">Business Inquiries</h3>
-              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+              <h3 className="text-2xl font-semibold text-black mb-4">Business Inquiries</h3>
+              <p className="text-black mb-6 max-w-2xl mx-auto">
                 For partnerships, vendor inquiries, or business collaborations, please reach out to our business development team.
               </p>
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="text-center">
-                  <Mail className="w-8 h-8 text-foreground mx-auto mb-2" />
-                  <h4 className="font-semibold text-foreground mb-1">Business Development</h4>
-                  <p className="text-muted-foreground">business@hash.com</p>
+                  <Mail className="w-8 h-8 text-black mx-auto mb-2" />
+                  <h4 className="font-semibold text-black mb-1">Business Development</h4>
+                  <p className="text-black">business@hash.com</p>
                 </div>
                 <div className="text-center">
-                  <Phone className="w-8 h-8 text-foreground mx-auto mb-2" />
-                  <h4 className="font-semibold text-foreground mb-1">Partnership Inquiries</h4>
-                  <p className="text-muted-foreground">+91 9876543210</p>
+                  <Phone className="w-8 h-8 text-black mx-auto mb-2" />
+                  <h4 className="font-semibold text-black mb-1">Partnership Inquiries</h4>
+                  <p className="text-black">+91 9876543210</p>
                 </div>
                 <div className="text-center">
-                  <Globe className="w-8 h-8 text-foreground mx-auto mb-2" />
-                  <h4 className="font-semibold text-foreground mb-1">Media & Press</h4>
-                  <p className="text-muted-foreground">press@hash.com</p>
+                  <Globe className="w-8 h-8 text-black mx-auto mb-2" />
+                  <h4 className="font-semibold text-black mb-1">Media & Press</h4>
+                  <p className="text-black">press@hash.com</p>
                 </div>
               </div>
             </CardContent>

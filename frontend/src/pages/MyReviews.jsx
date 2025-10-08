@@ -91,7 +91,7 @@ const MyReviews = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background py-12">
+      <div className="min-h-screen bg-white py-12">
         <div className="container mx-auto px-4">
           <div className="animate-pulse space-y-6">
             {[1, 2, 3].map(i => (
@@ -113,14 +113,14 @@ const MyReviews = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12">
+    <div className="min-h-screen bg-white py-12">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="max-w-4xl mx-auto"
         >
-          <h1 className="text-3xl font-bold text-foreground mb-8">My Reviews</h1>
+          <h1 className="text-3xl font-bold text-black mb-8">My Reviews</h1>
 
           {/* Tabs */}
           <div className="flex space-x-1 mb-6 p-1 bg-muted rounded-lg">
@@ -128,8 +128,8 @@ const MyReviews = () => {
               onClick={() => setActiveTab('reviewable')}
               className={`flex-1 py-2 px-4 rounded-md transition-colors ${
                 activeTab === 'reviewable'
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-white text-black shadow-sm'
+                  : 'text-black hover:text-black'
               }`}
             >
               Products to Review ({reviewableProducts.length})
@@ -138,8 +138,8 @@ const MyReviews = () => {
               onClick={() => setActiveTab('reviewed')}
               className={`flex-1 py-2 px-4 rounded-md transition-colors ${
                 activeTab === 'reviewed'
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-white text-black shadow-sm'
+                  : 'text-black hover:text-black'
               }`}
             >
               My Reviews ({myReviews.length})
@@ -149,17 +149,17 @@ const MyReviews = () => {
           {/* Reviewable Products Tab */}
           {activeTab === 'reviewable' && (
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-foreground mb-4">
+              <h2 className="text-xl font-semibold text-black mb-4">
                 Products You Can Review
               </h2>
               
               {reviewableProducts.length === 0 ? (
                 <Card className="p-8 text-center">
-                  <Package className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-medium text-foreground mb-2">
+                  <Package className="w-12 h-12 mx-auto mb-4 text-black" />
+                  <h3 className="text-lg font-medium text-black mb-2">
                     No Products to Review
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-black">
                     You'll see products here after you receive your orders.
                   </p>
                 </Card>
@@ -176,13 +176,13 @@ const MyReviews = () => {
                           />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-foreground mb-1">
+                          <h3 className="font-semibold text-black mb-1">
                             {item.product.name}
                           </h3>
-                          <p className="text-sm text-muted-foreground mb-2">
+                          <p className="text-sm text-black mb-2">
                             Purchased on {formatDate(item.purchaseDate)}
                           </p>
-                          <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                          <div className="flex items-center space-x-2 text-xs text-black">
                             <Calendar className="w-3 h-3" />
                             <span>Order delivered</span>
                           </div>
@@ -204,17 +204,17 @@ const MyReviews = () => {
           {/* My Reviews Tab */}
           {activeTab === 'reviewed' && (
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-foreground mb-4">
+              <h2 className="text-xl font-semibold text-black mb-4">
                 Your Reviews
               </h2>
               
               {myReviews.length === 0 ? (
                 <Card className="p-8 text-center">
-                  <Star className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-medium text-foreground mb-2">
+                  <Star className="w-12 h-12 mx-auto mb-4 text-black" />
+                  <h3 className="text-lg font-medium text-black mb-2">
                     No Reviews Yet
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-black">
                     Your product reviews will appear here.
                   </p>
                 </Card>
@@ -231,20 +231,20 @@ const MyReviews = () => {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-semibold text-foreground">
+                          <h3 className="font-semibold text-black">
                             {review.product?.name}
                           </h3>
                           <div className="flex items-center space-x-2">
                             <StarRating rating={review.rating} />
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-sm text-black">
                               {formatDate(review.createdAt)}
                             </span>
                           </div>
                         </div>
-                        <h4 className="font-medium text-foreground mb-2">
+                        <h4 className="font-medium text-black mb-2">
                           {review.title}
                         </h4>
-                        <p className="text-muted-foreground text-sm leading-relaxed mb-3">
+                        <p className="text-black text-sm leading-relaxed mb-3">
                           {review.comment}
                         </p>
                         {review.isVerifiedPurchase && (

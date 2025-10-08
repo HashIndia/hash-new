@@ -192,7 +192,7 @@ export default function Register() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black hover:text-black transition-colors"
                   >
                     {showPassword ? "🙈" : "👁️"}
                   </button>
@@ -206,7 +206,7 @@ export default function Register() {
                           style={{ width: `${(passwordStrength.strength + 1) * 25}%` }}
                         ></div>
                       </div>
-                      <span className="text-xs text-muted-foreground">{passwordStrength.text}</span>
+                      <span className="text-xs text-black">{passwordStrength.text}</span>
                     </div>
                   </div>
                 )}
@@ -238,7 +238,7 @@ export default function Register() {
                 <input
                   type="checkbox"
                   id="terms"
-                  className="mt-1 w-4 h-4 text-hash-purple border-border rounded focus:ring-hash-purple"
+                  className="mt-1 w-4 h-4 text-hash-purple border-black rounded focus:ring-hash-purple"
                   required
                 />
                 <label htmlFor="terms" className="text-sm text-neutral-700">
@@ -267,8 +267,8 @@ export default function Register() {
                 )}
               </Button>
             </form>
-            <div className="text-center mt-6 pt-4 border-t border-border">
-              <p className="text-sm text-muted-foreground">
+            <div className="text-center mt-6 pt-4 border-t border-black">
+              <p className="text-sm text-black">
                 Already have an account?{" "}
                 <a href="/login" className="font-semibold text-hash-purple hover:text-hash-blue underline underline-offset-2 transition-colors">
                   Sign in
@@ -278,7 +278,7 @@ export default function Register() {
           </CardContent>
         </Card>
         <div className="text-center mt-8">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-black">
             By creating an account, you agree to receive marketing emails from us.
           </p>
         </div>

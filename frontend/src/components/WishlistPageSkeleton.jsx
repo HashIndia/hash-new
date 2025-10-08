@@ -25,7 +25,7 @@ export default function WishlistPageSkeleton() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-8 md:py-12">
+    <div className="min-h-screen bg-white py-8 md:py-12">
       <div className="container mx-auto px-4 md:px-6">
         {/* Title Skeleton */}
         <motion.div
@@ -60,7 +60,7 @@ export default function WishlistPageSkeleton() {
         >
           {[1, 2, 3, 4, 5, 6, 7, 8].map((index) => (
             <motion.div key={index} variants={itemVariants}>
-              <Card className="group hover:shadow-xl transition-all duration-300 border-border bg-card h-full overflow-hidden">
+              <Card className="group hover:shadow-xl transition-all duration-300 border-black bg-white h-full overflow-hidden">
                 <CardContent className="p-0">
                   {/* Product Image Skeleton */}
                   <div className="aspect-square relative overflow-hidden">
@@ -153,7 +153,7 @@ export default function WishlistPageSkeleton() {
           
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[1, 2, 3, 4].map((index) => (
-              <div key={index} className="bg-card border border-border rounded-xl p-4">
+              <div key={index} className="bg-white border border-black rounded-xl p-4">
                 <div className="aspect-square bg-gradient-to-br from-foreground/10 to-foreground/5 rounded-lg animate-pulse mb-3"></div>
                 <div className="h-4 bg-gradient-to-r from-foreground/15 to-foreground/10 rounded w-3/4 animate-pulse mb-2"></div>
                 <div className="h-5 bg-gradient-to-r from-hash-purple/30 to-hash-purple/20 rounded w-1/2 animate-pulse"></div>

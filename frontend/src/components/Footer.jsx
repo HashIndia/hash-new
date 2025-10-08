@@ -73,13 +73,13 @@ export default function Footer() {
   };
 
   return (
-    <footer className="hidden min-[1200px]:block bg-background text-foreground mt-auto relative overflow-hidden border-t border-border">
+    <footer className="hidden min-[1200px]:block bg-white text-black mt-auto relative overflow-hidden border-t border-neutral-200">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,hsl(var(--hash-purple))_0%,transparent_50%),radial-gradient(circle_at_80%_20%,hsl(var(--hash-blue))_0%,transparent_50%)] opacity-5"></div>
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='7' cy='7' r='3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23888888' fill-opacity='0.1'%3E%3Ccircle cx='7' cy='7' r='3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
         }} />
       </div>
 
@@ -108,7 +108,7 @@ export default function Footer() {
                 className="h-10 object-contain"
               />
             </Link>
-            <p className="text-muted-foreground mb-8 leading-relaxed text-lg">
+            <p className="text-black mb-8 leading-relaxed text-lg">
               Define your style story with premium fashion that speaks your language. 
               Bold, modern, and uniquely you.
             </p>
@@ -119,7 +119,7 @@ export default function Footer() {
                 <motion.a
                   key={social.name}
                   href={social.href}
-                  className={`w-12 h-12 bg-card/50 backdrop-blur-sm rounded-xl flex items-center justify-center transition-all group ${social.color} border border-border hover:border-hash-purple/50`}
+                  className={`w-12 h-12 bg-white backdrop-blur-sm rounded-xl flex items-center justify-center transition-all group ${social.color} border border-gray-200 hover:border-black`}
                   aria-label={social.name}
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.95 }}
@@ -133,7 +133,7 @@ export default function Footer() {
           {/* Footer Links */}
           {Object.entries(footerLinks).map(([category, links]) => (
             <motion.div key={category} variants={itemVariants}>
-              <h4 className="font-bold text-xl text-foreground mb-6 font-space">{category}</h4>
+              <h4 className="font-bold text-xl text-black mb-6 font-space">{category}</h4>
               <ul className="space-y-4">
                 {links.map((link) => (
                   <li key={link.name}>
@@ -141,11 +141,11 @@ export default function Footer() {
                       to={link.href}
                       className="group block"
                     >
-                      <div className="text-muted-foreground hover:text-foreground transition-colors">
+                      <div className="text-black hover:text-gray-600 transition-colors">
                         <div className="font-medium group-hover:translate-x-1 transition-transform">
                           {link.name}
                         </div>
-                        <div className="text-sm text-muted-foreground/70 group-hover:text-muted-foreground mt-1">
+                        <div className="text-sm text-black/70 group-hover:text-black mt-1">
                           {link.description}
                         </div>
                       </div>
@@ -163,9 +163,9 @@ export default function Footer() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="border-t border-border pt-8 mt-12 flex flex-col lg:flex-row justify-between items-center gap-6"
+          className="border-t border-gray-200 pt-8 mt-12 flex flex-col lg:flex-row justify-between items-center gap-6"
         >
-          <div className="text-muted-foreground text-center lg:text-left">
+          <div className="text-black text-center lg:text-left">
             <p className="mb-1">© 2024 Hash. All rights reserved.</p>
             <p className="mb-2 text-sm">Owned & Operated by Orca Whale INC</p>
             <p className="flex items-center justify-center lg:justify-start gap-2">
@@ -186,7 +186,7 @@ export default function Footer() {
               {['VISA', 'MC', 'UPI', 'AMEX'].map((payment) => (
                 <motion.div
                   key={payment}
-                  className="w-12 h-8 bg-card/50 backdrop-blur-sm rounded-lg flex items-center justify-center text-xs font-bold text-muted-foreground border border-border"
+                  className="w-12 h-8 bg-white/50 backdrop-blur-sm rounded-lg flex items-center justify-center text-xs font-bold text-black border border-neutral-200"
                   whileHover={{ scale: 1.1 }}
                 >
                   {payment}

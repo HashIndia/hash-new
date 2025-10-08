@@ -128,9 +128,9 @@ export default function FAQ() {
   })).filter(category => category.faqs.length > 0);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       {/* Header Section */}
-      <div className="bg-background text-foreground py-16 border-b border-border">
+      <div className="bg-white text-black py-16 border-b border-black">
         <motion.div 
           className="container mx-auto px-6 max-w-4xl text-center"
           variants={containerVariants}
@@ -139,9 +139,9 @@ export default function FAQ() {
         >
           <motion.div variants={itemVariants}>
             <h1 className="text-5xl md:text-6xl font-light tracking-[0.2em] mb-4">HASH</h1>
-            <p className="text-muted-foreground text-sm tracking-[0.15em] uppercase mb-8">Help Center</p>
+            <p className="text-black text-sm tracking-[0.15em] uppercase mb-8">Help Center</p>
             <h2 className="text-3xl md:text-4xl font-light mb-4">Frequently Asked Questions</h2>
-            <p className="text-muted-foreground">Find quick answers to common questions</p>
+            <p className="text-black">Find quick answers to common questions</p>
           </motion.div>
         </motion.div>
       </div>
@@ -155,16 +155,16 @@ export default function FAQ() {
       >
         {/* Search Bar */}
         <motion.div variants={itemVariants} className="mb-12">
-          <Card className="border border-border shadow-sm bg-card">
+          <Card className="border border-black shadow-sm bg-white">
             <CardContent className="p-6">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black w-5 h-5" />
                 <Input
                   type="text"
                   placeholder="Search for answers..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-3 text-lg bg-background border-border text-foreground"
+                  className="pl-10 pr-4 py-3 text-lg bg-white border-black text-black"
                 />
               </div>
             </CardContent>
@@ -175,28 +175,28 @@ export default function FAQ() {
         <motion.div variants={itemVariants} className="space-y-8">
           {filteredFAQs.length > 0 ? (
             filteredFAQs.map((category, categoryIndex) => (
-              <Card key={categoryIndex} className="border border-border shadow-sm bg-card">
+              <Card key={categoryIndex} className="border border-black shadow-sm bg-white">
                 <CardContent className="p-8">
-                  <h2 className="text-2xl font-semibold text-foreground mb-6">{category.category}</h2>
+                  <h2 className="text-2xl font-semibold text-black mb-6">{category.category}</h2>
                   <div className="space-y-4">
                     {category.faqs.map((faq, faqIndex) => {
                       const isOpen = openItems[`${categoryIndex}-${faqIndex}`];
                       return (
-                        <div key={faqIndex} className="border border-border rounded-lg bg-background">
+                        <div key={faqIndex} className="border border-black rounded-lg bg-white">
                           <button
                             onClick={() => toggleFAQ(categoryIndex, faqIndex)}
-                            className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-card transition-colors"
+                            className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-white transition-colors"
                           >
-                            <span className="font-medium text-foreground pr-4">{faq.question}</span>
+                            <span className="font-medium text-black pr-4">{faq.question}</span>
                             {isOpen ? (
-                              <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                              <ChevronUp className="w-5 h-5 text-black flex-shrink-0" />
                             ) : (
-                              <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                              <ChevronDown className="w-5 h-5 text-black flex-shrink-0" />
                             )}
                           </button>
                           {isOpen && (
-                            <div className="px-6 pb-4 border-t border-border">
-                              <p className="text-foreground leading-relaxed">{faq.answer}</p>
+                            <div className="px-6 pb-4 border-t border-black">
+                              <p className="text-black leading-relaxed">{faq.answer}</p>
                             </div>
                           )}
                         </div>
@@ -207,17 +207,17 @@ export default function FAQ() {
               </Card>
             ))
           ) : (
-            <Card className="border border-border shadow-sm bg-card">
+            <Card className="border border-black shadow-sm bg-white">
               <CardContent className="p-12 text-center">
-                <Search className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-2">No results found</h3>
-                <p className="text-muted-foreground mb-4">
+                <Search className="w-16 h-16 text-black mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-black mb-2">No results found</h3>
+                <p className="text-black mb-4">
                   Try searching with different keywords or browse our categories below.
                 </p>
                 <Button
                   onClick={() => setSearchTerm('')}
                   variant="outline"
-                  className="border-border text-foreground hover:bg-card"
+                  className="border-black text-black hover:bg-white"
                 >
                   Clear search
                 </Button>
@@ -228,11 +228,11 @@ export default function FAQ() {
 
         {/* Contact Section */}
         <motion.div variants={itemVariants} className="mt-16">
-          <Card className="border border-border shadow-sm bg-card">
+          <Card className="border border-black shadow-sm bg-white">
             <CardContent className="p-8 text-center">
               <MessageCircle className="w-12 h-12 text-hash-purple mx-auto mb-4" />
-              <h3 className="text-2xl font-semibold text-foreground mb-4">Still need help?</h3>
-              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+              <h3 className="text-2xl font-semibold text-black mb-4">Still need help?</h3>
+              <p className="text-black mb-6 max-w-2xl mx-auto">
                 Can't find what you're looking for? Our student team is here to help! 
                 Contact us directly and we'll get back to you quickly.
               </p>
@@ -247,7 +247,7 @@ export default function FAQ() {
                 </Link>
                 <Button
                   variant="outline"
-                  className="border-border text-foreground hover:bg-card"
+                  className="border-black text-black hover:bg-white"
                   onClick={() => window.open('https://wa.me/+919876543210', '_blank')}
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
@@ -261,13 +261,13 @@ export default function FAQ() {
         {/* Footer Note */}
         <motion.div 
           variants={itemVariants}
-          className="mt-16 text-center py-8 border-t border-border"
+          className="mt-16 text-center py-8 border-t border-black"
         >
           <div className="flex items-center justify-center gap-2 mb-4">
             <MessageCircle className="w-5 h-5 text-hash-purple" />
-            <span className="text-foreground font-medium">Hash Student Support</span>
+            <span className="text-black font-medium">Hash Student Support</span>
           </div>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-black text-sm">
             Questions answered by real NITK students who understand your needs
           </p>
         </motion.div>

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 
 const ProfileHeaderSkeleton = () => (
-  <div className="bg-card rounded-2xl border border-border p-8 animate-pulse">
+  <div className="bg-white rounded-2xl border border-black p-8 animate-pulse">
     <div className="flex items-start space-x-6">
       <div className="bg-gray-200 w-24 h-24 rounded-full"></div>
       <div className="flex-1 space-y-4">
@@ -17,7 +17,7 @@ const ProfileHeaderSkeleton = () => (
 );
 
 const StatsCardSkeleton = () => (
-  <div className="bg-card rounded-xl border border-border p-6 animate-pulse">
+  <div className="bg-white rounded-xl border border-black p-6 animate-pulse">
     <div className="flex items-center justify-between mb-4">
       <div className="bg-gray-200 h-6 w-20 rounded"></div>
       <div className="bg-gray-200 w-8 h-8 rounded-lg"></div>
@@ -28,7 +28,7 @@ const StatsCardSkeleton = () => (
 );
 
 const OrderCardSkeleton = () => (
-  <div className="bg-card rounded-xl border border-border p-6 animate-pulse">
+  <div className="bg-white rounded-xl border border-black p-6 animate-pulse">
     <div className="flex items-start justify-between mb-4">
       <div className="space-y-2">
         <div className="bg-gray-200 h-5 w-32 rounded"></div>
@@ -50,7 +50,7 @@ const OrderCardSkeleton = () => (
       ))}
     </div>
     
-    <div className="flex justify-between items-center mt-4 pt-4 border-t border-border">
+    <div className="flex justify-between items-center mt-4 pt-4 border-t border-black">
       <div className="bg-gray-200 h-5 w-24 rounded"></div>
       <div className="bg-gray-200 h-9 w-20 rounded-lg"></div>
     </div>
@@ -58,7 +58,7 @@ const OrderCardSkeleton = () => (
 );
 
 const AddressCardSkeleton = () => (
-  <div className="bg-card rounded-xl border border-border p-6 animate-pulse">
+  <div className="bg-white rounded-xl border border-black p-6 animate-pulse">
     <div className="flex items-start justify-between mb-4">
       <div className="space-y-2">
         <div className="bg-gray-200 h-5 w-20 rounded"></div>
@@ -78,7 +78,7 @@ const AddressCardSkeleton = () => (
 const SidebarSkeleton = () => (
   <div className="space-y-2">
     {['Profile', 'Orders', 'Addresses', 'Wishlist', 'Settings'].map((item, i) => (
-      <div key={i} className="bg-card rounded-lg border border-border p-4 animate-pulse">
+      <div key={i} className="bg-white rounded-lg border border-black p-4 animate-pulse">
         <div className="flex items-center space-x-3">
           <div className="bg-gray-200 w-5 h-5 rounded"></div>
           <div className="bg-gray-200 h-4 w-20 rounded"></div>
@@ -96,7 +96,7 @@ const WishlistGridSkeleton = () => (
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: i * 0.1 }}
-        className="bg-card rounded-2xl shadow-sm border border-border p-4 animate-pulse"
+        className="bg-white rounded-2xl shadow-sm border border-black p-4 animate-pulse"
       >
         <div className="bg-gray-200 h-48 rounded-xl mb-4"></div>
         <div className="space-y-3">
@@ -114,7 +114,7 @@ export default function ProfilePageSkeleton() {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-background py-8"
+      className="min-h-screen bg-white py-8"
     >
       <div className="container mx-auto px-4">
         {/* Page Title */}
@@ -124,7 +124,7 @@ export default function ProfilePageSkeleton() {
 
         {/* Profile Form (if shown) - placeholder */}
         <div className="mb-6">
-          <div className="bg-card rounded-xl border border-border p-6 animate-pulse">
+          <div className="bg-white rounded-xl border border-black p-6 animate-pulse">
             <div className="bg-gray-200 h-8 rounded w-32 mb-4"></div>
             <div className="space-y-4">
               <div className="bg-gray-200 h-12 rounded"></div>
@@ -145,8 +145,8 @@ export default function ProfilePageSkeleton() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            <div className="bg-card border border-border shadow-sm rounded-xl animate-pulse">
-              <div className="bg-card border-b border-border p-4">
+            <div className="bg-white border border-black shadow-sm rounded-xl animate-pulse">
+              <div className="bg-white border-b border-black p-4">
                 <div className="bg-gray-200 h-6 rounded w-24"></div>
               </div>
               <div className="p-6 space-y-4">
@@ -173,8 +173,8 @@ export default function ProfilePageSkeleton() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <div className="bg-card border border-border shadow-sm rounded-xl animate-pulse">
-              <div className="flex flex-row items-center justify-between bg-card border-b border-border p-4">
+            <div className="bg-white border border-black shadow-sm rounded-xl animate-pulse">
+              <div className="flex flex-row items-center justify-between bg-white border-b border-black p-4">
                 <div className="bg-gray-200 h-6 rounded w-28"></div>
                 <div className="bg-gray-200 h-10 w-24 rounded-lg"></div>
               </div>
@@ -182,7 +182,7 @@ export default function ProfilePageSkeleton() {
                 {/* Address Cards */}
                 <div className="space-y-4">
                   {[1, 2].map((_, i) => (
-                    <div key={i} className="border border-border rounded-lg p-4 bg-muted/30">
+                    <div key={i} className="border border-black rounded-lg p-4 bg-white/30">
                       <div className="flex justify-between items-start">
                         <div className="space-y-2">
                           <div className="bg-gray-200 h-5 w-24 rounded"></div>
@@ -210,14 +210,14 @@ export default function ProfilePageSkeleton() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          <div className="bg-card border border-border shadow-sm rounded-xl animate-pulse">
-            <div className="bg-card border-b border-border p-4">
+          <div className="bg-white border border-black shadow-sm rounded-xl animate-pulse">
+            <div className="bg-white border-b border-black p-4">
               <div className="bg-gray-200 h-6 rounded w-32"></div>
             </div>
             <div className="p-6">
               <div className="space-y-4">
                 {[1, 2].map((_, i) => (
-                  <div key={i} className="border border-border rounded-lg p-4">
+                  <div key={i} className="border border-black rounded-lg p-4">
                     <div className="flex justify-between items-start mb-4">
                       <div className="space-y-2">
                         <div className="bg-gray-200 h-5 w-32 rounded"></div>

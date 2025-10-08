@@ -24,7 +24,7 @@ const SpinnerWithText = ({
   size = 'md', 
   text = 'Loading...', 
   className = '',
-  textClassName = 'text-muted-foreground mt-4' 
+  textClassName = 'text-black mt-4' 
 }) => {
   return (
     <div className="text-center">
@@ -38,7 +38,7 @@ const SpinnerWithText = ({
 const LoadingOverlay = ({ 
   isLoading, 
   text = 'Loading...', 
-  className = 'min-h-screen bg-background' 
+  className = 'min-h-screen bg-white' 
 }) => {
   if (!isLoading) return null;
 

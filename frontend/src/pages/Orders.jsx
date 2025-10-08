@@ -334,7 +334,7 @@ export default function Orders() {
       case 'shipped': return 'bg-hash-blue/10 text-hash-blue border border-hash-blue/20';
       case 'processing': return 'bg-hash-orange/10 text-hash-orange border border-hash-orange/20';
       case 'cancelled': return 'bg-destructive/10 text-destructive border border-destructive/20';
-      default: return 'bg-muted text-muted-foreground border border-border';
+      default: return 'bg-white text-black border border-black';
     }
   };
 
@@ -354,7 +354,7 @@ export default function Orders() {
 
   if (orders.length === 0) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <motion.div 
           className="text-center"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -362,15 +362,15 @@ export default function Orders() {
           transition={{ duration: 0.6 }}
         >
           <div className="text-6xl mb-4">📦</div>
-          <h2 className="text-3xl font-bold text-foreground mb-4 font-space">No Orders Yet</h2>
-          <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+          <h2 className="text-3xl font-bold text-black mb-4 font-space">No Orders Yet</h2>
+          <p className="text-black mb-8 max-w-md mx-auto">
             You haven't placed any orders yet. Start shopping to see your order history here!
           </p>
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Button asChild size="lg" className="bg-hash-purple hover:bg-hash-purple/90 text-white shadow-lg shadow-hash-purple/25">
+            <Button asChild size="lg" className="bg-black hover:bg-gray-800 text-white">
               <a href="/shop">Start Shopping</a>
             </Button>
           </motion.div>
@@ -380,7 +380,7 @@ export default function Orders() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+  <div className="min-h-screen bg-white">
       <motion.div 
         className="container mx-auto py-6 sm:py-12 px-4 sm:px-6"
         variants={containerVariants}
@@ -392,8 +392,8 @@ export default function Orders() {
           className="text-center mb-8 sm:mb-12"
           variants={itemVariants}
         >
-          <h1 className="text-2xl sm:text-4xl font-bold text-foreground mb-4 font-space">Order History</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">Track your orders and view purchase history</p>
+          <h1 className="text-2xl sm:text-4xl font-bold text-black mb-4 font-space">Order History</h1>
+          <p className="text-sm sm:text-base text-black">Track your orders and view purchase history</p>
         </motion.div>
 
         <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
@@ -403,18 +403,18 @@ export default function Orders() {
               variants={itemVariants}
               layout
             >
-              <Card className="bg-card border border-border hover:shadow-lg transition-all duration-300 shadow-lg">
+              <Card className="bg-white border border-gray-200 hover:shadow-lg transition-all duration-300 shadow-sm">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 mb-4 sm:mb-6">
                     <div className="flex-1">
-                      <h3 className="text-base sm:text-lg font-semibold text-foreground">
+                      <h3 className="text-base sm:text-lg font-semibold text-black">
                         Order #{order.orderNumber || order._id?.slice(-8)}
                       </h3>
-                      <p className="text-sm text-muted-foreground">Placed on {new Date(order.createdAt).toLocaleDateString()}</p>
+                      <p className="text-sm text-black">Placed on {new Date(order.createdAt).toLocaleDateString()}</p>
                     </div>
                     
                     <div className="flex items-center justify-between sm:text-right sm:flex-col sm:items-end gap-2">
-                      <div className="text-lg sm:text-xl font-bold text-foreground">
+                      <div className="text-lg sm:text-xl font-bold text-black">
                         ₹{order.totalAmount?.toFixed(2)}
                       </div>
                       <span className={`inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getStatusColor(order.status)}`}>
@@ -427,11 +427,11 @@ export default function Orders() {
                   {/* Order Progress */}
                   {order.status !== 'cancelled' && (
                     <div className="mb-4 sm:mb-6">
-                      <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground mb-2">
+                      <div className="flex items-center justify-between text-xs sm:text-sm text-black mb-2">
                         <span>Order Progress</span>
                         <span>{order.status === 'delivered' ? '100%' : order.status === 'shipped' ? '66%' : '33%'}%</span>
                       </div>
-                      <div className="w-full bg-muted rounded-full h-1.5 sm:h-2">
+                      <div className="w-full bg-white rounded-full h-1.5 sm:h-2">
                         <div 
                           className="bg-hash-purple h-1.5 sm:h-2 rounded-full transition-all duration-500"
                           style={{ 
@@ -440,7 +440,7 @@ export default function Orders() {
                           }}
                         ></div>
                       </div>
-                      <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                      <div className="flex justify-between mt-2 text-xs text-black">
                         <span>Ordered</span>
                         <span>Shipped</span>
                         <span>Delivered</span>
@@ -482,12 +482,12 @@ export default function Orders() {
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border"
+                      className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-black"
                     >
-                      <h4 className="font-semibold text-foreground mb-3 sm:mb-4 text-sm sm:text-base">Order Items</h4>
+                      <h4 className="font-semibold text-black mb-3 sm:mb-4 text-sm sm:text-base">Order Items</h4>
                       <div className="space-y-3 sm:space-y-4">
                         {(order.items || []).map((item, index) => (
-                          <div key={index} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-muted/30 rounded-xl border border-border">
+                          <div key={index} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-white/30 rounded-xl border border-black">
                             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden bg-gray-50 flex-shrink-0">
                               <img
                                 src={item.image || item.product?.images?.[0]?.url || item.product?.images?.[0] || `https://placehold.co/60x60/64748b/fff?text=Item`}
@@ -499,12 +499,12 @@ export default function Orders() {
                               />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h5 className="font-medium text-foreground text-sm sm:text-base truncate">{item.name}</h5>
-                              <p className="text-xs sm:text-sm text-muted-foreground">Qty: {item.quantity}</p>
-                              {item.size && <p className="text-xs sm:text-sm text-muted-foreground">Size: {item.size}</p>}
+                              <h5 className="font-medium text-black text-sm sm:text-base truncate">{item.name}</h5>
+                              <p className="text-xs sm:text-sm text-black">Qty: {item.quantity}</p>
+                              {item.size && <p className="text-xs sm:text-sm text-black">Size: {item.size}</p>}
                             </div>
                             <div className="text-right flex-shrink-0">
-                              <div className="font-semibold text-foreground text-sm sm:text-base">₹{item.price?.toFixed(2)}</div>
+                              <div className="font-semibold text-black text-sm sm:text-base">₹{item.price?.toFixed(2)}</div>
                               {order.status === 'delivered' && (
                                 <Button
                                   size="sm"
@@ -524,9 +524,9 @@ export default function Orders() {
                         ))}
                       </div>
                       
-                      <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-muted/30 rounded-xl border border-border">
-                        <h4 className="font-semibold text-foreground mb-2 sm:mb-3 text-sm sm:text-base">Delivery Address</h4>
-                        <div className="text-muted-foreground text-sm sm:text-base">
+                      <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-white/30 rounded-xl border border-black">
+                        <h4 className="font-semibold text-black mb-2 sm:mb-3 text-sm sm:text-base">Delivery Address</h4>
+                        <div className="text-black text-sm sm:text-base">
                           <p>{order.shippingAddress?.line1}</p>
                           {order.shippingAddress?.line2 && <p>{order.shippingAddress.line2}</p>}
                           <p>{order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.pincode}</p>
@@ -546,30 +546,30 @@ export default function Orders() {
           className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto"
           variants={itemVariants}
         >
-          <Card className="bg-card border border-border">
+          <Card className="bg-white border border-gray-200">
             <CardContent className="p-4 sm:p-6 text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-black mb-2">
                 {orders.length}
               </div>
-              <div className="text-sm sm:text-base text-muted-foreground">Total Orders</div>
+              <div className="text-sm sm:text-base text-black">Total Orders</div>
             </CardContent>
           </Card>
           
-          <Card className="bg-card border border-border">
+          <Card className="bg-white border border-gray-200">
             <CardContent className="p-4 sm:p-6 text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-black mb-2">
                 ₹{orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0).toFixed(2)}
               </div>
-              <div className="text-sm sm:text-base text-muted-foreground">Total Spent</div>
+              <div className="text-sm sm:text-base text-black">Total Spent</div>
             </CardContent>
           </Card>
           
-          <Card className="bg-card border border-border">
+          <Card className="bg-white border border-gray-200">
             <CardContent className="p-4 sm:p-6 text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+              <div className="text-2xl sm:text-3xl font-bold text-black mb-2">
                 {orders.filter(order => order.status === 'delivered').length}
               </div>
-              <div className="text-sm sm:text-base text-muted-foreground">Delivered</div>
+              <div className="text-sm sm:text-base text-black">Delivered</div>
             </CardContent>
           </Card>
         </motion.div>

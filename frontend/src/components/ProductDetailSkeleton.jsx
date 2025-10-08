@@ -107,7 +107,7 @@ const ReviewsSkeleton = () => (
     {/* Individual Reviews */}
     <div className="space-y-6">
       {[...Array(3)].map((_, i) => (
-        <div key={i} className="bg-card border border-border rounded-xl p-6 space-y-4">
+        <div key={i} className="bg-white border border-black rounded-xl p-6 space-y-4">
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-4">
               <div className="bg-gray-200 w-12 h-12 rounded-full animate-pulse"></div>
@@ -138,7 +138,7 @@ const RelatedProductsSkeleton = () => (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.1 }}
-          className="bg-card rounded-2xl shadow-sm border border-border p-4 animate-pulse"
+          className="bg-white rounded-2xl shadow-sm border border-black p-4 animate-pulse"
         >
           <div className="bg-gray-200 h-48 rounded-xl mb-4"></div>
           <div className="space-y-3">
@@ -157,10 +157,10 @@ export default function ProductDetailSkeleton() {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-background"
+      className="min-h-screen bg-white"
     >
       {/* Breadcrumb */}
-      <section className="bg-background border-b border-border py-4">
+      <section className="bg-white border-b border-neutral-200 py-4">
         <div className="container mx-auto px-6">
           <div className="flex items-center space-x-2 animate-pulse">
             {[...Array(4)].map((_, i) => (
@@ -184,7 +184,7 @@ export default function ProductDetailSkeleton() {
       </section>
 
       {/* Product Tabs */}
-      <section className="py-12 bg-muted/30">
+      <section className="py-12 bg-white/30">
         <div className="container mx-auto px-6">
           {/* Tab Navigation */}
           <div className="flex space-x-8 mb-8">

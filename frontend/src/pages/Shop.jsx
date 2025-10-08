@@ -100,7 +100,7 @@ export default function Shop() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-neutral-900">
+    <div className="min-h-screen bg-neutral-50 text-neutral-900">
       <SEO 
         title="Shop Premium Fashion - HASH India | Latest Collection"
         description="Shop the latest collection at HASH India. Discover premium t-shirts, jeans, dresses, and accessories. Free shipping, easy returns, and best quality guaranteed. Find your style today!"
@@ -134,7 +134,7 @@ export default function Shop() {
         }}
       />
       {/* Hero Section */}
-      <section className="bg-hash-purple text-white py-16 relative overflow-hidden">
+      <section className="bg-gradient-to-br from-black via-neutral-900 to-neutral-800 text-white py-16 relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.1)_0%,transparent_50%)] opacity-50"></div>
         
@@ -155,12 +155,12 @@ export default function Shop() {
       </section>
 
       {/* Search & Filters Section */}
-      <section className="bg-white border-b border-neutral-200 md:sticky md:top-16 md:z-40 md:backdrop-blur-sm shadow-sm">
+      <section className="bg-white border-b border-neutral-200 md:sticky md:top-16 md:z-40 md:backdrop-blur-sm shadow-lg rounded-b-3xl">
         <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
           <div className="flex flex-col gap-4">
             {/* Search */}
             <div className="relative w-full">
-              <Search className="absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 md:w-5 md:h-5" />
+              <Search className="absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 text-black w-4 h-4 md:w-5 md:h-5" />
               <Input
                 type="text"
                 placeholder="Search products..."
@@ -241,12 +241,12 @@ export default function Shop() {
                 </SelectContent>
               </Select>
               
-              <div className="flex border border-border rounded-lg overflow-hidden">
+              <div className="flex border border-black rounded-lg overflow-hidden">
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('grid')}
-                  className="rounded-none border-r border-border px-2 md:px-3"
+                  className="rounded-none border-r border-black px-2 md:px-3"
                 >
                   <Grid className="w-3 h-3 md:w-4 md:h-4" />
                 </Button>
@@ -265,15 +265,15 @@ export default function Shop() {
       </section>
 
       {/* Products Grid */}
-      <section className="py-8 md:py-12 bg-white">
+      <section className="py-8 md:py-12 bg-gradient-to-b from-white to-neutral-50 border-b border-neutral-100 shadow-sm rounded-3xl my-12 mx-auto max-w-7xl">
         <div className="container mx-auto px-4 md:px-6">
           {/* Results Summary */}
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 md:mb-8 gap-2">
-            <div className="text-sm md:text-base text-muted-foreground">
+            <div className="text-sm md:text-base text-black">
               Showing {filteredProducts.length} of {pagination.total} products
               {searchTerm && (
                 <span className="ml-2 block sm:inline">
-                  for "<span className="font-medium text-foreground">{searchTerm}</span>"
+                  for "<span className="font-medium text-black">{searchTerm}</span>"
                 </span>
               )}
             </div>
@@ -299,9 +299,9 @@ export default function Shop() {
                   transition={{ delay: index * 0.1 }}
                 >
                   <Link to={`/product/${product._id}`}>
-                    <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-border bg-card h-full">
+                    <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-neutral-100 hover:border-black/10 bg-white h-full rounded-2xl shadow-md">
                       <CardContent className="p-0">
-                        <div className="aspect-square overflow-hidden rounded-t-xl relative bg-gray-50">
+                        <div className="aspect-square overflow-hidden rounded-t-2xl relative bg-neutral-100">
                           <img
                             src={product.images?.[0]?.url || product.images?.[0] || '/placeholder-product.jpg'}
                             alt={product.name}
@@ -310,14 +310,14 @@ export default function Shop() {
                               e.target.src = '/placeholder-product.jpg';
                             }}
                           />
-                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300" />
                         </div>
                         <div className="p-4">
-                          <h3 className="font-semibold text-lg mb-2 text-neutral-900 group-hover:text-hash-purple transition-colors duration-200">{product.name}</h3>
+                          <h3 className="font-semibold text-lg mb-2 text-neutral-900 group-hover:text-black transition-colors duration-200">{product.name}</h3>
                           <p className="text-neutral-600 text-sm mb-3 line-clamp-2">{product.description}</p>
                           <div className="flex justify-between items-center">
-                            <span className="text-xl font-bold text-hash-purple">₹{product.price}</span>
-                            <Badge variant="secondary" className="bg-hash-purple/10 text-hash-purple border-hash-purple/20">
+                            <span className="text-xl font-bold text-black">₹{product.price}</span>
+                            <Badge variant="secondary" className="bg-neutral-100 text-neutral-800 border-neutral-200">
                               {product.category}
                             </Badge>
                           </div>

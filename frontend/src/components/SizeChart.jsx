@@ -27,11 +27,11 @@ const SizeChart = ({ isOpen, onClose, product }) => {
           exit={{ opacity: 0, scale: 0.95 }}
           className="relative w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto"
         >
-          <Card className="p-6 bg-background">
+          <Card className="p-6 bg-white">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-2">
                 <Ruler className="w-5 h-5 text-hash-purple" />
-                <h3 className="text-xl font-semibold text-foreground">
+                <h3 className="text-xl font-semibold text-black">
                   Size Chart - {product.name}
                 </h3>
               </div>
@@ -61,40 +61,40 @@ const SizeChart = ({ isOpen, onClose, product }) => {
             {/* Size Chart Table */}
             {measurements.length > 0 && (
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-border">
+                <table className="w-full border-collapse border border-black">
                   <thead>
                     <tr className="bg-muted">
-                      <th className="border border-border px-4 py-3 text-left font-medium text-foreground">
+                      <th className="border border-black px-4 py-3 text-left font-medium text-black">
                         Size
                       </th>
                       {chartType === 'clothing' && (
                         <>
-                          <th className="border border-border px-4 py-3 text-left font-medium text-foreground">
+                          <th className="border border-black px-4 py-3 text-left font-medium text-black">
                             Chest (cm)
                           </th>
-                          <th className="border border-border px-4 py-3 text-left font-medium text-foreground">
+                          <th className="border border-black px-4 py-3 text-left font-medium text-black">
                             Waist (cm)
                           </th>
-                          <th className="border border-border px-4 py-3 text-left font-medium text-foreground">
+                          <th className="border border-black px-4 py-3 text-left font-medium text-black">
                             Hips (cm)
                           </th>
-                          <th className="border border-border px-4 py-3 text-left font-medium text-foreground">
+                          <th className="border border-black px-4 py-3 text-left font-medium text-black">
                             Length (cm)
                           </th>
-                          <th className="border border-border px-4 py-3 text-left font-medium text-foreground">
+                          <th className="border border-black px-4 py-3 text-left font-medium text-black">
                             Shoulders (cm)
                           </th>
-                          <th className="border border-border px-4 py-3 text-left font-medium text-foreground">
+                          <th className="border border-black px-4 py-3 text-left font-medium text-black">
                             Sleeves (cm)
                           </th>
                         </>
                       )}
                       {chartType === 'shoes' && (
                         <>
-                          <th className="border border-border px-4 py-3 text-left font-medium text-foreground">
+                          <th className="border border-black px-4 py-3 text-left font-medium text-black">
                             Length (cm)
                           </th>
-                          <th className="border border-border px-4 py-3 text-left font-medium text-foreground">
+                          <th className="border border-black px-4 py-3 text-left font-medium text-black">
                             Width (cm)
                           </th>
                         </>
@@ -103,38 +103,38 @@ const SizeChart = ({ isOpen, onClose, product }) => {
                   </thead>
                   <tbody>
                     {measurements.map((measurement, index) => (
-                      <tr key={index} className={index % 2 === 0 ? 'bg-background' : 'bg-muted/50'}>
-                        <td className="border border-border px-4 py-3 font-medium text-foreground">
+                      <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-muted/50'}>
+                        <td className="border border-black px-4 py-3 font-medium text-black">
                           {measurement.size}
                         </td>
                         {chartType === 'clothing' && (
                           <>
-                            <td className="border border-border px-4 py-3 text-muted-foreground">
+                            <td className="border border-black px-4 py-3 text-black">
                               {measurement.chest || '-'}
                             </td>
-                            <td className="border border-border px-4 py-3 text-muted-foreground">
+                            <td className="border border-black px-4 py-3 text-black">
                               {measurement.waist || '-'}
                             </td>
-                            <td className="border border-border px-4 py-3 text-muted-foreground">
+                            <td className="border border-black px-4 py-3 text-black">
                               {measurement.hips || '-'}
                             </td>
-                            <td className="border border-border px-4 py-3 text-muted-foreground">
+                            <td className="border border-black px-4 py-3 text-black">
                               {measurement.length || '-'}
                             </td>
-                            <td className="border border-border px-4 py-3 text-muted-foreground">
+                            <td className="border border-black px-4 py-3 text-black">
                               {measurement.shoulders || '-'}
                             </td>
-                            <td className="border border-border px-4 py-3 text-muted-foreground">
+                            <td className="border border-black px-4 py-3 text-black">
                               {measurement.sleeves || '-'}
                             </td>
                           </>
                         )}
                         {chartType === 'shoes' && (
                           <>
-                            <td className="border border-border px-4 py-3 text-muted-foreground">
+                            <td className="border border-black px-4 py-3 text-black">
                               {measurement.length || '-'}
                             </td>
-                            <td className="border border-border px-4 py-3 text-muted-foreground">
+                            <td className="border border-black px-4 py-3 text-black">
                               {measurement.width || '-'}
                             </td>
                           </>

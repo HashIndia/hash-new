@@ -176,7 +176,7 @@ export default function Cart() {
                           >
                             -
                           </button>
-                          <span className="px-3 md:px-4 py-1 font-semibold text-foreground text-sm md:text-base">{item.quantity}</span>
+                          <span className="px-3 md:px-4 py-1 font-semibold text-black text-sm md:text-base">{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
                             className="px-2 md:px-3 py-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 transition-colors text-sm md:text-base"

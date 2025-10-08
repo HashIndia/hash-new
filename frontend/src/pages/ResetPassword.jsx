@@ -68,7 +68,7 @@ export default function ResetPassword() {
           </CardHeader>
           <CardContent>
             <div className="text-center space-y-4">
-              <p className="text-muted-foreground">
+              <p className="text-black">
                 Password reset links expire after 10 minutes for security reasons.
               </p>
               <Button 
@@ -106,7 +106,7 @@ export default function ResetPassword() {
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black hover:text-black"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -124,7 +124,7 @@ export default function ResetPassword() {
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black hover:text-black"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
                 {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

@@ -70,7 +70,7 @@ export default function OrderSuccess() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated background effects */}
       <div className="absolute inset-0 bg-hash-purple/10" />
       
@@ -108,7 +108,7 @@ export default function OrderSuccess() {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="relative w-full max-w-md z-10"
       >
-        <Card className="shadow-2xl bg-card/90 backdrop-blur-sm border border-border overflow-hidden">
+        <Card className="shadow-2xl bg-white/90 backdrop-blur-sm border border-black overflow-hidden">
           {/* Header with gradient */}
           <CardHeader className="text-center pb-6 bg-hash-purple text-white relative">
             <div className="absolute inset-0 bg-black/20" />
@@ -150,7 +150,7 @@ export default function OrderSuccess() {
           
           <CardContent className="text-center space-y-6 p-6">
             <motion.p 
-              className="text-muted-foreground leading-relaxed"
+              className="text-black leading-relaxed"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
@@ -160,32 +160,32 @@ export default function OrderSuccess() {
 
             {orderDetails && (
               <motion.div 
-                className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-4 text-left"
+                className="bg-white/50 backdrop-blur-sm border border-black rounded-xl p-4 text-left"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
               >
-                <h4 className="font-semibold mb-3 text-foreground flex items-center gap-2">
+                <h4 className="font-semibold mb-3 text-black flex items-center gap-2">
                   <div className="w-2 h-2 bg-hash-green rounded-full"></div>
                   Order Details
                 </h4>
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">Order ID:</span> {orderDetails.orderId || orderDetails._id}
+                  <p className="text-sm text-black">
+                    <span className="font-medium text-black">Order ID:</span> {orderDetails.orderId || orderDetails._id}
                   </p>
                   {orderDetails.orderNumber && (
-                    <p className="text-sm text-muted-foreground">
-                      <span className="font-medium text-foreground">Order Number:</span> {orderDetails.orderNumber}
+                    <p className="text-sm text-black">
+                      <span className="font-medium text-black">Order Number:</span> {orderDetails.orderNumber}
                     </p>
                   )}
                   {orderDetails.totalAmount && (
-                    <p className="text-sm text-muted-foreground">
-                      <span className="font-medium text-foreground">Total Amount:</span> 
+                    <p className="text-sm text-black">
+                      <span className="font-medium text-black">Total Amount:</span> 
                       <span className="text-hash-green font-bold"> ₹{orderDetails.totalAmount}</span>
                     </p>
                   )}
-                  <p className="text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">Payment Method:</span> {
+                  <p className="text-sm text-black">
+                    <span className="font-medium text-black">Payment Method:</span> {
                       orderDetails.paymentMethod === 'upi' ? 'UPI' :
                       orderDetails.paymentMethod === 'card' ? 'Card' :
                       orderDetails.paymentMethod === 'netbanking' ? 'Net Banking' :
@@ -195,8 +195,8 @@ export default function OrderSuccess() {
                     }
                   </p>
                   {orderDetails.status && (
-                    <p className="text-sm text-muted-foreground">
-                      <span className="font-medium text-foreground">Status:</span> 
+                    <p className="text-sm text-black">
+                      <span className="font-medium text-black">Status:</span> 
                       <span className="ml-1 px-2 py-1 bg-hash-green/10 text-hash-green rounded-full text-xs font-medium">
                         {orderDetails.status}
                       </span>
