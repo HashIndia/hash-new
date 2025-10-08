@@ -58,9 +58,6 @@ export default function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/order-success" element={<OrderSuccess />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/orders" element={<Orders />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/verify-otp" element={<VerifyOTP />} />
@@ -75,7 +72,6 @@ export default function App() {
             <Route path="/faq" element={<FAQ />} />
             <Route path="/size-guide" element={<SizeGuide />} />
             <Route path="/business" element={<Business />} />
-            <Route path="*" element={<NotFound />} />
             <Route
               path="/profile"
               element={
@@ -100,6 +96,7 @@ export default function App() {
                 </PrivateRoute>
               }
             />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
         <Footer />

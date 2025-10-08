@@ -29,50 +29,35 @@ export default function ProductDetails() {
   const [activeImage, setActiveImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [showSizeChart, setShowSizeChart] = useState(false);
+  const [showPoloVarsityForm, setShowPoloVarsityForm] = useState(false);
   const [totalReviews, setTotalReviews] = useState(0);
   const [remainingOfferUnits, setRemainingOfferUnits] = useState(0);
 
+  // Load product when component mounts or ID changes
+  useEffect(() => {
+    if (id) {
+      loadProduct(id);
+    }
+  }, [id, loadProduct]);
+
   // Update remaining offer units when product changes
   useEffect(() => {
-    if (product?.limitedOffer?.isActive) {
-      const remaining = product.limitedOffer.maxUnits - (product.limitedOffer.unitsSold || 0);
+    if (currentProduct?.limitedOffer?.isActive) {
+      const remaining = (currentProduct.limitedOffer?.maxUnits || 0) - (currentProduct.limitedOffer?.unitsSold || 0);
       setRemainingOfferUnits(Math.max(0, remaining));
     } else {
       setRemainingOfferUnits(0);
     }
-  }, [product]);
+  }, [currentProduct]);
 
   // Helper functions for limited offer
-  const getEffectivePrice = () => {
-    if (product?.limitedOffer?.isActive && remainingOfferUnits > 0) {
-      return product.limitedOffer.specialPrice;
-    }
-    return product?.price || 0;
-  };
-
-  const getDiscountPercentage = () => {
-    if (product?.limitedOffer?.isActive && remainingOfferUnits > 0) {
-      const discount = ((product.price - product.limitedOffer.specialPrice) / product.price) * 100;
-      return Math.round(discount);
-    }
-    return 0;
-  };
-
-  const isOfferValid = () => {
-    if (!product?.limitedOffer?.isActive) return false;
-    
-    const hasUnitsLeft = remainingOfferUnits > 0;
-    const isWithinDateRange = !product.limitedOffer.endDate || new Date() <= new Date(product.limitedOffer.endDate);
-    
-    return hasUnitsLeft && isWithinDateRange;
-  };
 
   // Check if product is in wishlist
   useEffect(() => {
-    if (wishlist && product && product._id) {
-      setIsWishlisted(wishlist.some(item => item._id === product._id));
+    if (wishlist && currentProduct && currentProduct._id) {
+      setIsWishlisted(wishlist.some(item => item._id === currentProduct._id));
     }
-  }, [wishlist, product?._id]);
+  }, [wishlist, currentProduct?._id]);
 
   // Helper functions for variant system
   const getAvailableSizes = () => {
@@ -88,10 +73,11 @@ export default function ProductDetails() {
     if (!safeProduct?.variants?.length) return [];
     const colors = safeProduct.variants
       .filter(variant => variant.stock > 0)
-      .map(variant => variant.color);
+      .map(variant => variant.color)
+      .filter(color => color); // Filter out any null/undefined colors
     const uniqueColors = colors.reduce((acc, color) => {
-      const exists = acc.find(c => c.hex === color.hex);
-      if (!exists) acc.push(color);
+      const exists = acc.find(c => c?.hex === color?.hex);
+      if (!exists && color?.hex) acc.push(color);
       return acc;
     }, []);
     return uniqueColors;
@@ -100,7 +86,7 @@ export default function ProductDetails() {
   const getSizesForColor = (colorHex) => {
     if (!safeProduct?.variants?.length) return [];
     return safeProduct.variants
-      .filter(variant => variant.color.hex === colorHex && variant.stock > 0)
+      .filter(variant => variant.color?.hex === colorHex && variant.stock > 0)
       .map(variant => variant.size);
   };
 
@@ -108,10 +94,11 @@ export default function ProductDetails() {
     if (!safeProduct?.variants?.length) return [];
     const colors = safeProduct.variants
       .filter(variant => variant.size === size && variant.stock > 0)
-      .map(variant => variant.color);
+      .map(variant => variant.color)
+      .filter(color => color); // Filter out any null/undefined colors
     return colors.reduce((acc, color) => {
-      const exists = acc.find(c => c.hex === color.hex);
-      if (!exists) acc.push(color);
+      const exists = acc.find(c => c?.hex === color?.hex);
+      if (!exists && color?.hex) acc.push(color);
       return acc;
     }, []);
   };
@@ -119,28 +106,69 @@ export default function ProductDetails() {
   const getVariantStock = (size, colorHex) => {
     if (!safeProduct?.variants?.length) return 0;
     const variant = safeProduct.variants.find(v => 
-      v.size === size && v.color.hex === colorHex
+      v.size === size && v.color?.hex === colorHex
     );
     return variant ? variant.stock : 0;
   };
 
+  const getSelectedVariant = () => {
+    if (!safeProduct?.variants?.length || !selectedSize || !selectedColor) return null;
+    return safeProduct.variants.find(v => 
+      v.size === selectedSize && v.color?.hex === selectedColor
+    );
+  };
+
+  // Discount calculation helpers
+  const isLimitedOfferActive = () => {
+    return safeProduct?.limitedOffer?.isActive && remainingOfferUnits > 0;
+  };
+
+  const isSaleActive = () => {
+    if (!safeProduct?.saleStartDate || !safeProduct?.saleEndDate) return false;
+    const now = new Date();
+    const saleStart = new Date(safeProduct.saleStartDate);
+    const saleEnd = new Date(safeProduct.saleEndDate);
+    return now >= saleStart && now <= saleEnd;
+  };
+
+  const getDiscountedPrice = () => {
+    if (isLimitedOfferActive()) {
+      return safeProduct.limitedOffer?.specialPrice;
+    }
+    if (isSaleActive() && safeProduct.salePrice < safeProduct.price) {
+      return safeProduct.salePrice;
+    }
+    return safeProduct.price;
+  };
+
+  const getDiscountPercentage = () => {
+    const discountedPrice = getDiscountedPrice();
+    if (discountedPrice < safeProduct.price) {
+      return Math.round(((safeProduct.price - discountedPrice) / safeProduct.price) * 100);
+    }
+    return 0;
+  };
+
   // Default/safe product structure
-  const safeProduct = product ? {
-    _id: product._id,
-    name: product.name || 'Product Name',
-    description: product.description || 'No description available',
-    price: product.price || 0,
-    salePrice: product.salePrice || product.price || 0,
-    images: Array.isArray(product.images) ? product.images : 
-             product.images ? [product.images] : 
+  const safeProduct = currentProduct ? {
+    _id: currentProduct._id,
+    name: currentProduct.name || 'Product Name',
+    description: currentProduct.description || 'No description available',
+    price: currentProduct.price || 0,
+    salePrice: currentProduct.salePrice || currentProduct.price || 0,
+    images: Array.isArray(currentProduct.images) ? currentProduct.images : 
+             currentProduct.images ? [currentProduct.images] : 
              [{ url: '/placeholder-image.jpg', isPrimary: true }],
-    stock: product.stock || 0,
-    category: product.category || 'General',
-    variants: product.variants || [],
-    sizeChart: product.sizeChart || { hasChart: false },
-    brand: product.brand || 'Unknown Brand',
-    reviewStats: product.reviewStats || { averageRating: 0, totalReviews: 0 },
-    features: product.features || []
+    stock: currentProduct.stock || 0,
+    category: currentProduct.category || 'General',
+    variants: currentProduct.variants || [],
+    sizeChart: currentProduct.sizeChart || { hasChart: false },
+    brand: currentProduct.brand || 'Unknown Brand',
+    reviewStats: currentProduct.reviewStats || { averageRating: 0, totalReviews: 0 },
+    features: currentProduct.features || [],
+    limitedOffer: currentProduct.limitedOffer || null,
+    saleStartDate: currentProduct.saleStartDate || null,
+    saleEndDate: currentProduct.saleEndDate || null
   } : null;
 
   if (isLoading) {
@@ -168,12 +196,12 @@ export default function ProductDetails() {
 
     try {
       if (isWishlisted) {
-        await authAPI.removeFromWishlist(product._id);
-        setWishlist(wishlist.filter(item => item._id !== product._id));
+        await authAPI.removeFromWishlist(currentProduct._id);
+        setWishlist(wishlist.filter(item => item._id !== currentProduct._id));
         toast.success('Removed from wishlist');
       } else {
-        await authAPI.addToWishlist(product._id);
-        setWishlist([...wishlist, product]);
+        await authAPI.addToWishlist(currentProduct._id);
+        setWishlist([...wishlist, currentProduct]);
         toast.success('Added to wishlist');
       }
       setIsWishlisted(!isWishlisted);
@@ -218,7 +246,7 @@ export default function ProductDetails() {
       addToCart(safeProduct, quantity, {
         size: selectedSize,
         color: selectedColor,
-        variantId: selectedVariant?._id,
+        variantId: getSelectedVariant()?._id,
       });
       toast.success('Added to cart successfully!');
     }
@@ -228,7 +256,7 @@ export default function ProductDetails() {
     addToCart(safeProduct, quantity, {
       size: selectedSize,
       color: selectedColor,
-      variantId: selectedVariant?._id,
+      variantId: getSelectedVariant()?._id,
       customFields: formData,
     });
     toast.success('Product added to cart!');
@@ -259,9 +287,9 @@ export default function ProductDetails() {
     }
   };
 
-  const currentPrice = isOfferValid() ? getEffectivePrice() : (safeProduct.salePrice || safeProduct.price);
-  const originalPrice = isOfferValid() ? safeProduct.price : (safeProduct.salePrice ? safeProduct.price : null);
-  const discount = isOfferValid() ? getDiscountPercentage() : (originalPrice ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0);
+  const currentPrice = getDiscountedPrice();
+  const originalPrice = safeProduct.price;
+  const discount = getDiscountPercentage();
 
   return (
     <div className="min-h-screen bg-background">
@@ -436,12 +464,12 @@ export default function ProductDetails() {
               </div>
 
               {/* Limited Offer Banner */}
-              {isOfferValid() && (
+              {isLimitedOfferActive() && (
                 <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white p-4 rounded-lg mb-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-bold text-lg">{safeProduct.limitedOffer.offerTitle}</h3>
-                      <p className="text-sm opacity-90">{safeProduct.limitedOffer.offerDescription}</p>
+                      <h3 className="font-bold text-lg">{safeProduct.limitedOffer?.offerTitle || 'Limited Time Offer'}</h3>
+                      <p className="text-sm opacity-90">{safeProduct.limitedOffer?.offerDescription || 'Special discount available'}</p>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold">{remainingOfferUnits}</div>
@@ -452,7 +480,7 @@ export default function ProductDetails() {
                     <div 
                       className="bg-white rounded-full h-2 transition-all duration-300"
                       style={{ 
-                        width: `${Math.max(5, (remainingOfferUnits / safeProduct.limitedOffer.maxUnits) * 100)}%` 
+                        width: `${Math.max(5, (remainingOfferUnits / (safeProduct.limitedOffer?.maxUnits || 1)) * 100)}%` 
                       }}
                     ></div>
                   </div>
@@ -689,7 +717,7 @@ export default function ProductDetails() {
                     getVariantStock(selectedSize, selectedColor) <= 10 ? 'text-yellow-500' : 
                     'text-green-500'
                   }`}>
-                    {getVariantStock(selectedSize, selectedColor)} units available for {selectedSize} - {safeProduct.variants.find(v => v.size === selectedSize && v.color.hex === selectedColor)?.color.name}
+                    {getVariantStock(selectedSize, selectedColor)} units available for {selectedSize} - {safeProduct.variants.find(v => v.size === selectedSize && v.color?.hex === selectedColor)?.color?.name}
                   </span>
                 </div>
               )}

@@ -12,7 +12,7 @@ const isSafariOrIOS = () => {
 };
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://hash-backend-production.up.railway.app/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   withCredentials: true,
   timeout: 15000, // Increased timeout for slow networks
   headers: {
@@ -70,9 +70,13 @@ api.interceptors.response.use(
         refreshAttempts = 0;
         authToken = null;
         localStorage.removeItem('safari_auth_token');
-        useUserStore.getState().logout();
-        if (!window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
+        
+        // Only logout and redirect for login/register endpoints, not for initial auth checks
+        if (originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/register')) {
+          useUserStore.getState().logout();
+          if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
+          }
         }
         return Promise.reject(error.response?.data || error);
       }
@@ -103,8 +107,10 @@ api.interceptors.response.use(
         authToken = null;
         localStorage.removeItem('safari_auth_token');
         processQueue(refreshError, null);
-        useUserStore.getState().logout();
-        if (!window.location.pathname.includes('/login')) {
+        
+        // Only clear state and redirect if we're not on login page and not doing initial auth check
+        if (!window.location.pathname.includes('/login') && !originalRequest.url?.includes('/auth/me')) {
+          useUserStore.getState().logout();
           window.location.href = '/login';
         }
         return Promise.reject(refreshError);
@@ -117,8 +123,10 @@ api.interceptors.response.use(
       refreshAttempts = 0;
       authToken = null;
       localStorage.removeItem('safari_auth_token');
-      useUserStore.getState().logout();
-      if (!window.location.pathname.includes('/login')) {
+      
+      // Only clear state and redirect if we're not on login page and not doing initial auth check
+      if (!window.location.pathname.includes('/login') && !originalRequest.url?.includes('/auth/me')) {
+        useUserStore.getState().logout();
         window.location.href = '/login';
       }
     }

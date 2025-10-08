@@ -8,6 +8,7 @@ import { startBackgroundLoading, endBackgroundLoading } from './BackgroundLoadin
 export default function AuthInitializer() {
   const { user, isAuthenticated, setUser, setWishlist, setAddresses, logout } = useUserStore();
   const { initialize: initializeProducts } = useProductStore();
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -31,13 +32,7 @@ export default function AuthInitializer() {
           console.warn('⚠️ Products initialization failed:', error);
         });
 
-        // Only check auth if we have stored authentication state
-        if (!isAuthenticated || !user) {
-          performanceMonitor.endInitialization();
-          endBackgroundLoading('initialization');
-          return;
-        }
-
+        // Check authentication status on initialization
         startBackgroundLoading('authentication');
         performanceMonitor.startAPICall('auth-check');
         
@@ -56,11 +51,15 @@ export default function AuthInitializer() {
                 if (wishlistResponse.data.wishlist) {
                   setWishlist(wishlistResponse.data.wishlist);
                 }
+              }).catch(error => {
+                console.warn('⚠️ Wishlist loading failed:', error);
               }),
               authAPI.getAddresses().then(addressResponse => {
                 if (addressResponse.data.addresses) {
                   setAddresses(addressResponse.data.addresses);
                 }
+              }).catch(error => {
+                console.warn('⚠️ Addresses loading failed:', error);
               })
             ]).then(() => {
               endBackgroundLoading('user-data');
@@ -69,13 +68,25 @@ export default function AuthInitializer() {
               console.warn('⚠️ Secondary data loading failed:', error);
             });
           } else if (isMounted) {
+            // Clear any stale user data but don't redirect
             logout();
           }
         } catch (authError) {
           performanceMonitor.endAPICall('auth-check');
           endBackgroundLoading('authentication');
-          if (isMounted && isAuthenticated) {
+          
+          console.log('Auth check failed:', authError);
+          
+          // Only logout if we had stored authentication data that's now invalid
+          if (isMounted && (isAuthenticated || user)) {
+            console.log('Clearing invalid auth state');
             logout();
+          }
+          
+          // Don't redirect here - let the app handle it naturally
+        } finally {
+          if (isMounted) {
+            setAuthChecked(true);
           }
         }
         
