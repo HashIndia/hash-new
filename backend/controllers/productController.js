@@ -172,6 +172,7 @@ export const createProduct = catchAsync(async (req, res, next) => {
     productData.stock = productData.variants.reduce((total, variant) => total + variant.stock, 0);
   }
 
+  console.log('Product Data being sent to Product.create:', productData);
   try {
     const product = await Product.create(productData);
     res.status(201).json({
@@ -179,6 +180,7 @@ export const createProduct = catchAsync(async (req, res, next) => {
       data: { product }
     });
   } catch (error) {
+    console.error('Error creating product:', error);
     return next(error);
   }
 });

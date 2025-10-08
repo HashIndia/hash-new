@@ -79,8 +79,6 @@ const productValidation = [
     .optional()
     .isInt({ min: 0 })
     .withMessage('Stock must be a non-negative integer'),
-  body('sku')
-    .optional(),
   body('brand')
     .optional(),
   body('subcategory')
