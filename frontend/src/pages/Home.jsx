@@ -44,20 +44,15 @@ export default function Home() {
   const [showSkeleton, setShowSkeleton] = useState(true);
 
   useEffect(() => {
-    if (products.length === 0 && !isLoading) {
-      initialize();
-    }
-    const timer = setTimeout(() => {
+    const fetchProducts = async () => {
+      if (products.length === 0) {
+        await initialize();
+      }
       setShowSkeleton(false);
-    }, 1200);
-    return () => clearTimeout(timer);
-  }, [initialize, products.length, isLoading]);
+    };
 
-  useEffect(() => {
-    if (products.length > 0) {
-      setShowSkeleton(false);
-    }
-  }, [products]);
+    fetchProducts();
+  }, [initialize, products.length]);
 
   if (showSkeleton && products.length === 0) {
     return <HomePageSkeleton />;
