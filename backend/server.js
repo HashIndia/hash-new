@@ -177,7 +177,7 @@ const findAvailablePort = (port) => {
     const server = app.listen(port, () => {
       server.close(() => resolve(port));
     }).on('error', () => {
-      resolve(findAvailablePort(port + 1));
+      resolve(findAvailablePort(parseInt(port) + 1));
     });
   });
 };
@@ -185,7 +185,7 @@ const findAvailablePort = (port) => {
 // Start server with port fallback
 const startServer = async () => {
   try {
-    const PORT = process.env.PORT || 5000;
+    const PORT = parseInt(process.env.PORT) || 5000;
     const availablePort = await findAvailablePort(PORT);
     
     app.listen(availablePort, () => {

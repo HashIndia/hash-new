@@ -6,7 +6,7 @@ import RefreshToken from '../models/RefreshToken.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 import emailService from '../services/emailService.js';
-import { createSendTokens, clearAuthCookies, revokeAllRefreshTokens } from '../utils/tokenUtils.js';
+import { createSendTokens, clearAuthCookies, revokeAllRefreshTokens, extractTokensFromCookies } from '../utils/tokenUtils.js';
 
 // Register a new user
 export const register = catchAsync(async (req, res, next) => {

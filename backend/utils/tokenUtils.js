@@ -186,3 +186,12 @@ export const revokeAllRefreshTokens = async (userId, userType = 'user') => {
     throw error;
   }
 };
+
+// --- Extract Tokens from Cookies ---
+export const extractTokensFromCookies = (req, userType = 'user') => {
+  const prefix = userType === 'admin' ? 'admin' : 'user';
+  return {
+    accessToken: req.cookies[`${prefix}AccessToken`],
+    refreshToken: req.cookies[`${prefix}RefreshToken`]
+  };
+};

@@ -12,21 +12,29 @@ const protect = (userType = 'user') =>
     const prefix = userType === 'admin' ? 'admin' : 'user';
     const cookieName = `${prefix}AccessToken`;
 
+    console.log(`🔐 [Auth] Checking auth for ${userType} on ${req.path}`);
+    console.log(`🔐 [Auth] Looking for cookie: ${cookieName}`);
+    console.log(`🔐 [Auth] Available cookies:`, Object.keys(req.cookies || {}));
+
     // First try to get token from cookies (primary method)
     if (req.cookies && req.cookies[cookieName]) {
       token = req.cookies[cookieName];
+      console.log(`🔐 [Auth] Found token in cookies`);
     }
     
     // Fallback for Safari/iOS: Check Authorization header or custom headers
     if (!token) {
       if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
         token = req.headers.authorization.split(' ')[1];
+        console.log(`🔐 [Auth] Found token in Authorization header`);
       } else if (req.headers['x-auth-token']) {
         token = req.headers['x-auth-token'];
+        console.log(`🔐 [Auth] Found token in X-Auth-Token header`);
       }
     }
 
     if (!token) {
+      console.log(`🔐 [Auth] No token found, returning 401`);
       return next(new AppError('You are not logged in. Please log in to get access.', 401));
     }
 
