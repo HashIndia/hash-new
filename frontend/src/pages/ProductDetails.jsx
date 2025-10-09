@@ -435,6 +435,9 @@ export default function ProductDetails() {
               <Badge variant="secondary" className="mb-2 bg-black/5 text-black border-black/10 text-xs">
                 {safeProduct.category}
               </Badge>
+              <Badge variant="secondary" className="mb-2 bg-black text-white border-black/10 text-xs px-3 py-1">
+                {safeProduct.category}
+              </Badge>
               <h1 className="text-xl lg:text-2xl font-bold text-black mb-2 leading-tight">
                 {safeProduct.name}
               </h1>
@@ -638,7 +641,7 @@ export default function ProductDetails() {
                     type="number"
                     value={quantity}
                     onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
-                    className="w-12 h-8 text-center border-0 bg-transparent text-black font-semibold text-sm focus:ring-0"
+                    className="w-20 h-8 text-center border-0 bg-transparent text-black font-semibold text-sm focus:ring-0"
                     min="1"
                     max={selectedSize && selectedColor ? getVariantStock(selectedSize, selectedColor) : safeProduct.stock}
                   />
