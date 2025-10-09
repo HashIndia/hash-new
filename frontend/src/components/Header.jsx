@@ -75,17 +75,9 @@ export default function Header() {
           <Link to="/shop" className="text-neutral-700 hover:text-black font-medium transition-all duration-200 hover:scale-105">
             Shop
           </Link>
-          <Link to="/about" className="text-neutral-700 hover:text-black font-medium transition-all duration-200 hover:scale-105">
-            About Us
-          </Link>
-          <Link to="/#core-team" className="text-neutral-700 hover:text-black font-medium transition-all duration-200 hover:scale-105 flex items-center gap-1" onClick={(e) => {
-            if (window.location.pathname === '/') {
-              e.preventDefault();
-              document.getElementById('core-team')?.scrollIntoView({ behavior: 'smooth' });
-            }
-          }}>
+          <a href="#core-team" className="text-neutral-700 hover:text-black font-medium transition-all duration-200 hover:scale-105 flex items-center gap-1">
             <Users className="w-4 h-4" /> Core
-          </Link>
+          </a>
           <Link to="/cart" className="relative group">
             <div className="p-2 rounded-xl hover:bg-neutral-100 transition-all duration-200 group-hover:scale-105">
               <ShoppingCart className="w-6 h-6 text-neutral-700 group-hover:text-black transition-colors" />
@@ -239,19 +231,13 @@ export default function Header() {
               >
                 Shop
               </Link>
-              <Link
-                to="/#core-team"
-                className="p-3 rounded-xl hover:bg-neutral-100 text-neutral-700 font-medium transition-all duration-200 flex items-center gap-2"
-                onClick={(e) => {
-                  setMobileMenuOpen(false);
-                  if (window.location.pathname === '/') {
-                    e.preventDefault();
-                    document.getElementById('core-team')?.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
+              <a
+                href="#core-team"
+                className=" p-3 rounded-xl hover:bg-neutral-100 text-neutral-700 font-medium transition-all duration-200 flex items-center gap-2"
+                onClick={() => setMobileMenuOpen(false)}
               >
                 <Users className="w-4 h-4" /> Core
-              </Link>
+              </a>
               {isAuthenticated ? (
                 <>
                   <Link

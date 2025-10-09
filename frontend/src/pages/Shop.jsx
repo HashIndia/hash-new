@@ -25,7 +25,7 @@ export default function Shop() {
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedBrand, setSelectedBrand] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   const [priceRange, setPriceRange] = useState('all');
   const [sortBy, setSortBy] = useState('createdAt');
@@ -39,7 +39,7 @@ export default function Shop() {
           page: pagination.page,
           limit: 12,
           search: searchTerm,
-          brand: selectedBrand,
+          category: selectedCategory,
 
           sort: sortBy.split('-')[0],
           order: sortBy.split('-')[1] || 'desc',
@@ -59,7 +59,7 @@ export default function Shop() {
           }
         }
         
-        if (params.brand === 'all') delete params.brand;
+        if (params.category === 'all') delete params.category;
 
         const response = await productsAPI.getProducts(params);
         setProducts(response.data.products);
@@ -81,12 +81,12 @@ export default function Shop() {
     }, 300); // Debounce search input
 
     return () => clearTimeout(debounceFetch);
-  }, [searchTerm, selectedBrand, priceRange, sortBy, pagination.page]);
+  }, [searchTerm, selectedCategory, priceRange, sortBy, pagination.page]);
 
   // Filter and sort products - This is now handled by the backend
   const filteredProducts = products;
 
-  const brands = useMemo(() => {
+  const categories = useMemo(() => {
     // Direct array of category values to match backend exactly
     return ['Polo', 'Regular Fit', 'Oversized Tees', 'Vest', 'Hoodie', 'Varsity', 'Croptop'];
   }, []);
@@ -168,19 +168,19 @@ export default function Shop() {
             
             {/* Quick Filters */}
             <div className="flex flex-wrap gap-2 md:gap-3 relative z-50">
-              <Select value={selectedBrand} onValueChange={setSelectedBrand}>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className="w-full sm:w-40 bg-white border-neutral-300 text-neutral-800 text-sm md:text-base shadow-sm">
-                  <SelectValue placeholder="Brand" />
+                  <SelectValue placeholder="Category" />
                 </SelectTrigger>
               <SelectContent className="bg-white border border-neutral-200 shadow-lg z-50">
-                  <SelectItem value="all" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">All Brands</SelectItem>
-                  {brands.map((brand) => (
+                  <SelectItem value="all" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">All Categories</SelectItem>
+                  {categories.map((category) => (
                     <SelectItem 
-                      key={brand} 
-                      value={brand} 
+                      key={category} 
+                      value={category} 
                       className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20"
                     >
-                      {brand}
+                      {category}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -289,7 +289,7 @@ export default function Shop() {
                           <h3 className="font-semibold text-lg mb-1 text-neutral-900 group-hover:text-black transition-colors duration-200">
                             {product.name}
                             <Badge variant="secondary" className="ml-2 inline-flex bg-neutral-100 text-neutral-800 border-neutral-200">
-                              {product.brand}
+                              {product.category}
                             </Badge>
                           </h3>
                           <p className="text-neutral-600 text-sm mb-3 line-clamp-2">{product.description}</p>
