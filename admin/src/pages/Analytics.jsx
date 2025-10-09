@@ -40,22 +40,6 @@ import useAnalyticsStore from "../stores/useAnalyticsStore";
 
 const VENDOR_ENTRIES_KEY = "hash_vendor_entries";
 
-const revenueDataFallback = [
-  { date: "2024-01-01", revenue: 45000, orders: 23 },
-  { date: "2024-01-02", revenue: 32000, orders: 18 },
-  { date: "2024-01-03", revenue: 51000, orders: 28 },
-  { date: "2024-01-04", revenue: 48000, orders: 25 },
-  { date: "2024-01-05", revenue: 62000, orders: 34 },
-  { date: "2024-01-06", revenue: 55000, orders: 29 },
-  { date: "2024-01-07", revenue: 72000, orders: 42 },
-];
-
-const customerSegmentDataFallback = [
-  { name: "New Customers", value: 35, color: "#3b82f6" },
-  { name: "Returning", value: 45, color: "#8b5cf6" },
-  { name: "VIP", value: 20, color: "#10b981" },
-];
-
 const trafficSourceData = [
   { source: "Organic Search", visitors: 2400, conversions: 180 },
   { source: "Social Media", visitors: 1800, conversions: 95 },
@@ -433,30 +417,26 @@ const Analytics = () => {
   }, [orders]);
 
   const orderStats = useMemo(() => {
-    if (dashboardStats) {
-      return {
-        total: dashboardStats.orders.total,
-        totalRevenue: dashboardStats.revenue.total,
-        avgOrderValue:
-          dashboardStats.orders.total > 0
-            ? dashboardStats.revenue.total / dashboardStats.orders.total
-            : 0,
-      };
-    }
-    const total = orders.length;
-    const validOrders = orders.filter((o) => o.status !== "cancelled");
-    const totalRevenue = validOrders.reduce(
-      (sum, order) => sum + (order.totalAmount || order.total || 0),
-      0
-    );
-    const avgOrderValue =
-      validOrders.length > 0 ? totalRevenue / validOrders.length : 0;
+    let totalRevenue = 0;
+    let totalSoldProducts = 0;
+
+    orders.forEach((order) => {
+      if (order.status !== "cancelled" && order.items) {
+        order.items.forEach((item) => {
+          totalSoldProducts += item.quantity || 0;
+          totalRevenue += (item.quantity || 0) * (item.price || 0);
+        });
+      }
+    });
+
+    const avgOrderValue = totalSoldProducts > 0 ? totalRevenue / totalSoldProducts : 0;
+
     return {
-      total,
-      totalRevenue,
-      avgOrderValue,
+      total: totalSoldProducts,
+      totalRevenue: totalRevenue,
+      avgOrderValue: avgOrderValue,
     };
-  }, [orders, dashboardStats]);
+  }, [orders]);
 
   const kpis = [
     {
@@ -485,18 +465,19 @@ const Analytics = () => {
     },
   ];
 
-  const revenueData =
-    revenueAnalytics?.dailyData?.map((item) => ({
+  const revenueData = useMemo(() => {
+    return revenueAnalytics?.dailyData?.map((item) => ({
       date: `${item._id.year}-${String(item._id.month).padStart(
         2,
         "0"
       )}-${String(item._id.day).padStart(2, "0")}`,
       revenue: item.revenue,
       orders: item.orders,
-    })) || revenueDataFallback;
+    })) || [];
+  }, [revenueAnalytics]);
 
-  const customerSegmentData =
-    customerAnalytics?.customerSegments?.map((segment) => ({
+  const customerSegmentData = useMemo(() => {
+    return customerAnalytics?.customerSegments?.map((segment) => ({
       name:
         segment._id === "new"
           ? "New Customers"
@@ -514,7 +495,8 @@ const Analytics = () => {
           : segment._id === "loyal"
           ? "#10b981"
           : "#6b7280",
-    })) || customerSegmentDataFallback;
+    })) || [];
+  }, [customerAnalytics]);
 
   return (
     <div className="space-y-6">

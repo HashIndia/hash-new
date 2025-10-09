@@ -177,7 +177,7 @@ const mockOrders = [
 
 const useOrderStore = create((set, get) => ({
   // State
-  orders: mockOrders,
+  orders: [],
   searchTerm: '',
   statusFilter: 'all',
   dateRange: 'all',
