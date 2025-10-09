@@ -26,7 +26,8 @@ export default function Shop() {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-
+  const [selectedSize, setSelectedSize] = useState('all');
+  const [selectedColor, setSelectedColor] = useState('all'); // New state for color filter
   const [priceRange, setPriceRange] = useState('all');
   const [sortBy, setSortBy] = useState('createdAt');
   const [viewMode, setViewMode] = useState('grid');
@@ -40,7 +41,8 @@ export default function Shop() {
           limit: 12,
           search: searchTerm,
           category: selectedCategory,
-
+          size: selectedSize,
+          color: selectedColor, // Include selectedColor in API params
           sort: sortBy.split('-')[0],
           order: sortBy.split('-')[1] || 'desc',
         };
@@ -60,6 +62,8 @@ export default function Shop() {
         }
         
         if (params.category === 'all') delete params.category;
+        if (params.size === 'all') delete params.size;
+        if (params.color === 'all') delete params.color; // Delete color param if 'all'
 
         const response = await productsAPI.getProducts(params);
         setProducts(response.data.products);
@@ -81,14 +85,14 @@ export default function Shop() {
     }, 300); // Debounce search input
 
     return () => clearTimeout(debounceFetch);
-  }, [searchTerm, selectedCategory, priceRange, sortBy, pagination.page]);
+  }, [searchTerm, selectedCategory, selectedSize, selectedColor, priceRange, sortBy, pagination.page]); // Add selectedColor to dependencies
 
   // Filter and sort products - This is now handled by the backend
   const filteredProducts = products;
 
   const categories = useMemo(() => {
-    // Direct array of category values to match backend exactly
-    return ['Polo', 'Regular Fit', 'Oversized Tees', 'Vest', 'Hoodie', 'Varsity', 'Croptop'];
+    // This should ideally come from an API endpoint
+    return ['Polo', 'Regular fit', 'Oversized tees', 'Vest', 'Hoodie', 'Varsity', 'Croptop'];
   }, []);
 
   if (loading && products.length === 0) {
@@ -177,7 +181,7 @@ export default function Shop() {
                   {categories.map((category) => (
                     <SelectItem 
                       key={category} 
-                      value={category} 
+                      value={category.toLowerCase().replace(/\s+/g, '-')} 
                       className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20"
                     >
                       {category}
@@ -186,7 +190,41 @@ export default function Shop() {
                 </SelectContent>
               </Select>
 
+              <Select value={selectedSize} onValueChange={setSelectedSize}>
+                <SelectTrigger className="w-full sm:w-40 bg-white border-neutral-300 text-neutral-800 text-sm md:text-base shadow-sm">
+                  <SelectValue placeholder="Size" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border border-neutral-200 shadow-lg z-50">
+                  <SelectItem value="all" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">All Sizes</SelectItem>
+                  <SelectItem value="XS" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">XS</SelectItem>
+                  <SelectItem value="S" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">S</SelectItem>
+                  <SelectItem value="M" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">M</SelectItem>
+                  <SelectItem value="L" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">L</SelectItem>
+                  <SelectItem value="XL" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">XL</SelectItem>
+                  <SelectItem value="XXL" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">XXL</SelectItem>
+                  <SelectItem value="XXXL" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">XXXL</SelectItem>
+                </SelectContent>
+              </Select>
 
+
+              <Select value={selectedColor} onValueChange={setSelectedColor}>
+                <SelectTrigger className="w-full sm:w-40 bg-white border-neutral-300 text-neutral-800 text-sm md:text-base shadow-sm">
+                  <SelectValue placeholder="Color" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border border-neutral-200 shadow-lg z-50">
+                  <SelectItem value="all" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">All Colors</SelectItem>
+                  <SelectItem value="Red" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Red</SelectItem>
+                  <SelectItem value="Blue" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Blue</SelectItem>
+                  <SelectItem value="Green" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Green</SelectItem>
+                  <SelectItem value="Black" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Black</SelectItem>
+                  <SelectItem value="White" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">White</SelectItem>
+                  <SelectItem value="Gray" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Gray</SelectItem>
+                  <SelectItem value="Yellow" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Yellow</SelectItem>
+                  <SelectItem value="Purple" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Purple</SelectItem>
+                  <SelectItem value="Pink" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Pink</SelectItem>
+                  <SelectItem value="Orange" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Orange</SelectItem>
+                </SelectContent>
+              </Select>
               
               <Select value={priceRange} onValueChange={setPriceRange}>
               <SelectTrigger className="w-full sm:w-40 bg-white border-neutral-300 text-neutral-800 text-sm md:text-base shadow-sm">
@@ -286,15 +324,13 @@ export default function Shop() {
                           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300" />
                         </div>
                         <div className="p-4">
-                          <h3 className="font-semibold text-lg mb-1 text-neutral-900 group-hover:text-black transition-colors duration-200">
-                            {product.name}
-                            <Badge variant="secondary" className="ml-2 inline-flex bg-neutral-100 text-neutral-800 border-neutral-200">
-                              {product.category}
-                            </Badge>
-                          </h3>
+                          <h3 className="font-semibold text-lg mb-2 text-neutral-900 group-hover:text-black transition-colors duration-200">{product.name}</h3>
                           <p className="text-neutral-600 text-sm mb-3 line-clamp-2">{product.description}</p>
                           <div className="flex justify-between items-center">
                             <span className="text-xl font-bold text-black">₹{product.price}</span>
+                            <Badge variant="secondary" className="bg-neutral-100 text-neutral-800 border-neutral-200">
+                              {product.category}
+                            </Badge>
                           </div>
                         </div>
                       </CardContent>
