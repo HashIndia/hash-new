@@ -28,6 +28,7 @@ export default function Shop() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedSize, setSelectedSize] = useState('all');
   const [selectedBrand, setSelectedBrand] = useState('all');
+  const [selectedColor, setSelectedColor] = useState('all'); // New state for color filter
   const [priceRange, setPriceRange] = useState('all');
   const [sortBy, setSortBy] = useState('createdAt');
   const [viewMode, setViewMode] = useState('grid');
@@ -43,6 +44,7 @@ export default function Shop() {
           category: selectedCategory,
           brand: selectedBrand,
           size: selectedSize,
+          color: selectedColor, // Include selectedColor in API params
           sort: sortBy.split('-')[0],
           order: sortBy.split('-')[1] || 'desc',
         };
@@ -64,6 +66,7 @@ export default function Shop() {
         if (params.category === 'all') delete params.category;
         if (params.brand === 'all') delete params.brand;
         if (params.size === 'all') delete params.size;
+        if (params.color === 'all') delete params.color; // Delete color param if 'all'
 
         const response = await productsAPI.getProducts(params);
         setProducts(response.data.products);
@@ -85,7 +88,7 @@ export default function Shop() {
     }, 300); // Debounce search input
 
     return () => clearTimeout(debounceFetch);
-  }, [searchTerm, selectedCategory, selectedSize, selectedBrand, priceRange, sortBy, pagination.page]);
+  }, [searchTerm, selectedCategory, selectedSize, selectedBrand, selectedColor, priceRange, sortBy, pagination.page]); // Add selectedColor to dependencies
 
   // Filter and sort products - This is now handled by the backend
   const filteredProducts = products;
@@ -212,6 +215,25 @@ export default function Shop() {
                   <SelectItem value="Adidas" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Adidas</SelectItem>
                   <SelectItem value="Puma" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Puma</SelectItem>
                   <SelectItem value="Levi's" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Levi's</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedColor} onValueChange={setSelectedColor}>
+                <SelectTrigger className="w-full sm:w-40 bg-white border-neutral-300 text-neutral-800 text-sm md:text-base shadow-sm">
+                  <SelectValue placeholder="Color" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border border-neutral-200 shadow-lg z-50">
+                  <SelectItem value="all" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">All Colors</SelectItem>
+                  <SelectItem value="Red" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Red</SelectItem>
+                  <SelectItem value="Blue" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Blue</SelectItem>
+                  <SelectItem value="Green" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Green</SelectItem>
+                  <SelectItem value="Black" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Black</SelectItem>
+                  <SelectItem value="White" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">White</SelectItem>
+                  <SelectItem value="Gray" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Gray</SelectItem>
+                  <SelectItem value="Yellow" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Yellow</SelectItem>
+                  <SelectItem value="Purple" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Purple</SelectItem>
+                  <SelectItem value="Pink" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Pink</SelectItem>
+                  <SelectItem value="Orange" className="text-neutral-800 hover:bg-hash-purple/10 focus:bg-hash-purple/20">Orange</SelectItem>
                 </SelectContent>
               </Select>
               

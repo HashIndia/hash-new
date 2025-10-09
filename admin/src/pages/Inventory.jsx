@@ -238,7 +238,7 @@ const Inventory = () => {
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="name">Name</SelectItem>
+              <SelectItem value="name">Name</SelectItem>/
               <SelectItem value="price">Price</SelectItem>
               <SelectItem value="stock">Stock</SelectItem>
               <SelectItem value="createdAt">Date Added</SelectItem>
