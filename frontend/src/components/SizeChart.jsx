@@ -58,130 +58,83 @@ const SizeChart = ({ isOpen, onClose, product }) => {
               </div>
             )}
 
-            {/* Size Chart Table */}
-            {measurements.length > 0 && (
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-black">
-                  <thead>
-                    <tr className="bg-muted">
-                      <th className="border border-black px-4 py-3 text-left font-medium text-black">
-                        Size
-                      </th>
-                      {chartType === 'clothing' && (
-                        <>
-                          <th className="border border-black px-4 py-3 text-left font-medium text-black">
-                            Chest (cm)
-                          </th>
-                          <th className="border border-black px-4 py-3 text-left font-medium text-black">
-                            Waist (cm)
-                          </th>
-                          <th className="border border-black px-4 py-3 text-left font-medium text-black">
-                            Hips (cm)
-                          </th>
-                          <th className="border border-black px-4 py-3 text-left font-medium text-black">
-                            Length (cm)
-                          </th>
-                          <th className="border border-black px-4 py-3 text-left font-medium text-black">
-                            Shoulders (cm)
-                          </th>
-                          <th className="border border-black px-4 py-3 text-left font-medium text-black">
-                            Sleeves (cm)
-                          </th>
-                        </>
-                      )}
-                      {chartType === 'shoes' && (
-                        <>
-                          <th className="border border-black px-4 py-3 text-left font-medium text-black">
-                            Length (cm)
-                          </th>
-                          <th className="border border-black px-4 py-3 text-left font-medium text-black">
-                            Width (cm)
-                          </th>
-                        </>
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {measurements.map((measurement, index) => (
-                      <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-muted/50'}>
-                        <td className="border border-black px-4 py-3 font-medium text-black">
-                          {measurement.size}
-                        </td>
-                        {chartType === 'clothing' && (
-                          <>
-                            <td className="border border-black px-4 py-3 text-black">
-                              {measurement.chest || '-'}
-                            </td>
-                            <td className="border border-black px-4 py-3 text-black">
-                              {measurement.waist || '-'}
-                            </td>
-                            <td className="border border-black px-4 py-3 text-black">
-                              {measurement.hips || '-'}
-                            </td>
-                            <td className="border border-black px-4 py-3 text-black">
-                              {measurement.length || '-'}
-                            </td>
-                            <td className="border border-black px-4 py-3 text-black">
-                              {measurement.shoulders || '-'}
-                            </td>
-                            <td className="border border-black px-4 py-3 text-black">
-                              {measurement.sleeves || '-'}
-                            </td>
-                          </>
-                        )}
-                        {chartType === 'shoes' && (
-                          <>
-                            <td className="border border-black px-4 py-3 text-black">
-                              {measurement.length || '-'}
-                            </td>
-                            <td className="border border-black px-4 py-3 text-black">
-                              {measurement.width || '-'}
-                            </td>
-                          </>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            {/* Visual Size Guide */}
+            <div className="mb-8">
+              <h4 className="font-medium text-gray-900 mb-3">Visual Size Guide:</h4>
+              <div className="relative bg-white rounded-xl overflow-hidden shadow-lg border-2 border-gray-200">
+                <img 
+                  src="https://i.imgur.com/9JS7Yq6.png" 
+                  alt="T-Shirt Measurement Guide" 
+                  className="w-full object-contain"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-2 text-center">
+                  Reference image: Standard T-shirt measurements
+                </div>
               </div>
-            )}
+            </div>
+
+            {/* Standard Size Guide */}
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-black">
+                <thead>
+                  <tr className="bg-muted">
+                    <th className="border border-black px-4 py-3 text-left font-medium text-black">Size</th>
+                    <th className="border border-black px-4 py-3 text-left font-medium text-black">Chest (in)</th>
+                    <th className="border border-black px-4 py-3 text-left font-medium text-black">Length (in)</th>
+                    <th className="border border-black px-4 py-3 text-left font-medium text-black">Shoulder (in)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="bg-white">
+                    <td className="border border-black px-4 py-3 font-medium text-black">S</td>
+                    <td className="border border-black px-4 py-3 text-black">36-38</td>
+                    <td className="border border-black px-4 py-3 text-black">27</td>
+                    <td className="border border-black px-4 py-3 text-black">17</td>
+                  </tr>
+                  <tr className="bg-muted/50">
+                    <td className="border border-black px-4 py-3 font-medium text-black">M</td>
+                    <td className="border border-black px-4 py-3 text-black">38-40</td>
+                    <td className="border border-black px-4 py-3 text-black">28</td>
+                    <td className="border border-black px-4 py-3 text-black">18</td>
+                  </tr>
+                  <tr className="bg-white">
+                    <td className="border border-black px-4 py-3 font-medium text-black">L</td>
+                    <td className="border border-black px-4 py-3 text-black">40-42</td>
+                    <td className="border border-black px-4 py-3 text-black">29</td>
+                    <td className="border border-black px-4 py-3 text-black">19</td>
+                  </tr>
+                  <tr className="bg-muted/50">
+                    <td className="border border-black px-4 py-3 font-medium text-black">XL</td>
+                    <td className="border border-black px-4 py-3 text-black">42-44</td>
+                    <td className="border border-black px-4 py-3 text-black">30</td>
+                    <td className="border border-black px-4 py-3 text-black">20</td>
+                  </tr>
+                  <tr className="bg-white">
+                    <td className="border border-black px-4 py-3 font-medium text-black">XXL</td>
+                    <td className="border border-black px-4 py-3 text-black">44-46</td>
+                    <td className="border border-black px-4 py-3 text-black">31</td>
+                    <td className="border border-black px-4 py-3 text-black">21</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
             {/* How to Measure */}
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
               <h4 className="font-medium text-gray-900 mb-2">How to Measure:</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-                {chartType === 'clothing' && (
-                  <>
-                    <div>
-                      <strong>Chest:</strong> Measure around the fullest part of your chest
-                    </div>
-                    <div>
-                      <strong>Waist:</strong> Measure around your natural waistline
-                    </div>
-                    <div>
-                      <strong>Hips:</strong> Measure around the fullest part of your hips
-                    </div>
-                    <div>
-                      <strong>Length:</strong> Measure from shoulder to hem
-                    </div>
-                    <div>
-                      <strong>Shoulders:</strong> Measure from shoulder seam to shoulder seam
-                    </div>
-                    <div>
-                      <strong>Sleeves:</strong> Measure from shoulder to cuff
-                    </div>
-                  </>
-                )}
-                {chartType === 'shoes' && (
-                  <>
-                    <div>
-                      <strong>Length:</strong> Measure from heel to longest toe
-                    </div>
-                    <div>
-                      <strong>Width:</strong> Measure across the widest part of your foot
-                    </div>
-                  </>
-                )}
+                <div>
+                  <strong>Chest:</strong> Measure around the fullest part of your chest, keeping the tape parallel to the ground.
+                </div>
+                <div>
+                  <strong>Length:</strong> Measure from the highest point of the shoulder to the desired length.
+                </div>
+                <div>
+                  <strong>Shoulder:</strong> Measure from one shoulder point to another, across the back.
+                </div>
+                <div className="md:col-span-2 mt-2 p-3 bg-yellow-50 rounded-lg text-yellow-800 text-xs">
+                  <strong>Pro Tip:</strong> If you're between sizes, we recommend going up a size for a more comfortable fit.
+                </div>
               </div>
             </div>
 

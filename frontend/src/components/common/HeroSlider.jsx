@@ -70,7 +70,7 @@ const HeroSlider = ({ heroProducts = [] }) => {
     : fallbackSlides;
 
   return (
-    <section className="relative h-[400px] md:h-[600px] text-white overflow-hidden rounded-b-3xl">
+    <section className="relative h-[360px] md:h-[480px] text-white overflow-hidden rounded-b-3xl">
       <Swiper
         spaceBetween={30}
         centeredSlides={true}
@@ -86,7 +86,7 @@ const HeroSlider = ({ heroProducts = [] }) => {
       >
         {slides.map((slide, idx) => (
           <SwiperSlide key={idx}>
-            <div className="relative h-[400px] md:h-[600px] flex items-center justify-center">
+            <div className="relative h-[360px] md:h-[480px] flex items-center justify-center">
               <img
                 src={slide.img}
                 alt={slide.title}

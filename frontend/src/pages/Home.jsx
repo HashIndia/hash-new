@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import HeroSlider from "../components/common/HeroSlider";
+import OffersStrip from "../components/common/OffersStrip";
 import {
   TrendingUp,
   ShoppingCart,
@@ -225,6 +226,7 @@ export default function Home() {
       />
       <div className="bg-white shadow-lg rounded-b-3xl">
         <HeroSlider heroProducts={heroProducts} />
+        <OffersStrip />
         {heroProducts.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-8 px-6">
             {heroProducts.map((product) => (
@@ -260,8 +262,8 @@ export default function Home() {
           </div>
         )}
       </div>
-      <section className="py-20 bg-gradient-to-b from-white to-neutral-50 border-b border-neutral-100 shadow-sm rounded-3xl my-12 mx-auto max-w-7xl">
-        <div className="container mx-auto px-6 ">
+      <section className="py-20 bg-gradient-to-b from-white to-neutral-50 border-b border-neutral-100 shadow-sm rounded-3xl mt-0 mb-12 mx-auto max-w-7xl">
+        <div className="container mx-auto px-6">
           <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}

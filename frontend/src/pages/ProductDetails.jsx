@@ -192,7 +192,7 @@ export default function ProductDetails() {
     stock: currentProduct.stock || 0,
     category: currentProduct.category || 'General',
     variants: currentProduct.variants || [],
-    sizeChart: currentProduct.sizeChart || { hasChart: false },
+    sizeChart: currentProduct.sizeChart || { hasChart: true },
     brand: currentProduct.brand || 'Unknown Brand',
     reviewStats: currentProduct.reviewStats || { averageRating: 0, totalReviews: 0 },
     features: currentProduct.features || [],
@@ -390,19 +390,28 @@ export default function ProductDetails() {
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                 />
                 {/* Wishlist Button */}
-                <motion.div
+                <motion.button
+                  onClick={handleWishlist}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
+                  className="absolute top-4 right-4 p-2.5 bg-white/90 backdrop-blur-sm hover:bg-white border-2 border-neutral-200 hover:border-black rounded-lg shadow-lg z-20"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <Button
-                    onClick={handleWishlist}
-                    variant="outline"
-                    size="sm"
-                    className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm hover:bg-white border-2 border-neutral-200 hover:border-black shadow-lg transition-all duration-200 hover:scale-105 z-20"
+                  <motion.div
+                    animate={isWishlisted ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-600 hover:text-red-500'} transition-colors`} />
-                  </Button>
-                </motion.div>
+                    <Heart 
+                      className={`h-5 w-5 ${
+                        isWishlisted 
+                          ? 'fill-red-500 text-red-500' 
+                          : 'text-gray-600 hover:text-red-500'
+                      } transition-all duration-200`}
+                    />
+                  </motion.div>
+                </motion.button>
               </div>
             </div>
 
@@ -433,7 +442,7 @@ export default function ProductDetails() {
             {/* Product Title & Rating */}
             <div>
               <Badge variant="secondary" className="mb-2 bg-black/5 text-black border-black/10 text-xs">
-                {safeProduct.category}
+                {safeProduct.brand || 'HASH'}
               </Badge>
               <h1 className="text-xl lg:text-2xl font-bold text-black mb-2 leading-tight">
                 {safeProduct.name}
@@ -478,15 +487,19 @@ export default function ProductDetails() {
                 <div className="flex items-center justify-between">
                   <h3 className="font-medium text-black text-sm">Size</h3>
                   {safeProduct.sizeChart?.hasChart && (
+                    <div className="space-y-1">
                     <Button
-                      variant="ghost"
-                      size="sm"
+                      variant="outline"
                       onClick={() => setShowSizeChart(true)}
-                      className="text-black hover:bg-gray-100 flex items-center gap-1 text-xs p-1"
+                      className="border-2 border-black/10 hover:border-black text-black hover:bg-black/5 flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all duration-200"
                     >
-                      <Ruler className="w-3 h-3" />
-                      Size Chart
+                      <Ruler className="w-4 h-4" />
+                      Size Guide
                     </Button>
+                    <div className="text-xs text-gray-500">
+                      Sizes: S (36"), M (38"), L (40"), XL (42"), XXL (44")
+                    </div>
+                  </div>
                   )}
                 </div>
                 
