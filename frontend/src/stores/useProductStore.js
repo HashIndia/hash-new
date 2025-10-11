@@ -25,12 +25,12 @@ const useProductStore = create((set, get) => ({
   isInitialized: false,
 
   // Initialize store
-  initialize: async () => {
+  initialize: async (forceRefresh = false) => {
     const state = get();
-    if (state.isInitialized) return;
-    
+    if (state.isInitialized && !forceRefresh) return;
+
     set({ isInitialized: true });
-    
+
     // Load categories and products in parallel for faster initialization
     // Don't await - let them load in background
     const promises = [
@@ -41,7 +41,7 @@ const useProductStore = create((set, get) => ({
         console.warn('Products loading failed:', error);
       })
     ];
-    
+
     // Don't wait for completion, just start the processes
     Promise.allSettled(promises).then(() => {
       console.log('✅ Store initialization completed');
@@ -205,4 +205,4 @@ const useProductStore = create((set, get) => ({
   clearError: () => set({ error: null }),
 }));
 
-export default useProductStore; 
+export default useProductStore;

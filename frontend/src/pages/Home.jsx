@@ -185,7 +185,7 @@ export default function Home() {
   const coreTeam = [
     {
       name: "Sutirth",
-      role: "Founder",
+      role: "Co-Founder",
       linkedin: "https://linkedin.com/in/sutirth-naik-689818297",
       img: "https://media.licdn.com/dms/image/v2/D5603AQEVtTiWrnT9vg/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1718231799800?e=2147483647&v=beta&t=uKTyC4gipnxNS9zFAbIp0tZ9JpeI7ffUCgADYCKFBUk",
     },

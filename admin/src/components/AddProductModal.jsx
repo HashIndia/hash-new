@@ -220,10 +220,9 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log('formData.name before validation:', formData.name); // Debugging line
-
     const totalStock = calculateTotalStock();
 
+    // Validate required fields
     if (!formData.name || !formData.price || !formData.category) {
       const missingFields = [];
       if (!formData.name) missingFields.push('Product Name');
@@ -247,10 +246,15 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
         setIsUploading(true);
         try {
           const uploadResponse = await uploadAPI.uploadProductFiles(selectedFiles);
-          uploadedFiles = uploadResponse.data.files;
-          toast.success(`${uploadedFiles.length} files uploaded successfully`);
+          if (uploadResponse && uploadResponse.data && uploadResponse.data.files) {
+            uploadedFiles = uploadResponse.data.files;
+            toast.success(`${uploadedFiles.length} files uploaded successfully`);
+          } else {
+            toast.warning('No files were uploaded or response format was unexpected');
+          }
         } catch (uploadError) {
-          toast.error('Failed to upload files');
+          console.error('File upload error:', uploadError);
+          toast.error(`Failed to upload files: ${uploadError.message || 'Unknown error'}`);
           setIsUploading(false);
           setLoading(false);
           return;
@@ -258,58 +262,74 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded, editProduct = null }
         setIsUploading(false);
       }
 
+      // Ensure all numeric values are properly parsed and validated
       const productData = {
-        name: formData.name,
-        description: formData.description,
-        price: parseFloat(formData.price),
-        discount: parseFloat(formData.discount) || 0,
-        category: formData.category,
+        name: formData.name.trim(),
+        description: formData.description ? formData.description.trim() : '',
+        price: isNaN(parseFloat(formData.price)) ? 0 : parseFloat(formData.price),
+        discount: isNaN(parseFloat(formData.discount)) ? 0 : parseFloat(formData.discount),
+        category: formData.category.trim(),
         stock: totalStock,
-        sku: formData.sku || undefined,
-        brand: formData.brand,
-        isTrending: formData.isTrending,
-        isHero: formData.isHero,
+        sku: formData.sku ? formData.sku.trim() : undefined,
+        brand: formData.brand ? formData.brand.trim() : '',
+        isTrending: Boolean(formData.isTrending),
+        isHero: Boolean(formData.isHero),
         limitedOffer: {
-          isActive: formData.limitedOffer.isActive,
-          specialPrice: formData.limitedOffer.specialPrice ? parseFloat(formData.limitedOffer.specialPrice) : 0,
-          maxUnits: formData.limitedOffer.maxUnits ? parseInt(formData.limitedOffer.maxUnits) : 0,
-          offerTitle: formData.limitedOffer.offerTitle,
-          offerDescription: formData.limitedOffer.offerDescription,
+          isActive: Boolean(formData.limitedOffer.isActive),
+          specialPrice: isNaN(parseFloat(formData.limitedOffer.specialPrice)) ? 0 : parseFloat(formData.limitedOffer.specialPrice),
+          maxUnits: isNaN(parseInt(formData.limitedOffer.maxUnits)) ? 0 : parseInt(formData.limitedOffer.maxUnits),
+          offerTitle: formData.limitedOffer.offerTitle ? formData.limitedOffer.offerTitle.trim() : 'Limited Time Offer',
+          offerDescription: formData.limitedOffer.offerDescription ? formData.limitedOffer.offerDescription.trim() : '',
           endDate: formData.limitedOffer.endDate ? new Date(formData.limitedOffer.endDate) : null,
           discountPercentage: calculateDiscountPercentage()
         },
         variants: formData.variants.map(variant => ({
-          size: variant.size.toUpperCase(),
-          color: variant.color,
-          stock: parseInt(variant.stock),
-          price: parseFloat(variant.price),
-          sku: variant.sku || undefined,
+          size: variant.size ? variant.size.toUpperCase() : '',
+          color: variant.color || { name: '', hex: '#000000' },
+          stock: isNaN(parseInt(variant.stock)) ? 0 : parseInt(variant.stock),
+          price: isNaN(parseFloat(variant.price)) ? 0 : parseFloat(variant.price),
+          sku: variant.sku ? variant.sku.trim() : undefined,
           images: variant.images || [],
         })),
-        images: uploadedFiles.length > 0 ? uploadedFiles : formData.images,
+        images: uploadedFiles.length > 0 ? uploadedFiles : (formData.images || []),
       };
 
-      console.log('Product Data being sent:', productData); // Add this line
+      console.log('Product Data being sent:', productData);
 
       let response;
       if (editProduct) {
         response = await adminProductsAPI.updateProduct(editProduct._id, productData);
-        toast.success('Product updated successfully');
+        if (response && response.data) {
+          toast.success('Product updated successfully');
+        } else {
+          throw new Error('Invalid response format from update API');
+        }
       } else {
         response = await adminProductsAPI.createProduct(productData);
-        toast.success('Product added successfully');
+        if (response && response.data) {
+          toast.success('Product added successfully');
+        } else {
+          throw new Error('Invalid response format from create API');
+        }
       }
 
-      if (onProductAdded) {
+      if (onProductAdded && response && response.data) {
         onProductAdded(response.data?.product || response.data);
       }
 
       // Refresh products in the frontend store
-      useProductStore.getState().loadProducts();
+      try {
+        useProductStore.getState().loadProducts();
+      } catch (storeError) {
+        console.warn('Failed to refresh product store:', storeError);
+        // Continue with normal flow even if store refresh fails
+      }
 
       handleClose();
     } catch (error) {
-      toast.error(editProduct ? 'Failed to update product' : 'Failed to add product');
+      console.error('Product operation error:', error);
+      const errorMessage = error.message || (editProduct ? 'Failed to update product' : 'Failed to add product');
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

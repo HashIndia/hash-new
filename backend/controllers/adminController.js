@@ -300,6 +300,65 @@ export const verifyDeliveryOTP = catchAsync(async (req, res, next) => {
   order.deliveryOTPVerified = true;
   order.deliveryOTP = undefined; // Clear OTP for security
   order.deliveryOTPExpires = undefined;
+
+  // Update product stock and sold to customer metrics
+  for (const item of order.items) {
+    const product = await Product.findById(item.product);
+
+    if (product) {
+      // Decrement overall product stock
+      product.stock -= item.quantity;
+
+      // Increment overall units sold (if using limitedOffer.unitsSold as a general sold counter)
+      if (product.limitedOffer && product.limitedOffer.unitsSold !== undefined) {
+        product.limitedOffer.unitsSold += item.quantity;
+      } else if (product.limitedOffer) {
+        // Initialize if it doesn't exist
+        product.limitedOffer.unitsSold = item.quantity;
+      }
+
+      // If product has variants, update variant-specific stock and units sold
+      if (product.variants && product.variants.length > 0) {
+        const variant = product.variants.find(
+          v => v.size === item.size && v.color === item.color
+        );
+        if (variant) {
+          variant.stock -= item.quantity;
+          if (variant.unitsSold !== undefined) {
+            variant.unitsSold += item.quantity;
+          } else {
+            variant.unitsSold = item.quantity;
+          }
+        }
+      }
+      await product.save();
+    }
+  }
+
+  // Update product stock and sold quantities
+  for (const item of order.items) {
+    const product = await Product.findById(item.product);
+    if (product) {
+      // Decrement overall stock
+      product.stock -= item.quantity;
+
+      // If product has variants, decrement variant stock
+      if (product.variants && product.variants.length > 0 && item.size && item.color) {
+        const variant = product.variants.find(v => v.size === item.size && v.color.hex === item.color.hex);
+        if (variant) {
+          variant.stock -= item.quantity;
+        }
+      }
+
+      // If it was a limited offer, increment unitsSold
+      if (product.limitedOffer && product.limitedOffer.isActive) {
+        product.limitedOffer.unitsSold += item.quantity;
+      }
+      await product.save();
+    }
+  }
+
+  await order.save();
   
   await order.save();
 
