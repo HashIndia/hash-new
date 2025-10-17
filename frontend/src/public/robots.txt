@@ -1,0 +1,44 @@
+# HASH India - Student-run fashion startup from NITK Surathkal
+# Founded by engineering students for affordable, quality fashion
+# Keywords: NITK, student startup, fashion brand, engineering students
+
+User-agent: *
+Allow: /
+Allow: /shop
+Allow: /product/*
+Allow: /about
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Allow: /returns
+Allow: /shipping
+Allow: /faq
+Allow: /size-guide
+Allow: /business
+
+# Disallow private/sensitive pages
+Disallow: /login
+Disallow: /register
+Disallow: /checkout
+Disallow: /profile
+Disallow: /orders
+Disallow: /cart
+Disallow: /wishlist
+Disallow: /verify-otp
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /order-success
+
+# Disallow admin areas
+Disallow: /admin
+Disallow: /api
+
+# Allow important files
+Allow: /sitemap.xml
+Allow: /robots.txt
+
+# Crawl delay to be respectful
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://hashindia.com/sitemap.xml
